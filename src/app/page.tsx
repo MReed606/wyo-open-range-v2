@@ -1,4 +1,8 @@
 import Link from "next/link";
+import { ListingCard } from "@/components/ListingCard";
+import { listings } from "@/data/listings";
+import { businesses } from "@/data/businesses";
+import { forumThreads } from "@/data/forums";
 
 const categories = [
   "Vehicles",
@@ -9,17 +13,10 @@ const categories = [
   "General Marketplace",
 ];
 
-const listings = [
-  ["2019 Ford F-350 Lariat", "$42,500", "Cheyenne • Southeast", "Verified Seller"],
-  ["Vortex Optics Bundle", "$650", "Laramie • South Central", "Trusted Seller"],
-  ["20ft Stock Trailer", "$8,900", "Torrington • East", "Verified Seller"],
-  ["Ranch Welding Services", "Contact", "Southeast WY", "Business"],
-];
-
 export default function Home() {
   return (
     <main className="min-h-screen bg-[#F7F5F2] text-[#1F2933]">
-      <section className="relative flex min-h-[520px] items-center justify-center overflow-hidden bg-gradient-to-br from-[#1F2933] via-[#2F5D50] to-[#C2A878] px-6 text-white">
+      <section className="relative flex min-h-[560px] items-center justify-center overflow-hidden bg-gradient-to-br from-[#1F2933] via-[#2F5D50] to-[#C2A878] px-6 text-white">
         <div className="absolute inset-0 bg-black/25" />
 
         <div className="relative z-10 max-w-4xl text-center">
@@ -70,9 +67,10 @@ export default function Home() {
 
         <div className="grid gap-5 md:grid-cols-3">
           {categories.map((category) => (
-            <div
+            <Link
+              href="/categories"
               key={category}
-              className="flex h-40 items-end rounded-2xl bg-gradient-to-br from-[#2F5D50] to-[#1F2933] p-5 text-white shadow-sm"
+              className="flex h-40 items-end rounded-2xl bg-gradient-to-br from-[#2F5D50] to-[#1F2933] p-5 text-white shadow-md transition hover:-translate-y-1 hover:shadow-xl"
             >
               <div>
                 <h3 className="text-xl font-bold">
@@ -83,7 +81,7 @@ export default function Home() {
                   Browse local listings
                 </p>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </section>
@@ -103,39 +101,16 @@ export default function Home() {
         </div>
 
         <div className="grid gap-5 md:grid-cols-4">
-          {listings.map(([title, price, location, seller]) => (
-            <div
-              key={title}
-              className="overflow-hidden rounded-2xl bg-white shadow-sm"
-            >
-              <div className="h-44 bg-gradient-to-br from-[#C2A878] to-[#2F5D50]" />
-
-              <div className="p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="text-lg font-bold">
-                      {price}
-                    </p>
-
-                    <h3 className="mt-1 font-semibold">
-                      {title}
-                    </h3>
-                  </div>
-
-                  <button className="text-xl">
-                    ♡
-                  </button>
-                </div>
-
-                <p className="mt-3 text-sm text-[#52606D]">
-                  {location}
-                </p>
-
-                <p className="mt-2 text-xs font-semibold text-[#2F5D50]">
-                  {seller}
-                </p>
-              </div>
-            </div>
+          {listings.map((listing) => (
+            <ListingCard
+              key={listing.slug}
+              title={listing.title}
+              price={listing.price}
+              location={listing.location}
+              seller={listing.seller}
+              slug={listing.slug}
+              condition={listing.condition}
+            />
           ))}
         </div>
       </section>
@@ -143,26 +118,69 @@ export default function Home() {
       <section className="border-t bg-white px-6 py-12">
         <div className="mx-auto grid max-w-7xl gap-6 md:grid-cols-2">
           <div className="rounded-2xl bg-[#F7F5F2] p-6">
-            <h2 className="text-2xl font-bold">
-              Verified Businesses
-            </h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold">
+                Verified Businesses
+              </h2>
 
-            <p className="mt-2 text-[#52606D]">
-              Discover trusted local dealers, FFLs, welders,
-              outfitters, ranch suppliers, and service providers.
-            </p>
+              <Link
+                href="/businesses"
+                className="text-sm font-semibold text-[#2F5D50]"
+              >
+                View all
+              </Link>
+            </div>
+
+            <div className="mt-5 space-y-4">
+              {businesses.slice(0, 3).map((business) => (
+                <Link
+                  key={business.slug}
+                  href={`/businesses/${business.slug}`}
+                  className="block rounded-xl bg-white p-4 shadow-sm transition hover:shadow-md"
+                >
+                  <p className="font-bold text-[#1F2933]">
+                    {business.name}
+                  </p>
+
+                  <p className="mt-1 text-sm text-[#52606D]">
+                    {business.category} • {business.location}
+                  </p>
+                </Link>
+              ))}
+            </div>
           </div>
 
           <div className="rounded-2xl bg-[#F7F5F2] p-6">
-            <h2 className="text-2xl font-bold">
-              Community Discussions
-            </h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold">
+                Community Discussions
+              </h2>
 
-            <p className="mt-2 text-[#52606D]">
-              Join statewide and regional conversations about
-              outdoors, ranching, vehicles, alerts, and local
-              recommendations.
-            </p>
+              <Link
+                href="/forums"
+                className="text-sm font-semibold text-[#2F5D50]"
+              >
+                View all
+              </Link>
+            </div>
+
+            <div className="mt-5 space-y-4">
+              {forumThreads.slice(0, 3).map((thread) => (
+                <Link
+                  key={thread.slug}
+                  href={`/forums/${thread.slug}`}
+                  className="block rounded-xl bg-white p-4 shadow-sm transition hover:shadow-md"
+                >
+                  <p className="font-bold text-[#1F2933]">
+                    {thread.title}
+                  </p>
+
+                  <p className="mt-1 text-sm text-[#52606D]">
+                    {thread.category} • {thread.replies} replies
+                  </p>
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </section>
