@@ -1,4 +1,36 @@
-export default function ListingDetailPage() {
+import { listings } from "@/data/listings";
+
+type ListingPageProps = {
+  params: Promise<{
+    slug: string;
+  }>;
+};
+
+export default async function ListingDetailPage({
+  params,
+}: ListingPageProps) {
+  const { slug } = await params;
+
+  const listing = listings.find(
+    (item) => item.slug === slug
+  );
+
+  if (!listing) {
+    return (
+      <main className="min-h-screen bg-[#F7F5F2] px-6 py-20">
+        <div className="mx-auto max-w-4xl rounded-2xl bg-white p-10 shadow-md">
+          <h1 className="text-4xl font-bold text-[#1F2933]">
+            Listing Not Found
+          </h1>
+
+          <p className="mt-4 text-lg text-[#52606D]">
+            The listing you are looking for does not exist.
+          </p>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="min-h-screen bg-[#F7F5F2]">
       <section className="mx-auto max-w-7xl px-6 py-10">
@@ -10,15 +42,15 @@ export default function ListingDetailPage() {
 
             <div className="mt-6 rounded-2xl bg-white p-6 shadow-md">
               <h1 className="text-4xl font-bold text-[#1F2933]">
-                2019 Ford F-350 Lariat
+                {listing.title}
               </h1>
 
               <p className="mt-3 text-3xl font-bold text-[#2F5D50]">
-                $42,500
+                {listing.price}
               </p>
 
               <p className="mt-3 text-lg text-[#52606D]">
-                Cheyenne • Southeast Wyoming • Good Condition
+                {listing.location} • {listing.condition} Condition
               </p>
 
               <div className="mt-6 border-t pt-6">
@@ -27,41 +59,26 @@ export default function ListingDetailPage() {
                 </h2>
 
                 <p className="mt-4 text-[#52606D]">
-                  Clean 2019 Ford F-350 Lariat with diesel power, strong towing
-                  capability, and excellent ranch/trailer use potential. This is
-                  sample content for the Wyo Open Range prototype.
+                  {listing.description}
                 </p>
 
                 <div className="mt-6 grid gap-4 md:grid-cols-2">
-                  <div className="rounded-xl bg-[#F7F5F2] p-4">
-                    <p className="text-sm font-bold text-[#52606D]">Mileage</p>
-                    <p className="mt-1 text-lg font-semibold text-[#1F2933]">
-                      82,000
-                    </p>
-                  </div>
+                  {Object.entries(listing.details).map(
+                    ([key, value]) => (
+                      <div
+                        key={key}
+                        className="rounded-xl bg-[#F7F5F2] p-4"
+                      >
+                        <p className="text-sm font-bold text-[#52606D]">
+                          {key}
+                        </p>
 
-                  <div className="rounded-xl bg-[#F7F5F2] p-4">
-                    <p className="text-sm font-bold text-[#52606D]">Fuel</p>
-                    <p className="mt-1 text-lg font-semibold text-[#1F2933]">
-                      Diesel
-                    </p>
-                  </div>
-
-                  <div className="rounded-xl bg-[#F7F5F2] p-4">
-                    <p className="text-sm font-bold text-[#52606D]">
-                      Drivetrain
-                    </p>
-                    <p className="mt-1 text-lg font-semibold text-[#1F2933]">
-                      4WD
-                    </p>
-                  </div>
-
-                  <div className="rounded-xl bg-[#F7F5F2] p-4">
-                    <p className="text-sm font-bold text-[#52606D]">Seller</p>
-                    <p className="mt-1 text-lg font-semibold text-[#1F2933]">
-                      Verified Seller
-                    </p>
-                  </div>
+                        <p className="mt-1 text-lg font-semibold text-[#1F2933]">
+                          {value}
+                        </p>
+                      </div>
+                    )
+                  )}
                 </div>
               </div>
             </div>
@@ -85,7 +102,10 @@ export default function ListingDetailPage() {
             </p>
 
             <div className="mt-5 rounded-xl bg-[#F7F5F2] p-4">
-              <p className="font-bold text-[#1F2933]">Verified User</p>
+              <p className="font-bold text-[#1F2933]">
+                {listing.seller}
+              </p>
+
               <p className="mt-1 text-sm text-[#52606D]">
                 Phone verified • Trusted seller history
               </p>
