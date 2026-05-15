@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { ListingCard } from "@/components/ListingCard";
 import { ListingGallery } from "@/components/ListingGallery";
 import { listings } from "@/data/listings";
 
@@ -13,6 +15,7 @@ export default async function ListingDetailPage({
   const { slug } = await params;
 
   const listing = listings.find((item) => item.slug === slug);
+  const relatedListings = listings.filter((item) => item.slug !== slug).slice(0, 3);
 
   if (!listing) {
     return (
@@ -25,6 +28,13 @@ export default async function ListingDetailPage({
           <p className="mt-4 text-lg text-[#52606D]">
             The listing you are looking for does not exist.
           </p>
+
+          <Link
+            href="/listings"
+            className="mt-6 inline-flex rounded-xl bg-[#2F5D50] px-5 py-3 font-semibold text-white"
+          >
+            Back to Listings
+          </Link>
         </div>
       </main>
     );
@@ -65,10 +75,7 @@ export default async function ListingDetailPage({
 
                 <div className="mt-6 grid gap-4 md:grid-cols-2">
                   {Object.entries(listing.details).map(([key, value]) => (
-                    <div
-                      key={key}
-                      className="rounded-xl bg-[#F7F5F2] p-4"
-                    >
+                    <div key={key} className="rounded-xl bg-[#F7F5F2] p-4">
                       <p className="text-sm font-bold text-[#52606D]">
                         {key}
                       </p>
@@ -79,6 +86,26 @@ export default async function ListingDetailPage({
                     </div>
                   ))}
                 </div>
+              </div>
+            </div>
+
+            <div className="mt-10">
+              <h2 className="text-3xl font-bold text-[#1F2933]">
+                Related Listings
+              </h2>
+
+              <div className="mt-6 grid gap-6 md:grid-cols-3">
+                {relatedListings.map((item) => (
+                  <ListingCard
+                    key={item.slug}
+                    title={item.title}
+                    price={item.price}
+                    location={item.location}
+                    seller={item.seller}
+                    slug={item.slug}
+                    condition={item.condition}
+                  />
+                ))}
               </div>
             </div>
           </div>
@@ -108,13 +135,19 @@ export default async function ListingDetailPage({
               </p>
             </div>
 
-            <button className="mt-6 w-full rounded-xl bg-[#2F5D50] px-5 py-3 font-semibold text-white transition hover:bg-[#24493f]">
+            <Link
+              href="/messages"
+              className="mt-6 block w-full rounded-xl bg-[#2F5D50] px-5 py-3 text-center font-semibold text-white transition hover:bg-[#24493f]"
+            >
               Message Seller
-            </button>
+            </Link>
 
-            <button className="mt-3 w-full rounded-xl border border-[#2F5D50] px-5 py-3 font-semibold text-[#2F5D50] transition hover:bg-[#F7F5F2]">
+            <Link
+              href="/messages"
+              className="mt-3 block w-full rounded-xl border border-[#2F5D50] px-5 py-3 text-center font-semibold text-[#2F5D50] transition hover:bg-[#F7F5F2]"
+            >
               Make Offer
-            </button>
+            </Link>
 
             <button className="mt-3 w-full rounded-xl border border-black/10 px-5 py-3 font-semibold text-[#1F2933] transition hover:bg-[#F7F5F2]">
               Save Listing

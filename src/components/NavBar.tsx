@@ -11,39 +11,38 @@ export function NavBar() {
           Wyo Open Range
         </Link>
 
-        <div className="hidden items-center gap-8 md:flex">
-          <Link
-            href="/listings"
-            className="text-sm font-bold text-[#1F2933] transition hover:text-[#2F5D50]"
-          >
+        <div className="hidden items-center gap-7 md:flex">
+          <Link href="/listings" className="text-sm font-bold text-[#1F2933] hover:text-[#2F5D50]">
             Browse
           </Link>
 
-          <Link
-            href="/categories"
-            className="text-sm font-bold text-[#1F2933] transition hover:text-[#2F5D50]"
-          >
+          <Link href="/categories" className="text-sm font-bold text-[#1F2933] hover:text-[#2F5D50]">
             Categories
           </Link>
 
-          <Link
-            href="/forums"
-            className="text-sm font-bold text-[#1F2933] transition hover:text-[#2F5D50]"
-          >
+          <Link href="/regions" className="text-sm font-bold text-[#1F2933] hover:text-[#2F5D50]">
+            Regions
+          </Link>
+
+          <Link href="/forums" className="text-sm font-bold text-[#1F2933] hover:text-[#2F5D50]">
             Forums
           </Link>
 
-          <Link
-            href="/businesses"
-            className="text-sm font-bold text-[#1F2933] transition hover:text-[#2F5D50]"
-          >
+          <Link href="/businesses" className="text-sm font-bold text-[#1F2933] hover:text-[#2F5D50]">
             Businesses
+          </Link>
+
+          <Link href="/messages" className="text-sm font-bold text-[#1F2933] hover:text-[#2F5D50]">
+            Messages
           </Link>
         </div>
 
-        <button className="rounded-xl bg-[#2F5D50] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#24493f]">
+        <Link
+          href="/post"
+          className="rounded-xl bg-[#2F5D50] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#24493f]"
+        >
           Post Listing
-        </button>
+        </Link>
       </div>
     </nav>
   );
