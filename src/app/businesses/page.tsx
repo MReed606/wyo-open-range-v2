@@ -1,9 +1,5 @@
-const businesses = [
-  "Frontier Welding & Repair",
-  "High Plains Outfitters",
-  "Southeast WY Trailer Sales",
-  "Range Line FFL Services",
-];
+import Link from "next/link";
+import { businesses } from "@/data/businesses";
 
 export default function BusinessesPage() {
   return (
@@ -20,27 +16,35 @@ export default function BusinessesPage() {
 
         <div className="mt-10 grid gap-6 md:grid-cols-2">
           {businesses.map((business) => (
-            <div
-              key={business}
-              className="rounded-2xl bg-white p-6 shadow-md transition hover:-translate-y-1 hover:shadow-xl"
+            <Link
+              key={business.slug}
+              href={`/businesses/${business.slug}`}
+              className="block rounded-2xl bg-white p-6 shadow-md transition hover:-translate-y-1 hover:shadow-xl"
             >
               <p className="text-sm font-bold uppercase tracking-wide text-[#2F5D50]">
-                Verified Business
+                {business.status}
               </p>
 
               <h2 className="mt-3 text-3xl font-bold text-[#1F2933]">
-                {business}
+                {business.name}
               </h2>
 
-              <p className="mt-4 text-base text-[#52606D]">
-                Serving Wyoming with trusted local service,
-                marketplace support, and verified operations.
+              <p className="mt-2 text-base font-semibold text-[#52606D]">
+                {business.category}
               </p>
 
-              <button className="mt-6 rounded-xl bg-[#2F5D50] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#24493f]">
+              <p className="mt-2 text-base text-[#52606D]">
+                {business.location}
+              </p>
+
+              <p className="mt-4 text-base text-[#52606D]">
+                {business.description}
+              </p>
+
+              <div className="mt-6 inline-flex rounded-xl bg-[#2F5D50] px-5 py-3 text-sm font-semibold text-white">
                 View Business
-              </button>
-            </div>
+              </div>
+            </Link>
           ))}
         </div>
       </section>
