@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 const categories = [
   "Vehicles",
   "Firearms & Outdoors",
@@ -92,9 +94,12 @@ export default function Home() {
             Recently Listed
           </h2>
 
-          <button className="text-sm font-semibold text-[#2F5D50]">
+          <Link
+            href="/listings"
+            className="text-sm font-semibold text-[#2F5D50] hover:text-[#24493f]"
+          >
             View all
-          </button>
+          </Link>
         </div>
 
         <div className="grid gap-5 md:grid-cols-4">
