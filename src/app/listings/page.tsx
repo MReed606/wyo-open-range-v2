@@ -1,3 +1,36 @@
+import { ListingCard } from "@/components/ListingCard";
+
+const listings = [
+  {
+    title: "2019 Ford F-350 Lariat",
+    price: "$42,500",
+    location: "Cheyenne • Southeast",
+    seller: "Verified Seller",
+    slug: "2019-ford-f350-lariat",
+  },
+  {
+    title: "20ft Stock Trailer",
+    price: "$8,900",
+    location: "Torrington • East",
+    seller: "Trusted Seller",
+    slug: "20ft-stock-trailer",
+  },
+  {
+    title: "Vortex Optics Bundle",
+    price: "$650",
+    location: "Laramie • South Central",
+    seller: "Verified Seller",
+    slug: "vortex-optics-bundle",
+  },
+  {
+    title: "Ranch Welding Services",
+    price: "Contact",
+    location: "Southeast Wyoming",
+    seller: "Verified Business",
+    slug: "ranch-welding-services",
+  },
+];
+
 export default function ListingsPage() {
   return (
     <main className="min-h-screen bg-[#F7F5F2]">
@@ -12,31 +45,15 @@ export default function ListingsPage() {
         </p>
 
         <div className="mt-10 grid gap-6 md:grid-cols-3">
-          {[1, 2, 3, 4, 5, 6].map((item) => (
-            <div
-              key={item}
-              className="overflow-hidden rounded-2xl bg-white shadow-md transition hover:-translate-y-1 hover:shadow-xl"
-            >
-              <div className="h-56 bg-gradient-to-br from-[#C2A878] to-[#2F5D50]" />
-
-              <div className="p-5">
-                <p className="text-2xl font-bold text-[#1F2933]">
-                  $12,500
-                </p>
-
-                <h2 className="mt-2 text-xl font-semibold text-[#1F2933]">
-                  Example Listing #{item}
-                </h2>
-
-                <p className="mt-3 text-base text-[#52606D]">
-                  Cheyenne • Southeast
-                </p>
-
-                <p className="mt-3 text-sm font-bold text-[#2F5D50]">
-                  Verified Seller
-                </p>
-              </div>
-            </div>
+          {listings.map((listing) => (
+            <ListingCard
+              key={listing.slug}
+              title={listing.title}
+              price={listing.price}
+              location={listing.location}
+              seller={listing.seller}
+              slug={listing.slug}
+            />
           ))}
         </div>
       </section>
