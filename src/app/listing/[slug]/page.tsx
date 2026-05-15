@@ -1,3 +1,4 @@
+import { ListingGallery } from "@/components/ListingGallery";
 import { listings } from "@/data/listings";
 
 type ListingPageProps = {
@@ -11,9 +12,7 @@ export default async function ListingDetailPage({
 }: ListingPageProps) {
   const { slug } = await params;
 
-  const listing = listings.find(
-    (item) => item.slug === slug
-  );
+  const listing = listings.find((item) => item.slug === slug);
 
   if (!listing) {
     return (
@@ -36,49 +35,49 @@ export default async function ListingDetailPage({
       <section className="mx-auto max-w-7xl px-6 py-10">
         <div className="grid gap-8 lg:grid-cols-[1fr_380px]">
           <div>
-            <div className="overflow-hidden rounded-2xl bg-white shadow-md">
-              <div className="h-[420px] bg-gradient-to-br from-[#C2A878] to-[#2F5D50]" />
-            </div>
+            <ListingGallery title={listing.title} />
 
             <div className="mt-6 rounded-2xl bg-white p-6 shadow-md">
-              <h1 className="text-4xl font-bold text-[#1F2933]">
-                {listing.title}
-              </h1>
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div>
+                  <h1 className="text-4xl font-bold text-[#1F2933]">
+                    {listing.title}
+                  </h1>
 
-              <p className="mt-3 text-3xl font-bold text-[#2F5D50]">
-                {listing.price}
-              </p>
+                  <p className="mt-3 text-lg text-[#52606D]">
+                    {listing.location} • {listing.condition}
+                  </p>
+                </div>
 
-              <p className="mt-3 text-lg text-[#52606D]">
-                {listing.location} • {listing.condition} Condition
-              </p>
+                <p className="text-3xl font-bold text-[#2F5D50]">
+                  {listing.price}
+                </p>
+              </div>
 
               <div className="mt-6 border-t pt-6">
                 <h2 className="text-2xl font-bold text-[#1F2933]">
                   Listing Details
                 </h2>
 
-                <p className="mt-4 text-[#52606D]">
+                <p className="mt-4 text-lg leading-8 text-[#52606D]">
                   {listing.description}
                 </p>
 
                 <div className="mt-6 grid gap-4 md:grid-cols-2">
-                  {Object.entries(listing.details).map(
-                    ([key, value]) => (
-                      <div
-                        key={key}
-                        className="rounded-xl bg-[#F7F5F2] p-4"
-                      >
-                        <p className="text-sm font-bold text-[#52606D]">
-                          {key}
-                        </p>
+                  {Object.entries(listing.details).map(([key, value]) => (
+                    <div
+                      key={key}
+                      className="rounded-xl bg-[#F7F5F2] p-4"
+                    >
+                      <p className="text-sm font-bold text-[#52606D]">
+                        {key}
+                      </p>
 
-                        <p className="mt-1 text-lg font-semibold text-[#1F2933]">
-                          {value}
-                        </p>
-                      </div>
-                    )
-                  )}
+                      <p className="mt-1 text-lg font-semibold text-[#1F2933]">
+                        {value}
+                      </p>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -102,9 +101,7 @@ export default async function ListingDetailPage({
             </p>
 
             <div className="mt-5 rounded-xl bg-[#F7F5F2] p-4">
-              <p className="font-bold text-[#1F2933]">
-                {listing.seller}
-              </p>
+              <p className="font-bold text-[#1F2933]">{listing.seller}</p>
 
               <p className="mt-1 text-sm text-[#52606D]">
                 Phone verified • Trusted seller history
@@ -121,6 +118,10 @@ export default async function ListingDetailPage({
 
             <button className="mt-3 w-full rounded-xl border border-black/10 px-5 py-3 font-semibold text-[#1F2933] transition hover:bg-[#F7F5F2]">
               Save Listing
+            </button>
+
+            <button className="mt-3 w-full rounded-xl border border-black/10 px-5 py-3 font-semibold text-[#52606D] transition hover:bg-[#F7F5F2]">
+              Report Listing
             </button>
           </aside>
         </div>
