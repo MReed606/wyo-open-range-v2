@@ -5,23 +5,13 @@ import { ListingCard } from "@/components/ListingCard";
 import { PageHeader } from "@/components/PageHeader";
 import { supabase } from "@/lib/supabase";
 
-type SavedListingRow = {
+type SavedListing = {
   listing_id: string;
-  listings: {
-    id: string;
-    title: string;
-    slug: string;
-    price: string | null;
-    city: string | null;
-    region: string | null;
-    seller_label: string | null;
-    condition: string | null;
-    image_url: string | null;
-  } | null;
+  listings: any;
 };
 
 export default function SavedPage() {
-  const [savedListings, setSavedListings] = useState<SavedListingRow[]>([]);
+  const [savedListings, setSavedListings] = useState<SavedListing[]>([]);
   const [status, setStatus] = useState("Loading saved listings...");
 
   useEffect(() => {
@@ -59,7 +49,7 @@ export default function SavedPage() {
         return;
       }
 
-      setSavedListings((data as SavedListingRow[]) ?? []);
+      setSavedListings((data as SavedListing[]) ?? []);
       setStatus("");
     }
 
@@ -96,6 +86,7 @@ export default function SavedPage() {
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {savedListings.map((row) => {
             const listing = row.listings;
+
             if (!listing) return null;
 
             return (
