@@ -69,12 +69,16 @@ export default function MessagesPage() {
   async function markConversationRead(conversationId: string, currentUserId: string) {
     if (!conversationId || !currentUserId) return;
 
-    await supabase
+    const { error } = await supabase
       .from("messages")
       .update({ read_at: new Date().toISOString() })
       .eq("conversation_id", conversationId)
       .neq("sender_id", currentUserId)
       .is("read_at", null);
+
+    if (!error) {
+      window.dispatchEvent(new Event("wyo-messages-read"));
+    }
   }
 
   async function openConversation(id: string) {
@@ -98,10 +102,10 @@ export default function MessagesPage() {
 
     setMessages((data as Message[]) ?? []);
 
-    window.dispatchEvent(new Event("messages-read"));
+    window.dispatchEvent(new Event("wyo-messages-read"));
 
     setTimeout(() => {
-      window.dispatchEvent(new Event("messages-read"));
+      window.dispatchEvent(new Event("wyo-messages-read"));
       messagesContainerRef.current?.scrollTo({
               top: messagesContainerRef.current.scrollHeight,
               behavior: "smooth",
@@ -128,13 +132,13 @@ export default function MessagesPage() {
           if (newMessage.sender_id !== userId) {
             await markConversationRead(selectedConversation, userId);
             newMessage.read_at = new Date().toISOString();
-            window.dispatchEvent(new Event("messages-read"));
+            window.dispatchEvent(new Event("wyo-messages-read"));
           }
 
           setMessages((current) => [...current, newMessage]);
 
           setTimeout(() => {
-            window.dispatchEvent(new Event("messages-read"));
+            window.dispatchEvent(new Event("wyo-messages-read"));
             messagesContainerRef.current?.scrollTo({
               top: messagesContainerRef.current.scrollHeight,
               behavior: "smooth",

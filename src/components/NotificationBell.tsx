@@ -29,25 +29,23 @@ export function NotificationBell() {
       return;
     }
 
-    const { count, error } = await supabase
+    const { count: unreadCount } = await supabase
       .from("messages")
       .select("id", { count: "exact", head: true })
       .in("conversation_id", ids)
       .neq("sender_id", user.id)
       .is("read_at", null);
 
-    if (!error) {
-      setCount(count ?? 0);
-    }
+    setCount(unreadCount ?? 0);
   }
 
   useEffect(() => {
     loadCount();
 
-    const interval = window.setInterval(loadCount, 5000);
+    const interval = window.setInterval(loadCount, 3000);
 
     const channel = supabase
-      .channel("navbar-message-bell-live")
+      .channel("navbar-unread-count")
       .on(
         "postgres_changes",
         {
@@ -55,19 +53,17 @@ export function NotificationBell() {
           schema: "public",
           table: "messages",
         },
-        () => {
-          loadCount();
-        }
+        () => loadCount()
       )
       .subscribe();
 
     window.addEventListener("focus", loadCount);
-    window.addEventListener("messages-read", loadCount);
+    window.addEventListener("wyo-messages-read", loadCount);
 
     return () => {
       window.clearInterval(interval);
       window.removeEventListener("focus", loadCount);
-      window.removeEventListener("messages-read", loadCount);
+      window.removeEventListener("wyo-messages-read", loadCount);
       supabase.removeChannel(channel);
     };
   }, []);
