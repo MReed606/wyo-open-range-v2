@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ListingGallery } from "@/components/ListingGallery";
+import { SaveListingButton } from "@/components/SaveListingButton";
 import { supabase } from "@/lib/supabase";
 
 type ListingPageProps = {
