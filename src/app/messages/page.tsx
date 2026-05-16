@@ -16,12 +16,12 @@ type Message = {
   sender_id: string;
   message: string;
   created_at: string;
+  read_at: string | null;
 };
 
 export default function MessagesPage() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [selectedConversation, setSelectedConversation] =
-    useState<string>("");
+  const [selectedConversation, setSelectedConversation] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [reply, setReply] = useState("");
   const [userId, setUserId] = useState("");
@@ -65,8 +65,48 @@ export default function MessagesPage() {
     loadConversations();
   }, []);
 
+  async function markConversationRead(conversationId: string, currentUserId: string) {
+    if (!conversationId || !currentUserId) return;
+
+    await supabase
+      .from("messages")
+      .update({ read_at: new Date().toISOString() })
+      .eq("conversation_id", conversationId)
+      .neq("sender_id", currentUserId)
+      .is("read_at", null);
+  }
+
+  async function openConversation(id: string) {
+    setSelectedConversation(id);
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) return;
+
+    setUserId(user.id);
+
+    await markConversationRead(id, user.id);
+
+    const { data } = await supabase
+      .from("messages")
+      .select("*")
+      .eq("conversation_id", id)
+      .order("created_at", { ascending: true });
+
+    setMessages((data as Message[]) ?? []);
+
+    window.dispatchEvent(new Event("messages-read"));
+
+    setTimeout(() => {
+      window.dispatchEvent(new Event("messages-read"));
+      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 500);
+  }
+
   useEffect(() => {
-    if (!selectedConversation) return;
+    if (!selectedConversation || !userId) return;
 
     const channel = supabase
       .channel(`messages-${selectedConversation}`)
@@ -78,17 +118,21 @@ export default function MessagesPage() {
           table: "messages",
           filter: `conversation_id=eq.${selectedConversation}`,
         },
-        (payload) => {
-          setMessages((current) => [
-            ...current,
-            payload.new as Message,
-          ]);
+        async (payload) => {
+          const newMessage = payload.new as Message;
+
+          if (newMessage.sender_id !== userId) {
+            await markConversationRead(selectedConversation, userId);
+            newMessage.read_at = new Date().toISOString();
+            window.dispatchEvent(new Event("messages-read"));
+          }
+
+          setMessages((current) => [...current, newMessage]);
 
           setTimeout(() => {
-            bottomRef.current?.scrollIntoView({
-              behavior: "smooth",
-            });
-          }, 100);
+            window.dispatchEvent(new Event("messages-read"));
+            bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+          }, 500);
         }
       )
       .subscribe();
@@ -96,44 +140,17 @@ export default function MessagesPage() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [selectedConversation]);
-
-  async function openConversation(id: string) {
-    setSelectedConversation(id);
-
-    const { data } = await supabase
-      .from("messages")
-      .select("*")
-      .eq("conversation_id", id)
-      .order("created_at", { ascending: true });
-
-    setMessages(data ?? []);
-
-    await supabase
-      .from("messages")
-      .update({ read_at: new Date().toISOString() })
-      .eq("conversation_id", id)
-      .neq("sender_id", userId)
-      .is("read_at", null);
-
-    setTimeout(() => {
-      bottomRef.current?.scrollIntoView({
-        behavior: "smooth",
-      });
-    }, 100);
-  }
+  }, [selectedConversation, userId]);
 
   async function sendReply() {
     if (!reply.trim()) return;
 
-    const { error } = await supabase
-      .from("messages")
-      .insert({
-        conversation_id: selectedConversation,
-        sender_id: userId,
-        message: reply,
-        read_at: null,
-      });
+    const { error } = await supabase.from("messages").insert({
+      conversation_id: selectedConversation,
+      sender_id: userId,
+      message: reply,
+      read_at: null,
+    });
 
     if (error) {
       alert(error.message);
@@ -173,9 +190,7 @@ export default function MessagesPage() {
             {conversations.map((conversation) => (
               <button
                 key={conversation.id}
-                onClick={() =>
-                  openConversation(conversation.id)
-                }
+                onClick={() => openConversation(conversation.id)}
                 className={`rounded-xl border p-4 text-left transition ${
                   selectedConversation === conversation.id
                     ? "border-[#2F5D50] bg-[#F0FDF4]"
@@ -183,8 +198,7 @@ export default function MessagesPage() {
                 }`}
               >
                 <p className="font-bold text-[#1F2933]">
-                  {conversation.listings?.title ??
-                    "Marketplace Listing"}
+                  {conversation.listings?.title ?? "Marketplace Listing"}
                 </p>
 
                 <p className="mt-2 text-sm text-[#52606D]">
@@ -222,9 +236,7 @@ export default function MessagesPage() {
                         : "text-[#52606D]"
                     }`}
                   >
-                    {new Date(
-                      message.created_at
-                    ).toLocaleString()}
+                    {new Date(message.created_at).toLocaleString()}
                   </p>
                 </div>
               ))}
