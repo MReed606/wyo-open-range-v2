@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase";
 
 type Listing = {
   id: string;
+  owner_id: string | null;
   title: string;
   slug: string;
   price: string | null;
