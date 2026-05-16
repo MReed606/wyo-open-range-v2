@@ -126,6 +126,10 @@ export default async function ListingDetailPage({
             >
               Make Offer
             </Link>
+
+            <div className="mt-3">
+              <SaveListingButton listingId={listing.id} />
+            </div>
           </aside>
         </div>
       </section>
