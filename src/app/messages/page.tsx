@@ -28,6 +28,7 @@ export default function MessagesPage() {
   const [status, setStatus] = useState("Loading conversations...");
 
   const bottomRef = useRef<HTMLDivElement | null>(null);
+  const messagesContainerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     async function loadConversations() {
@@ -101,7 +102,10 @@ export default function MessagesPage() {
 
     setTimeout(() => {
       window.dispatchEvent(new Event("messages-read"));
-      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+      messagesContainerRef.current?.scrollTo({
+              top: messagesContainerRef.current.scrollHeight,
+              behavior: "smooth",
+            });
     }, 500);
   }
 
@@ -131,7 +135,10 @@ export default function MessagesPage() {
 
           setTimeout(() => {
             window.dispatchEvent(new Event("messages-read"));
-            bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+            messagesContainerRef.current?.scrollTo({
+              top: messagesContainerRef.current.scrollHeight,
+              behavior: "smooth",
+            });
           }, 500);
         }
       )
@@ -216,7 +223,10 @@ export default function MessagesPage() {
             </h2>
           </div>
 
-          <div className="flex-1 overflow-y-auto px-6 py-6">
+          <div
+            ref={messagesContainerRef}
+            className="flex-1 overflow-y-auto px-6 py-6"
+          >
             <div className="grid gap-4">
               {messages.map((message) => (
                 <div
