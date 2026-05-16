@@ -62,10 +62,12 @@ export function NotificationBell() {
       .subscribe();
 
     window.addEventListener("focus", loadCount);
+    window.addEventListener("messages-read", loadCount);
 
     return () => {
       window.clearInterval(interval);
       window.removeEventListener("focus", loadCount);
+      window.removeEventListener("messages-read", loadCount);
       supabase.removeChannel(channel);
     };
   }, []);
