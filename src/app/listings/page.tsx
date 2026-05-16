@@ -1,7 +1,13 @@
 import { ListingCard } from "@/components/ListingCard";
-import { listings } from "@/data/listings";
+import { supabase } from "@/lib/supabase";
 
-export default function ListingsPage() {
+export default async function ListingsPage() {
+  const { data: listings, error } = await supabase
+    .from("listings")
+    .select("*")
+    .eq("status", "active")
+    .order("created_at", { ascending: false });
+
   return (
     <main className="min-h-screen bg-[#F7F5F2]">
       <section className="mx-auto max-w-7xl px-6 py-12">
@@ -10,46 +16,36 @@ export default function ListingsPage() {
         </h1>
 
         <p className="mt-4 text-lg text-[#52606D]">
-          Search vehicles, firearms, ranch equipment, services, and more across Wyoming.
+          Real listings from the Wyo Open Range database.
         </p>
 
-        <div className="mt-8 rounded-2xl bg-white p-4 shadow-sm">
-          <div className="grid gap-3 md:grid-cols-[1fr_180px_180px_140px]">
-            <input
-              className="rounded-xl border px-4 py-3 text-[#1F2933] outline-none"
-              placeholder="Search listings..."
-            />
-
-            <select className="rounded-xl border px-4 py-3 text-[#1F2933]">
-              <option>All Categories</option>
-              <option>Vehicles</option>
-              <option>Ranch & Ag</option>
-              <option>Firearms & Outdoors</option>
-            </select>
-
-            <select className="rounded-xl border px-4 py-3 text-[#1F2933]">
-              <option>Statewide</option>
-              <option>Southeast</option>
-              <option>Central</option>
-              <option>Northwest</option>
-            </select>
-
-            <button className="rounded-xl bg-[#2F5D50] px-5 py-3 font-semibold text-white">
-              Search
-            </button>
+        {error && (
+          <div className="mt-8 rounded-2xl bg-white p-6 text-red-700 shadow-md">
+            Database error: {error.message}
           </div>
-        </div>
+        )}
+
+        {!error && (!listings || listings.length === 0) && (
+          <div className="mt-8 rounded-2xl bg-white p-8 shadow-md">
+            <h2 className="text-2xl font-bold text-[#1F2933]">
+              No listings yet
+            </h2>
+            <p className="mt-3 text-[#52606D]">
+              Post the first real listing to start building the marketplace.
+            </p>
+          </div>
+        )}
 
         <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {listings.map((listing) => (
+          {listings?.map((listing) => (
             <ListingCard
-              key={listing.slug}
+              key={listing.id}
               title={listing.title}
-              price={listing.price}
-              location={listing.location}
-              seller={listing.seller}
+              price={listing.price ?? "Contact"}
+              location={`${listing.city ?? "Wyoming"} • ${listing.region ?? "Statewide"}`}
+              seller={listing.seller_label ?? "Seller"}
               slug={listing.slug}
-              condition={listing.condition}
+              condition={listing.condition ?? "Used"}
             />
           ))}
         </div>
