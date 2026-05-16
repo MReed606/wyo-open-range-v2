@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { NotificationBell } from "@/components/NotificationBell";
 import { AuthStatus } from "@/components/auth/AuthStatus";
 
 export function NavBar() {
