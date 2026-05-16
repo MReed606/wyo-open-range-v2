@@ -194,6 +194,7 @@ export default function ListingsPage() {
               price={listing.price ?? "Contact"}
               location={`${listing.city ?? "Wyoming"} • ${listing.region ?? "Statewide"}`}
               seller={listing.seller_label ?? "Seller"}
+              sellerSlug={listing.owner_id ?? ""}
               slug={listing.slug}
               condition={listing.condition ?? "Used"}
               imageUrl={listing.image_url ?? ""}

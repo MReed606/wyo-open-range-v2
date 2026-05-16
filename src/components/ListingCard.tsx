@@ -8,6 +8,7 @@ type ListingCardProps = {
   slug: string;
   condition: string;
   imageUrl?: string;
+  sellerSlug?: string;
 };
 
 export function ListingCard({
@@ -18,6 +19,7 @@ export function ListingCard({
   slug,
   condition,
   imageUrl,
+  sellerSlug,
 }: ListingCardProps) {
   return (
     <Link
@@ -55,9 +57,18 @@ export function ListingCard({
           {location}
         </p>
 
-        <p className="mt-2 text-sm font-semibold text-[#1F2933]">
-          {seller}
-        </p>
+        {sellerSlug ? (
+          <Link
+            href={`/seller/${sellerSlug}`}
+            className="mt-2 inline-block text-sm font-bold text-[#2F5D50] hover:underline"
+          >
+            {seller}
+          </Link>
+        ) : (
+          <p className="mt-2 text-sm font-semibold text-[#1F2933]">
+            {seller}
+          </p>
+        )}
       </div>
     </Link>
   );

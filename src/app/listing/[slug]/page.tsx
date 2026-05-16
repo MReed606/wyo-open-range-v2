@@ -21,6 +21,12 @@ export default async function ListingDetailPage({
     .eq("status", "active")
     .single();
 
+  const { data: sellerProfile } = await supabase
+    .from("profiles")
+    .select("public_slug")
+    .eq("id", listing.owner_id)
+    .single();
+
   const { data: imagesData } = await supabase
     .from("listing_images")
     .select("image_url")
@@ -113,9 +119,12 @@ export default async function ListingDetailPage({
               Seller Profile
             </p>
 
-            <h2 className="mt-3 text-2xl font-bold text-[#1F2933]">
+            <Link
+              href={`/seller/${sellerProfile?.public_slug ?? ""}`}
+              className="mt-3 inline-block text-2xl font-bold text-[#2F5D50] hover:underline"
+            >
               {listing.seller_label ?? "Seller"}
-            </h2>
+            </Link>
 
             <p className="mt-2 text-[#52606D]">
               Real database listing
