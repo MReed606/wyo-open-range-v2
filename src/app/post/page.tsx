@@ -60,16 +60,18 @@ export default function PostListingPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#F7F5F2]">
+    <main className="min-h-screen bg-[#F7F5F2] text-[#1F2933]">
       <section className="border-b bg-white">
         <div className="mx-auto max-w-7xl px-6 py-12">
           <p className="text-sm font-bold uppercase tracking-[0.25em] text-[#2F5D50]">
             Create Listing
           </p>
+
           <h1 className="mt-3 text-5xl font-bold text-[#1F2933]">
             Post a Real Listing
           </h1>
-          <p className="mt-4 max-w-3xl text-lg text-[#52606D]">
+
+          <p className="mt-4 max-w-3xl text-lg font-medium text-[#374151]">
             This form now saves directly to your Supabase listings table.
           </p>
         </div>
@@ -83,9 +85,12 @@ export default function PostListingPage() {
 
           <div className="mt-8 grid gap-5">
             <label className="grid gap-2">
-              <span className="font-bold text-[#1F2933]">Title</span>
+              <span className="text-sm font-bold uppercase tracking-wide text-[#1F2933]">
+                Title
+              </span>
+
               <input
-                className="rounded-xl border px-4 py-3"
+                className="rounded-xl border border-gray-300 bg-white px-4 py-3 font-medium text-[#111827] placeholder:text-gray-500"
                 value={title}
                 onChange={(event) => setTitle(event.target.value)}
                 placeholder="Example: 2019 Ford F-350 Lariat"
@@ -93,9 +98,12 @@ export default function PostListingPage() {
             </label>
 
             <label className="grid gap-2">
-              <span className="font-bold text-[#1F2933]">Price</span>
+              <span className="text-sm font-bold uppercase tracking-wide text-[#1F2933]">
+                Price
+              </span>
+
               <input
-                className="rounded-xl border px-4 py-3"
+                className="rounded-xl border border-gray-300 bg-white px-4 py-3 font-medium text-[#111827] placeholder:text-gray-500"
                 value={price}
                 onChange={(event) => setPrice(event.target.value)}
                 placeholder="$42,500 / OBO / Trade / Contact"
@@ -104,9 +112,12 @@ export default function PostListingPage() {
 
             <div className="grid gap-5 md:grid-cols-2">
               <label className="grid gap-2">
-                <span className="font-bold text-[#1F2933]">Category</span>
+                <span className="text-sm font-bold uppercase tracking-wide text-[#1F2933]">
+                  Category
+                </span>
+
                 <select
-                  className="rounded-xl border px-4 py-3"
+                  className="rounded-xl border border-gray-300 bg-white px-4 py-3 font-semibold text-[#111827]"
                   value={category}
                   onChange={(event) => setCategory(event.target.value)}
                 >
@@ -119,9 +130,12 @@ export default function PostListingPage() {
               </label>
 
               <label className="grid gap-2">
-                <span className="font-bold text-[#1F2933]">Condition</span>
+                <span className="text-sm font-bold uppercase tracking-wide text-[#1F2933]">
+                  Condition
+                </span>
+
                 <select
-                  className="rounded-xl border px-4 py-3"
+                  className="rounded-xl border border-gray-300 bg-white px-4 py-3 font-semibold text-[#111827]"
                   value={condition}
                   onChange={(event) => setCondition(event.target.value)}
                 >
@@ -137,18 +151,24 @@ export default function PostListingPage() {
 
             <div className="grid gap-5 md:grid-cols-2">
               <label className="grid gap-2">
-                <span className="font-bold text-[#1F2933]">City</span>
+                <span className="text-sm font-bold uppercase tracking-wide text-[#1F2933]">
+                  City
+                </span>
+
                 <input
-                  className="rounded-xl border px-4 py-3"
+                  className="rounded-xl border border-gray-300 bg-white px-4 py-3 font-medium text-[#111827] placeholder:text-gray-500"
                   value={city}
                   onChange={(event) => setCity(event.target.value)}
                 />
               </label>
 
               <label className="grid gap-2">
-                <span className="font-bold text-[#1F2933]">Region</span>
+                <span className="text-sm font-bold uppercase tracking-wide text-[#1F2933]">
+                  Region
+                </span>
+
                 <input
-                  className="rounded-xl border px-4 py-3"
+                  className="rounded-xl border border-gray-300 bg-white px-4 py-3 font-medium text-[#111827] placeholder:text-gray-500"
                   value={region}
                   onChange={(event) => setRegion(event.target.value)}
                 />
@@ -156,9 +176,12 @@ export default function PostListingPage() {
             </div>
 
             <label className="grid gap-2">
-              <span className="font-bold text-[#1F2933]">Description</span>
+              <span className="text-sm font-bold uppercase tracking-wide text-[#1F2933]">
+                Description
+              </span>
+
               <textarea
-                className="min-h-40 rounded-xl border px-4 py-3"
+                className="min-h-40 rounded-xl border border-gray-300 bg-white px-4 py-3 font-medium text-[#111827] placeholder:text-gray-500"
                 value={description}
                 onChange={(event) => setDescription(event.target.value)}
                 placeholder="Describe the item, condition, location, and details..."
@@ -167,13 +190,13 @@ export default function PostListingPage() {
 
             <button
               onClick={submitListing}
-              className="rounded-xl bg-[#2F5D50] px-5 py-3 font-semibold text-white"
+              className="rounded-xl bg-[#2F5D50] px-5 py-3 text-lg font-bold text-white transition hover:bg-[#24493f]"
             >
               Publish Listing
             </button>
 
             {status && (
-              <div className="rounded-xl bg-[#F7F5F2] p-4 font-semibold text-[#1F2933]">
+              <div className="rounded-xl bg-[#F3F4F6] p-4 font-semibold text-[#111827]">
                 {status}
               </div>
             )}
@@ -184,7 +207,8 @@ export default function PostListingPage() {
           <h2 className="text-2xl font-bold text-[#1F2933]">
             Real Database Posting
           </h2>
-          <p className="mt-4 text-[#52606D]">
+
+          <p className="mt-4 text-base font-medium leading-7 text-[#374151]">
             Once submitted, this listing will be saved to Supabase and appear on the Browse page.
           </p>
         </aside>
