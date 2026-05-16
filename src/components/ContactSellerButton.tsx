@@ -95,7 +95,7 @@ export function ContactSellerButton({
             placeholder="Send seller a message..."
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            className="min-h-32 w-full rounded-xl border border-gray-300 px-4 py-3"
+            className="min-h-32 w-full rounded-xl border border-gray-300 px-4 py-3 text-[#111827] placeholder:text-gray-500"
           />
 
           <button
