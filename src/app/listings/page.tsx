@@ -25,17 +25,6 @@ export default async function ListingsPage() {
           </div>
         )}
 
-        {!error && (!listings || listings.length === 0) && (
-          <div className="mt-8 rounded-2xl bg-white p-8 shadow-md">
-            <h2 className="text-2xl font-bold text-[#1F2933]">
-              No listings yet
-            </h2>
-            <p className="mt-3 text-[#52606D]">
-              Post the first real listing to start building the marketplace.
-            </p>
-          </div>
-        )}
-
         <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {listings?.map((listing) => (
             <ListingCard
@@ -46,6 +35,7 @@ export default async function ListingsPage() {
               seller={listing.seller_label ?? "Seller"}
               slug={listing.slug}
               condition={listing.condition ?? "Used"}
+              imageUrl={listing.image_url ?? ""}
             />
           ))}
         </div>

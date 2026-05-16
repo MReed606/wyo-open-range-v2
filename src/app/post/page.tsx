@@ -20,6 +20,7 @@ export default function PostListingPage() {
   const [city, setCity] = useState("Cheyenne");
   const [region, setRegion] = useState("Southeast");
   const [description, setDescription] = useState("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [status, setStatus] = useState("");
 
   async function submitListing() {
@@ -32,6 +33,29 @@ export default function PostListingPage() {
     if (!user) {
       setStatus("You must be logged in to post a listing.");
       return;
+    }
+
+    let imageUrl = "";
+
+    if (imageFile) {
+      const imageName = `${Date.now()}-${imageFile.name}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("listing-images")
+        .upload(imageName, imageFile);
+
+      if (uploadError) {
+        setStatus(uploadError.message);
+        return;
+      }
+
+      const {
+        data: { publicUrl },
+      } = supabase.storage
+        .from("listing-images")
+        .getPublicUrl(imageName);
+
+      imageUrl = publicUrl;
     }
 
     const baseSlug = createSlug(title);
@@ -47,6 +71,7 @@ export default function PostListingPage() {
       condition,
       city,
       region,
+      image_url: imageUrl,
       seller_label: "Verified Seller",
       status: "active",
     });
@@ -72,7 +97,7 @@ export default function PostListingPage() {
           </h1>
 
           <p className="mt-4 max-w-3xl text-lg font-medium text-[#374151]">
-            This form now saves directly to your Supabase listings table.
+            Listings now support real image uploads using Supabase Storage.
           </p>
         </div>
       </section>
@@ -90,7 +115,7 @@ export default function PostListingPage() {
               </span>
 
               <input
-                className="rounded-xl border border-gray-300 bg-white px-4 py-3 font-medium text-[#111827] placeholder:text-gray-500"
+                className="rounded-xl border border-gray-300 bg-white px-4 py-3 font-medium text-[#111827]"
                 value={title}
                 onChange={(event) => setTitle(event.target.value)}
                 placeholder="Example: 2019 Ford F-350 Lariat"
@@ -103,10 +128,10 @@ export default function PostListingPage() {
               </span>
 
               <input
-                className="rounded-xl border border-gray-300 bg-white px-4 py-3 font-medium text-[#111827] placeholder:text-gray-500"
+                className="rounded-xl border border-gray-300 bg-white px-4 py-3 font-medium text-[#111827]"
                 value={price}
                 onChange={(event) => setPrice(event.target.value)}
-                placeholder="$42,500 / OBO / Trade / Contact"
+                placeholder="$42,500"
               />
             </label>
 
@@ -156,7 +181,7 @@ export default function PostListingPage() {
                 </span>
 
                 <input
-                  className="rounded-xl border border-gray-300 bg-white px-4 py-3 font-medium text-[#111827] placeholder:text-gray-500"
+                  className="rounded-xl border border-gray-300 bg-white px-4 py-3 font-medium text-[#111827]"
                   value={city}
                   onChange={(event) => setCity(event.target.value)}
                 />
@@ -168,7 +193,7 @@ export default function PostListingPage() {
                 </span>
 
                 <input
-                  className="rounded-xl border border-gray-300 bg-white px-4 py-3 font-medium text-[#111827] placeholder:text-gray-500"
+                  className="rounded-xl border border-gray-300 bg-white px-4 py-3 font-medium text-[#111827]"
                   value={region}
                   onChange={(event) => setRegion(event.target.value)}
                 />
@@ -181,10 +206,27 @@ export default function PostListingPage() {
               </span>
 
               <textarea
-                className="min-h-40 rounded-xl border border-gray-300 bg-white px-4 py-3 font-medium text-[#111827] placeholder:text-gray-500"
+                className="min-h-40 rounded-xl border border-gray-300 bg-white px-4 py-3 font-medium text-[#111827]"
                 value={description}
                 onChange={(event) => setDescription(event.target.value)}
                 placeholder="Describe the item, condition, location, and details..."
+              />
+            </label>
+
+            <label className="grid gap-2">
+              <span className="text-sm font-bold uppercase tracking-wide text-[#1F2933]">
+                Listing Image
+              </span>
+
+              <input
+                type="file"
+                accept="image/*"
+                className="rounded-xl border border-gray-300 bg-white px-4 py-3 font-medium text-[#111827]"
+                onChange={(event) => {
+                  if (event.target.files?.[0]) {
+                    setImageFile(event.target.files[0]);
+                  }
+                }}
               />
             </label>
 
@@ -205,11 +247,11 @@ export default function PostListingPage() {
 
         <aside className="h-fit rounded-2xl bg-white p-6 shadow-md lg:sticky lg:top-24">
           <h2 className="text-2xl font-bold text-[#1F2933]">
-            Real Database Posting
+            Image Upload Enabled
           </h2>
 
           <p className="mt-4 text-base font-medium leading-7 text-[#374151]">
-            Once submitted, this listing will be saved to Supabase and appear on the Browse page.
+            Uploaded images are now stored in Supabase Storage and attached to listings automatically.
           </p>
         </aside>
       </section>
