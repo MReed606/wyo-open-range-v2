@@ -35,19 +35,24 @@ export default function PostListingPage() {
       return;
     }
 
-    const baseSlug = createSlug(title);
-    const uniqueSlug = `${baseSlug}-${Date.now()
-      .toString()
-      .slice(-5)}`;
+    const slug =
+      createSlug(title) +
+      "-" +
+      Date.now().toString().slice(-5);
 
     const uploadedUrls: string[] = [];
 
-    for (const imageFile of imageFiles) {
-      const imageName = `${Date.now()}-${Math.random()}-${imageFile.name}`;
+    for (const file of imageFiles) {
+      const fileName =
+        Date.now() +
+        "-" +
+        Math.random().toString(36).substring(2) +
+        "-" +
+        file.name;
 
       const { error: uploadError } = await supabase.storage
         .from("listing-images")
-        .upload(imageName, imageFile);
+        .upload(fileName, file);
 
       if (uploadError) {
         setStatus(uploadError.message);
@@ -58,61 +63,57 @@ export default function PostListingPage() {
         data: { publicUrl },
       } = supabase.storage
         .from("listing-images")
-        .getPublicUrl(imageName);
+        .getPublicUrl(fileName);
 
       uploadedUrls.push(publicUrl);
     }
 
-    const primaryImage = uploadedUrls[0] ?? "";
-
-    const { data: listingData, error } = await supabase
+    const { data: listing, error } = await supabase
       .from("listings")
       .insert({
         owner_id: user.id,
         title,
-        slug: uniqueSlug,
+        slug,
         description,
         price,
         category,
         condition,
         city,
         region,
-        image_url: primaryImage,
+        image_url: uploadedUrls[0] ?? "",
         seller_label: "Verified Seller",
         status: "active",
       })
       .select()
       .single();
 
-    if (error || !listingData) {
+    if (error || !listing) {
       setStatus(error?.message ?? "Failed to create listing.");
       return;
     }
 
     if (uploadedUrls.length > 0) {
-      const imageRows = uploadedUrls.map((url) => ({
-        listing_id: listingData.id,
-        image_url: url,
-      }));
-
-      await supabase
-        .from("listing_images")
-        .insert(imageRows);
+      await supabase.from("listing_images").insert(
+        uploadedUrls.map((url) => ({
+          listing_id: listing.id,
+          image_url: url,
+        }))
+      );
     }
 
-    window.location.href = `/listing/${uniqueSlug}`;
+    window.location.href = `/listing/${slug}`;
   }
 
   return (
     <main className="min-h-screen bg-[#F7F5F2] text-[#1F2933]">
       <section className="border-b bg-white">
-        <div className="mx-auto max-w-7xl px-6 py-12">
+        <div className="mx-auto max-w-5xl px-6 py-12">
           <p className="text-sm font-bold uppercase tracking-[0.25em] text-[#2F5D50]">
-            Create Listing
+            Marketplace
           </p>
 
-          <h1 className="mt-3 text-5xl font-bold text-[#1F2933]">
-            Post a Real Listing
+          <h1 className="mt-3 text-5xl font-bold">
+            Create Listing
           </h1>
         </div>
       </section>
@@ -121,7 +122,7 @@ export default function PostListingPage() {
         <div className="rounded-2xl bg-white p-8 shadow-md">
           <div className="grid gap-5">
             <input
-              placeholder="Listing title"
+              placeholder="Title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="rounded-xl border border-gray-300 px-4 py-3"
@@ -191,6 +192,25 @@ export default function PostListingPage() {
               }
               className="rounded-xl border border-gray-300 px-4 py-3"
             />
+
+            {imageFiles.length > 0 && (
+              <div className="rounded-xl bg-[#F3F4F6] p-4">
+                <p className="font-bold">
+                  {imageFiles.length} image(s) selected
+                </p>
+
+                <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-4">
+                  {imageFiles.map((file, index) => (
+                    <div
+                      key={index}
+                      className="rounded-xl border bg-white p-2 text-sm"
+                    >
+                      {file.name}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <button
               onClick={submitListing}
