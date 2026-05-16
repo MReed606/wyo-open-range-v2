@@ -48,7 +48,7 @@ export default async function ListingDetailPage({
       <section className="mx-auto max-w-7xl px-6 py-10">
         <div className="grid gap-8 lg:grid-cols-[1fr_380px]">
           <div>
-            <ListingGallery title={listing.title} />
+            <ListingGallery title={listing.title} imageUrl={listing.image_url ?? ""} />
 
             <div className="mt-6 rounded-2xl bg-white p-6 shadow-md">
               <div className="flex flex-wrap items-start justify-between gap-4">
