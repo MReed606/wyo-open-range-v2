@@ -179,19 +179,35 @@ export default function PostListingPage() {
               className="min-h-40 rounded-xl border border-gray-300 px-4 py-3"
             />
 
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={(e) =>
-                setImageFiles(
-                  e.target.files
-                    ? Array.from(e.target.files)
-                    : []
-                )
-              }
-              className="rounded-xl border border-gray-300 px-4 py-3"
-            />
+            <label className="rounded-2xl border-2 border-dashed border-[#2F5D50]/30 bg-[#F8FAFC] p-8 text-center transition hover:border-[#2F5D50] hover:bg-[#F1F5F9]">
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={(e) =>
+                  setImageFiles(
+                    e.target.files
+                      ? Array.from(e.target.files)
+                      : []
+                  )
+                }
+                className="hidden"
+              />
+
+              <div className="flex flex-col items-center">
+                <p className="text-xl font-bold text-[#1F2933]">
+                  Upload Listing Photos
+                </p>
+
+                <p className="mt-2 text-[#52606D]">
+                  Click here to select one or multiple images
+                </p>
+
+                <div className="mt-4 rounded-xl bg-[#2F5D50] px-5 py-3 font-bold text-white">
+                  Choose Images
+                </div>
+              </div>
+            </label>
 
             {imageFiles.length > 0 && (
               <div className="rounded-xl bg-[#F3F4F6] p-4">
