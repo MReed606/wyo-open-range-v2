@@ -15,6 +15,7 @@ type Listing = {
   condition: string | null;
   image_url: string | null;
   category: string | null;
+  description: string | null;
   created_at: string;
 };
 
