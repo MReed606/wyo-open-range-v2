@@ -29,21 +29,25 @@ export function NotificationBell() {
       return;
     }
 
-    const { count } = await supabase
+    const { count, error } = await supabase
       .from("messages")
-      .select("*", { count: "exact", head: true })
+      .select("id", { count: "exact", head: true })
       .in("conversation_id", ids)
       .neq("sender_id", user.id)
       .is("read_at", null);
 
-    setCount(count ?? 0);
+    if (!error) {
+      setCount(count ?? 0);
+    }
   }
 
   useEffect(() => {
     loadCount();
 
+    const interval = window.setInterval(loadCount, 5000);
+
     const channel = supabase
-      .channel("navbar-message-bell")
+      .channel("navbar-message-bell-live")
       .on(
         "postgres_changes",
         {
@@ -51,15 +55,18 @@ export function NotificationBell() {
           schema: "public",
           table: "messages",
         },
-        () => loadCount()
+        () => {
+          loadCount();
+        }
       )
       .subscribe();
 
     window.addEventListener("focus", loadCount);
 
     return () => {
-      supabase.removeChannel(channel);
+      window.clearInterval(interval);
       window.removeEventListener("focus", loadCount);
+      supabase.removeChannel(channel);
     };
   }, []);
 

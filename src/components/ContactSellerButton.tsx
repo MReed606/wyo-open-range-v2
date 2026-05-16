@@ -65,6 +65,7 @@ export function ContactSellerButton({
         conversation_id: conversationId,
         sender_id: user.id,
         message,
+        read_at: null,
       });
 
     if (messageError) {

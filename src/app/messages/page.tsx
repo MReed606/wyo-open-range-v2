@@ -132,6 +132,7 @@ export default function MessagesPage() {
         conversation_id: selectedConversation,
         sender_id: userId,
         message: reply,
+        read_at: null,
       });
 
     if (error) {
