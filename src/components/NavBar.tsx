@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AuthStatus } from "@/components/auth/AuthStatus";
 
 export function NavBar() {
   return (
@@ -17,12 +18,16 @@ export function NavBar() {
           <Link href="/dashboard" className="text-sm font-bold text-[#1F2933] hover:text-[#2F5D50]">Dashboard</Link>
         </div>
 
-        <Link
-          href="/post"
-          className="rounded-xl bg-[#2F5D50] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#24493f]"
-        >
-          Post Listing
-        </Link>
+        <div className="flex items-center gap-3">
+          <AuthStatus />
+
+          <Link
+            href="/post"
+            className="rounded-xl bg-[#2F5D50] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#24493f]"
+          >
+            Post Listing
+          </Link>
+        </div>
       </div>
     </nav>
   );
