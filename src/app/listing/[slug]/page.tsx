@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ListingGallery } from "@/components/ListingGallery";
 import { SaveListingButton } from "@/components/SaveListingButton";
+import { ContactSellerButton } from "@/components/ContactSellerButton";
 import { supabase } from "@/lib/supabase";
 
 type ListingPageProps = {
@@ -137,12 +138,10 @@ export default async function ListingDetailPage({
               Message Seller
             </Link>
 
-            <Link
-              href="/messages"
-              className="mt-3 block w-full rounded-xl border border-[#2F5D50] px-5 py-3 text-center font-semibold text-[#2F5D50] transition hover:bg-[#F7F5F2]"
-            >
-              Make Offer
-            </Link>
+            <ContactSellerButton
+              listingId={listing.id}
+              sellerId={listing.owner_id}
+            />
 
             <div className="mt-3">
               <SaveListingButton listingId={listing.id} />

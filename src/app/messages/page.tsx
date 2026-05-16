@@ -1,133 +1,160 @@
-import { PageHeader } from "@/components/PageHeader";
+"use client";
 
-const conversations = [
-  {
-    name: "Cody R.",
-    subject: "2019 Ford F-350 Lariat",
-    preview: "Is this still available this weekend?",
-    status: "Unread",
-  },
-  {
-    name: "Frontier Welding & Repair",
-    subject: "Ranch Welding Services",
-    preview: "We can get you scheduled next week.",
-    status: "Business",
-  },
-  {
-    name: "Wyoming Member",
-    subject: "20ft Stock Trailer",
-    preview: "Would you consider a trade plus cash?",
-    status: "Offer",
-  },
-];
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
+
+type Conversation = {
+  id: string;
+  created_at: string;
+  listings: {
+    title: string;
+  } | null;
+};
+
+type Message = {
+  id: string;
+  sender_id: string;
+  message: string;
+  created_at: string;
+};
 
 export default function MessagesPage() {
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [selectedConversation, setSelectedConversation] =
+    useState<string>("");
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [status, setStatus] = useState("Loading conversations...");
+
+  useEffect(() => {
+    async function loadConversations() {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        window.location.href = "/login";
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("conversations")
+        .select(`
+          id,
+          created_at,
+          listings (
+            title
+          )
+        `)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        setStatus(error.message);
+        return;
+      }
+
+      setConversations((data as any) ?? []);
+      setStatus("");
+    }
+
+    loadConversations();
+  }, []);
+
+  async function openConversation(id: string) {
+    setSelectedConversation(id);
+
+    const { data } = await supabase
+      .from("messages")
+      .select("*")
+      .eq("conversation_id", id)
+      .order("created_at", { ascending: true });
+
+    setMessages(data ?? []);
+  }
+
   return (
     <main className="min-h-screen bg-[#F7F5F2]">
-      <PageHeader
-        eyebrow="Marketplace Messaging"
-        title="Messages"
-        description="A prototype inbox for buyer/seller conversations, business inquiries, offers, and transaction updates."
-      />
+      <section className="border-b bg-white">
+        <div className="mx-auto max-w-7xl px-6 py-12">
+          <p className="text-sm font-bold uppercase tracking-[0.25em] text-[#2F5D50]">
+            Messaging
+          </p>
 
-      <section className="mx-auto grid max-w-7xl gap-8 px-6 py-12 lg:grid-cols-[340px_1fr_300px]">
+          <h1 className="mt-3 text-5xl font-bold text-[#1F2933]">
+            Inbox
+          </h1>
+        </div>
+      </section>
+
+      <section className="mx-auto grid max-w-7xl gap-6 px-6 py-10 lg:grid-cols-[340px_1fr]">
         <div className="rounded-2xl bg-white p-4 shadow-md">
-          <h2 className="px-2 py-3 text-xl font-bold text-[#1F2933]">
+          <h2 className="mb-4 text-2xl font-bold text-[#1F2933]">
             Conversations
           </h2>
 
-          <div className="mt-2 space-y-3">
-            {conversations.map((conversation) => (
-              <div key={conversation.subject} className="rounded-xl bg-[#F7F5F2] p-4">
-                <p className="font-bold text-[#1F2933]">
-                  {conversation.name}
-                </p>
+          {status && (
+            <div className="rounded-xl bg-[#F3F4F6] p-4 font-semibold">
+              {status}
+            </div>
+          )}
 
-                <p className="mt-1 text-sm font-semibold text-[#2F5D50]">
-                  {conversation.subject}
+          <div className="grid gap-3">
+            {conversations.map((conversation) => (
+              <button
+                key={conversation.id}
+                onClick={() =>
+                  openConversation(conversation.id)
+                }
+                className={`rounded-xl border p-4 text-left transition ${
+                  selectedConversation === conversation.id
+                    ? "border-[#2F5D50] bg-[#F0FDF4]"
+                    : "border-gray-200 bg-white"
+                }`}
+              >
+                <p className="font-bold text-[#1F2933]">
+                  {conversation.listings?.title ??
+                    "Marketplace Listing"}
                 </p>
 
                 <p className="mt-2 text-sm text-[#52606D]">
-                  {conversation.preview}
+                  Open conversation
                 </p>
-              </div>
+              </button>
             ))}
           </div>
         </div>
 
         <div className="rounded-2xl bg-white p-6 shadow-md">
-          <p className="text-sm font-bold uppercase tracking-wide text-[#2F5D50]">
-            Active Conversation
-          </p>
-
-          <h2 className="mt-3 text-2xl font-bold text-[#1F2933]">
-            2019 Ford F-350 Lariat
+          <h2 className="text-2xl font-bold text-[#1F2933]">
+            Messages
           </h2>
 
-          <div className="mt-8 space-y-5">
-            <div className="max-w-lg rounded-2xl bg-[#F7F5F2] p-5">
-              <p className="font-bold text-[#1F2933]">Buyer</p>
-              <p className="mt-2 text-[#52606D]">
-                Is this still available this weekend?
-              </p>
-            </div>
+          <div className="mt-6 grid gap-4">
+            {messages.map((message) => (
+              <div
+                key={message.id}
+                className="rounded-2xl bg-[#F3F4F6] p-4"
+              >
+                <p className="text-[#1F2933]">
+                  {message.message}
+                </p>
 
-            <div className="ml-auto max-w-lg rounded-2xl bg-[#2F5D50] p-5 text-white">
-              <p className="font-bold">Seller</p>
-              <p className="mt-2 text-white/85">
-                Yes, still available. I can meet in Cheyenne.
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-[#2F5D50] bg-white p-5">
-              <p className="text-sm font-bold uppercase tracking-wide text-[#2F5D50]">
-                Offer Card
-              </p>
-
-              <p className="mt-2 text-2xl font-bold text-[#1F2933]">
-                $40,000
-              </p>
-
-              <p className="mt-2 text-[#52606D]">
-                Buyer can pick up this weekend.
-              </p>
-
-              <div className="mt-5 flex flex-wrap gap-3">
-                <button className="rounded-xl bg-[#2F5D50] px-4 py-2 text-sm font-semibold text-white">
-                  Accept
-                </button>
-
-                <button className="rounded-xl border border-[#2F5D50] px-4 py-2 text-sm font-semibold text-[#2F5D50]">
-                  Counter
-                </button>
-
-                <button className="rounded-xl border border-black/10 px-4 py-2 text-sm font-semibold text-[#52606D]">
-                  Decline
-                </button>
+                <p className="mt-2 text-sm text-[#52606D]">
+                  {new Date(
+                    message.created_at
+                  ).toLocaleString()}
+                </p>
               </div>
-            </div>
+            ))}
+
+            {messages.length === 0 && (
+              <div className="rounded-2xl bg-[#F8FAFC] p-10 text-center">
+                <p className="text-lg font-semibold text-[#52606D]">
+                  Select a conversation
+                </p>
+              </div>
+            )}
           </div>
         </div>
-
-        <aside className="rounded-2xl bg-white p-6 shadow-md">
-          <h2 className="text-xl font-bold text-[#1F2933]">
-            Listing Context
-          </h2>
-
-          <div className="mt-5 h-36 rounded-xl bg-gradient-to-br from-[#C2A878] to-[#2F5D50]" />
-
-          <p className="mt-5 text-2xl font-bold text-[#1F2933]">
-            $42,500
-          </p>
-
-          <p className="mt-2 font-semibold text-[#1F2933]">
-            2019 Ford F-350 Lariat
-          </p>
-
-          <p className="mt-2 text-sm text-[#52606D]">
-            Cheyenne • Verified Seller
-          </p>
-        </aside>
       </section>
     </main>
   );
