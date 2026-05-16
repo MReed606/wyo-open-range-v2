@@ -20,7 +20,7 @@ export default function PostListingPage() {
   const [city, setCity] = useState("Cheyenne");
   const [region, setRegion] = useState("Southeast");
   const [description, setDescription] = useState("");
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [status, setStatus] = useState("");
 
   async function submitListing() {
@@ -31,14 +31,19 @@ export default function PostListingPage() {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      setStatus("You must be logged in to post a listing.");
+      setStatus("You must be logged in.");
       return;
     }
 
-    let imageUrl = "";
+    const baseSlug = createSlug(title);
+    const uniqueSlug = `${baseSlug}-${Date.now()
+      .toString()
+      .slice(-5)}`;
 
-    if (imageFile) {
-      const imageName = `${Date.now()}-${imageFile.name}`;
+    const uploadedUrls: string[] = [];
+
+    for (const imageFile of imageFiles) {
+      const imageName = `${Date.now()}-${Math.random()}-${imageFile.name}`;
 
       const { error: uploadError } = await supabase.storage
         .from("listing-images")
@@ -55,30 +60,44 @@ export default function PostListingPage() {
         .from("listing-images")
         .getPublicUrl(imageName);
 
-      imageUrl = publicUrl;
+      uploadedUrls.push(publicUrl);
     }
 
-    const baseSlug = createSlug(title);
-    const uniqueSlug = `${baseSlug}-${Date.now().toString().slice(-5)}`;
+    const primaryImage = uploadedUrls[0] ?? "";
 
-    const { error } = await supabase.from("listings").insert({
-      owner_id: user.id,
-      title,
-      slug: uniqueSlug,
-      description,
-      price,
-      category,
-      condition,
-      city,
-      region,
-      image_url: imageUrl,
-      seller_label: "Verified Seller",
-      status: "active",
-    });
+    const { data: listingData, error } = await supabase
+      .from("listings")
+      .insert({
+        owner_id: user.id,
+        title,
+        slug: uniqueSlug,
+        description,
+        price,
+        category,
+        condition,
+        city,
+        region,
+        image_url: primaryImage,
+        seller_label: "Verified Seller",
+        status: "active",
+      })
+      .select()
+      .single();
 
-    if (error) {
-      setStatus(error.message);
+    if (error || !listingData) {
+      setStatus(error?.message ?? "Failed to create listing.");
       return;
+    }
+
+    if (uploadedUrls.length > 0) {
+      const imageRows = uploadedUrls.map((url) => ({
+        listing_id: listingData.id,
+        image_url: url,
+      }));
+
+      await supabase
+        .from("listing_images")
+        .insert(imageRows);
     }
 
     window.location.href = `/listing/${uniqueSlug}`;
@@ -95,165 +114,98 @@ export default function PostListingPage() {
           <h1 className="mt-3 text-5xl font-bold text-[#1F2933]">
             Post a Real Listing
           </h1>
-
-          <p className="mt-4 max-w-3xl text-lg font-medium text-[#374151]">
-            Listings now support real image uploads using Supabase Storage.
-          </p>
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-7xl gap-8 px-6 py-12 lg:grid-cols-[1fr_360px]">
+      <section className="mx-auto max-w-5xl px-6 py-12">
         <div className="rounded-2xl bg-white p-8 shadow-md">
-          <h2 className="text-3xl font-bold text-[#1F2933]">
-            Listing Details
-          </h2>
+          <div className="grid gap-5">
+            <input
+              placeholder="Listing title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="rounded-xl border border-gray-300 px-4 py-3"
+            />
 
-          <div className="mt-8 grid gap-5">
-            <label className="grid gap-2">
-              <span className="text-sm font-bold uppercase tracking-wide text-[#1F2933]">
-                Title
-              </span>
+            <input
+              placeholder="Price"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              className="rounded-xl border border-gray-300 px-4 py-3"
+            />
 
-              <input
-                className="rounded-xl border border-gray-300 bg-white px-4 py-3 font-medium text-[#111827]"
-                value={title}
-                onChange={(event) => setTitle(event.target.value)}
-                placeholder="Example: 2019 Ford F-350 Lariat"
-              />
-            </label>
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="rounded-xl border border-gray-300 px-4 py-3"
+            >
+              <option>Vehicles</option>
+              <option>Ranch & Ag</option>
+              <option>Local Services</option>
+              <option>General Marketplace</option>
+            </select>
 
-            <label className="grid gap-2">
-              <span className="text-sm font-bold uppercase tracking-wide text-[#1F2933]">
-                Price
-              </span>
+            <select
+              value={condition}
+              onChange={(e) => setCondition(e.target.value)}
+              className="rounded-xl border border-gray-300 px-4 py-3"
+            >
+              <option>New</option>
+              <option>Like New</option>
+              <option>Good</option>
+              <option>Fair</option>
+              <option>Service</option>
+            </select>
 
-              <input
-                className="rounded-xl border border-gray-300 bg-white px-4 py-3 font-medium text-[#111827]"
-                value={price}
-                onChange={(event) => setPrice(event.target.value)}
-                placeholder="$42,500"
-              />
-            </label>
+            <input
+              placeholder="City"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              className="rounded-xl border border-gray-300 px-4 py-3"
+            />
 
-            <div className="grid gap-5 md:grid-cols-2">
-              <label className="grid gap-2">
-                <span className="text-sm font-bold uppercase tracking-wide text-[#1F2933]">
-                  Category
-                </span>
+            <input
+              placeholder="Region"
+              value={region}
+              onChange={(e) => setRegion(e.target.value)}
+              className="rounded-xl border border-gray-300 px-4 py-3"
+            />
 
-                <select
-                  className="rounded-xl border border-gray-300 bg-white px-4 py-3 font-semibold text-[#111827]"
-                  value={category}
-                  onChange={(event) => setCategory(event.target.value)}
-                >
-                  <option>Vehicles</option>
-                  <option>Firearms & Outdoors</option>
-                  <option>Ranch & Ag</option>
-                  <option>Local Services</option>
-                  <option>General Marketplace</option>
-                </select>
-              </label>
+            <textarea
+              placeholder="Description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="min-h-40 rounded-xl border border-gray-300 px-4 py-3"
+            />
 
-              <label className="grid gap-2">
-                <span className="text-sm font-bold uppercase tracking-wide text-[#1F2933]">
-                  Condition
-                </span>
-
-                <select
-                  className="rounded-xl border border-gray-300 bg-white px-4 py-3 font-semibold text-[#111827]"
-                  value={condition}
-                  onChange={(event) => setCondition(event.target.value)}
-                >
-                  <option>New</option>
-                  <option>Like New</option>
-                  <option>Good</option>
-                  <option>Fair</option>
-                  <option>Parts/Repair</option>
-                  <option>Service</option>
-                </select>
-              </label>
-            </div>
-
-            <div className="grid gap-5 md:grid-cols-2">
-              <label className="grid gap-2">
-                <span className="text-sm font-bold uppercase tracking-wide text-[#1F2933]">
-                  City
-                </span>
-
-                <input
-                  className="rounded-xl border border-gray-300 bg-white px-4 py-3 font-medium text-[#111827]"
-                  value={city}
-                  onChange={(event) => setCity(event.target.value)}
-                />
-              </label>
-
-              <label className="grid gap-2">
-                <span className="text-sm font-bold uppercase tracking-wide text-[#1F2933]">
-                  Region
-                </span>
-
-                <input
-                  className="rounded-xl border border-gray-300 bg-white px-4 py-3 font-medium text-[#111827]"
-                  value={region}
-                  onChange={(event) => setRegion(event.target.value)}
-                />
-              </label>
-            </div>
-
-            <label className="grid gap-2">
-              <span className="text-sm font-bold uppercase tracking-wide text-[#1F2933]">
-                Description
-              </span>
-
-              <textarea
-                className="min-h-40 rounded-xl border border-gray-300 bg-white px-4 py-3 font-medium text-[#111827]"
-                value={description}
-                onChange={(event) => setDescription(event.target.value)}
-                placeholder="Describe the item, condition, location, and details..."
-              />
-            </label>
-
-            <label className="grid gap-2">
-              <span className="text-sm font-bold uppercase tracking-wide text-[#1F2933]">
-                Listing Image
-              </span>
-
-              <input
-                type="file"
-                accept="image/*"
-                className="rounded-xl border border-gray-300 bg-white px-4 py-3 font-medium text-[#111827]"
-                onChange={(event) => {
-                  if (event.target.files?.[0]) {
-                    setImageFile(event.target.files[0]);
-                  }
-                }}
-              />
-            </label>
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={(e) =>
+                setImageFiles(
+                  e.target.files
+                    ? Array.from(e.target.files)
+                    : []
+                )
+              }
+              className="rounded-xl border border-gray-300 px-4 py-3"
+            />
 
             <button
               onClick={submitListing}
-              className="rounded-xl bg-[#2F5D50] px-5 py-3 text-lg font-bold text-white transition hover:bg-[#24493f]"
+              className="rounded-xl bg-[#2F5D50] px-5 py-3 text-lg font-bold text-white"
             >
               Publish Listing
             </button>
 
             {status && (
-              <div className="rounded-xl bg-[#F3F4F6] p-4 font-semibold text-[#111827]">
+              <div className="rounded-xl bg-[#F3F4F6] p-4 font-semibold">
                 {status}
               </div>
             )}
           </div>
         </div>
-
-        <aside className="h-fit rounded-2xl bg-white p-6 shadow-md lg:sticky lg:top-24">
-          <h2 className="text-2xl font-bold text-[#1F2933]">
-            Image Upload Enabled
-          </h2>
-
-          <p className="mt-4 text-base font-medium leading-7 text-[#374151]">
-            Uploaded images are now stored in Supabase Storage and attached to listings automatically.
-          </p>
-        </aside>
       </section>
     </main>
   );

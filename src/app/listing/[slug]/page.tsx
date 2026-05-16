@@ -21,6 +21,14 @@ export default async function ListingDetailPage({
     .eq("status", "active")
     .single();
 
+  const { data: imagesData } = await supabase
+    .from("listing_images")
+    .select("image_url")
+    .eq("listing_id", listing.id);
+
+  const galleryImages =
+    imagesData?.map((img) => img.image_url) ?? [];
+
   if (error || !listing) {
     return (
       <main className="min-h-screen bg-[#F7F5F2] px-6 py-20">
@@ -49,7 +57,7 @@ export default async function ListingDetailPage({
       <section className="mx-auto max-w-7xl px-6 py-10">
         <div className="grid gap-8 lg:grid-cols-[1fr_380px]">
           <div>
-            <ListingGallery title={listing.title} imageUrl={listing.image_url ?? ""} />
+            <ListingGallery title={listing.title} images={galleryImages} />
 
             <div className="mt-6 rounded-2xl bg-white p-6 shadow-md">
               <div className="flex flex-wrap items-start justify-between gap-4">

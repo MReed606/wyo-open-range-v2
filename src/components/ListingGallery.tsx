@@ -1,41 +1,55 @@
+"use client";
+
+import { useState } from "react";
+
 type ListingGalleryProps = {
   title: string;
-  imageUrl?: string;
+  images: string[];
 };
 
-export function ListingGallery({ title, imageUrl }: ListingGalleryProps) {
-  const thumbnails = [1, 2, 3, 4];
+export function ListingGallery({
+  title,
+  images,
+}: ListingGalleryProps) {
+  const fallback =
+    "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1200&auto=format&fit=crop";
+
+  const allImages =
+    images.length > 0 ? images : [fallback];
+
+  const [activeImage, setActiveImage] = useState(allImages[0]);
 
   return (
     <div className="rounded-2xl bg-white p-4 shadow-md">
-      <div className="relative h-[420px] overflow-hidden rounded-2xl bg-gradient-to-br from-[#C2A878] via-[#2F5D50] to-[#1F2933]">
-        {imageUrl ? (
-          <img
-            src={imageUrl}
-            alt={title}
-            className="h-full w-full object-cover"
-          />
-        ) : null}
+      <div className="relative h-[420px] overflow-hidden rounded-2xl bg-[#D1D5DB]">
+        <img
+          src={activeImage}
+          alt={title}
+          className="h-full w-full object-cover"
+        />
 
-        <div className="absolute bottom-5 left-5 rounded-xl bg-black/50 px-4 py-2 text-sm font-semibold text-white backdrop-blur">
+        <div className="absolute bottom-5 left-5 rounded-xl bg-black/60 px-4 py-2 text-sm font-semibold text-white backdrop-blur">
           {title}
         </div>
       </div>
 
       <div className="mt-4 grid grid-cols-4 gap-3">
-        {thumbnails.map((thumb) => (
-          <div
-            key={thumb}
-            className="h-24 overflow-hidden rounded-xl bg-gradient-to-br from-[#C2A878] to-[#2F5D50] shadow-sm ring-1 ring-black/5"
+        {allImages.map((image, index) => (
+          <button
+            key={`${image}-${index}`}
+            onClick={() => setActiveImage(image)}
+            className={`overflow-hidden rounded-xl border-2 transition ${
+              activeImage === image
+                ? "border-[#2F5D50]"
+                : "border-transparent"
+            }`}
           >
-            {imageUrl ? (
-              <img
-                src={imageUrl}
-                alt={`${title} thumbnail ${thumb}`}
-                className="h-full w-full object-cover"
-              />
-            ) : null}
-          </div>
+            <img
+              src={image}
+              alt={`${title} ${index + 1}`}
+              className="h-24 w-full object-cover"
+            />
+          </button>
         ))}
       </div>
     </div>
