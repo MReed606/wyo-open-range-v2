@@ -109,6 +109,13 @@ export default function MessagesPage() {
 
     setMessages(data ?? []);
 
+    await supabase
+      .from("messages")
+      .update({ read_at: new Date().toISOString() })
+      .eq("conversation_id", id)
+      .neq("sender_id", userId)
+      .is("read_at", null);
+
     setTimeout(() => {
       bottomRef.current?.scrollIntoView({
         behavior: "smooth",

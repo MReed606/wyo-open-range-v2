@@ -7,38 +7,39 @@ import { supabase } from "@/lib/supabase";
 export function NotificationBell() {
   const [count, setCount] = useState(0);
 
-  useEffect(() => {
-    async function loadCount() {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+  async function loadCount() {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-      if (!user) {
-        setCount(0);
-        return;
-      }
-
-      const { data: conversations } = await supabase
-        .from("conversations")
-        .select("id")
-        .or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`);
-
-      const conversationIds = conversations?.map((item) => item.id) ?? [];
-
-      if (conversationIds.length === 0) {
-        setCount(0);
-        return;
-      }
-
-      const { data: messages } = await supabase
-        .from("messages")
-        .select("id")
-        .in("conversation_id", conversationIds)
-        .neq("sender_id", user.id);
-
-      setCount(messages?.length ?? 0);
+    if (!user) {
+      setCount(0);
+      return;
     }
 
+    const { data: conversations } = await supabase
+      .from("conversations")
+      .select("id")
+      .or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`);
+
+    const ids = conversations?.map((item) => item.id) ?? [];
+
+    if (ids.length === 0) {
+      setCount(0);
+      return;
+    }
+
+    const { count } = await supabase
+      .from("messages")
+      .select("*", { count: "exact", head: true })
+      .in("conversation_id", ids)
+      .neq("sender_id", user.id)
+      .is("read_at", null);
+
+    setCount(count ?? 0);
+  }
+
+  useEffect(() => {
     loadCount();
 
     const channel = supabase
@@ -46,18 +47,19 @@ export function NotificationBell() {
       .on(
         "postgres_changes",
         {
-          event: "INSERT",
+          event: "*",
           schema: "public",
           table: "messages",
         },
-        () => {
-          loadCount();
-        }
+        () => loadCount()
       )
       .subscribe();
 
+    window.addEventListener("focus", loadCount);
+
     return () => {
       supabase.removeChannel(channel);
+      window.removeEventListener("focus", loadCount);
     };
   }, []);
 
