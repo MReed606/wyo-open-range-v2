@@ -36,6 +36,7 @@ export default function ListingsPage() {
       const { data, error } = await supabase
         .from("listings")
         .select("*")
+        .neq("status", "removed")
         .eq("status", "active")
         .order("created_at", { ascending: false });
 

@@ -6,101 +6,53 @@ export default async function HomePage() {
   const { data: listings } = await supabase
     .from("listings")
     .select("*")
-    .order("created_at", { ascending: false })
+    .neq("status", "removed")
+    .order("created_at", {
+      ascending: false,
+    })
     .limit(6);
 
-  const { count: listingCount } = await supabase
-    .from("listings")
-    .select("*", { count: "exact", head: true });
-
-  const { count: userCount } = await supabase
-    .from("profiles")
-    .select("*", { count: "exact", head: true });
+  const categories = [
+    "Vehicles",
+    "Livestock",
+    "Equipment",
+    "Housing",
+    "Services",
+    "Jobs",
+  ];
 
   return (
     <main className="min-h-screen bg-[#F7F5F2]">
 
       {/* HERO */}
-      <section className="border-b border-black/10 bg-white">
+      <section className="border-b border-black/5 bg-white">
 
-        <div className="mx-auto max-w-7xl px-6 py-20">
+        <div className="mx-auto flex max-w-7xl flex-col items-center px-6 py-24 text-center">
 
-          <div className="max-w-3xl">
+          <h1 className="max-w-4xl text-5xl font-black leading-tight tracking-tight text-[#111827] md:text-7xl">
+            Wyoming's Marketplace for Ranch, Land, Livestock & Local Trade
+          </h1>
 
-            <div className="mb-4 inline-flex rounded-full border border-[#2F5D50]/20 bg-[#2F5D50]/10 px-4 py-2 text-sm font-semibold text-[#2F5D50]">
-              Wyoming Marketplace • Businesses • Community
-            </div>
+          <p className="mt-8 max-w-2xl text-xl leading-9 text-[#374151]">
+            Buy, sell, trade, and connect across Wyoming with a marketplace built for rural communities.
+          </p>
 
-            <h1 className="text-5xl font-black leading-tight tracking-tight text-[#111827] sm:text-6xl">
-              Better reach.
-              <br />
-              Better options.
-              <br />
-              Less BS.
-            </h1>
+          <div className="mt-10 flex flex-wrap justify-center gap-4">
 
-            <p className="mt-6 max-w-2xl text-xl text-[#374151]">
-              Wyoming’s modern marketplace for buying, selling,
-              businesses, services, jobs, and community.
-            </p>
+            <Link
+              href="/listings"
+              className="rounded-2xl bg-[#2F5D50] px-6 py-4 text-lg font-bold text-white shadow transition hover:bg-[#24493f]"
+            >
+              Browse Listings
+            </Link>
 
-            <div className="mt-8 flex flex-wrap gap-4">
+            <Link
+              href="/post"
+              className="rounded-2xl border border-[#2F5D50] bg-white px-6 py-4 text-lg font-bold text-[#2F5D50] transition hover:bg-[#F3F7F5]"
+            >
+              Post Listing
+            </Link>
 
-              <Link
-                href="/listings"
-                className="rounded-2xl bg-[#2F5D50] px-6 py-4 text-lg font-bold text-white shadow transition hover:bg-[#24493f]"
-              >
-                Browse Marketplace
-              </Link>
-
-              <Link
-                href="/post"
-                className="rounded-2xl border border-gray-300 bg-white px-6 py-4 text-lg font-bold text-[#111827] shadow-sm transition hover:bg-gray-50"
-              >
-                Post Listing
-              </Link>
-
-            </div>
-
-          </div>
-
-        </div>
-
-      </section>
-
-      {/* STATS */}
-      <section className="mx-auto max-w-7xl px-6 py-12">
-
-        <div className="grid gap-4 sm:grid-cols-3">
-
-          <div className="rounded-2xl bg-white p-6 shadow-sm">
-            <div className="text-sm font-bold uppercase tracking-wide text-gray-500">
-              Listings
-            </div>
-
-            <div className="mt-2 text-4xl font-black text-[#111827]">
-              {listingCount ?? 0}
-            </div>
-          </div>
-
-          <div className="rounded-2xl bg-white p-6 shadow-sm">
-            <div className="text-sm font-bold uppercase tracking-wide text-gray-500">
-              Members
-            </div>
-
-            <div className="mt-2 text-4xl font-black text-[#111827]">
-              {userCount ?? 0}
-            </div>
-          </div>
-
-          <div className="rounded-2xl bg-white p-6 shadow-sm">
-            <div className="text-sm font-bold uppercase tracking-wide text-gray-500">
-              Marketplace
-            </div>
-
-            <div className="mt-2 text-4xl font-black text-[#2F5D50]">
-              Live
-            </div>
           </div>
 
         </div>
@@ -108,35 +60,38 @@ export default async function HomePage() {
       </section>
 
       {/* CATEGORIES */}
-      <section className="mx-auto max-w-7xl px-6 pb-12">
+      <section className="mx-auto max-w-7xl px-6 py-16">
 
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mb-10 flex items-center justify-between">
 
-          <h2 className="text-3xl font-black text-[#111827]">
-            Browse Categories
-          </h2>
+          <div>
+
+            <h2 className="text-4xl font-black text-[#111827]">
+              Browse Categories
+            </h2>
+
+            <p className="mt-3 text-lg text-[#374151]">
+              Explore Wyoming marketplace categories.
+            </p>
+
+          </div>
 
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
 
-          {[
-            "Vehicles",
-            "Livestock",
-            "Equipment",
-            "Housing",
-            "Services",
-            "Jobs",
-            "Businesses",
-            "Community",
-          ].map((category) => (
+          {categories.map((category) => (
 
             <Link
               key={category}
               href={`/listings?category=${category}`}
-              className="rounded-2xl bg-white p-6 text-lg font-bold text-[#111827] shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+              className="rounded-3xl bg-white p-8 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
             >
-              {category}
+
+              <h3 className="text-2xl font-black text-[#111827]">
+                {category}
+              </h3>
+
             </Link>
 
           ))}
@@ -145,14 +100,22 @@ export default async function HomePage() {
 
       </section>
 
-      {/* FEATURED LISTINGS */}
+      {/* RECENT LISTINGS */}
       <section className="mx-auto max-w-7xl px-6 pb-20">
 
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mb-10 flex items-center justify-between">
 
-          <h2 className="text-3xl font-black text-[#111827]">
-            Latest Listings
-          </h2>
+          <div>
+
+            <h2 className="text-4xl font-black text-[#111827]">
+              Recent Listings
+            </h2>
+
+            <p className="mt-3 text-lg text-[#374151]">
+              Fresh marketplace activity from across Wyoming.
+            </p>
+
+          </div>
 
           <Link
             href="/listings"
@@ -163,36 +126,42 @@ export default async function HomePage() {
 
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 
           {listings?.map((listing) => (
 
             <Link
               key={listing.id}
               href={`/listing/${listing.slug}`}
-              className="overflow-hidden rounded-2xl bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+              className="overflow-hidden rounded-3xl bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md"
             >
 
               {listing.image_url && (
+
                 <img
                   src={listing.image_url}
                   alt={listing.title}
                   className="h-56 w-full object-cover"
                 />
+
               )}
 
-              <div className="p-5">
+              <div className="p-6">
 
-                <h3 className="line-clamp-1 text-xl font-bold text-[#111827]">
+                <h3 className="text-2xl font-black text-[#111827]">
                   {listing.title}
                 </h3>
 
-                <p className="mt-2 text-lg font-bold text-[#2F5D50]">
-                  ${listing.price ?? "Contact"}
-                </p>
+                {listing.category && (
 
-                <p className="mt-2 line-clamp-2 text-sm text-[#374151]">
-                  {listing.description}
+                  <div className="mt-3 inline-flex rounded-full bg-[#2F5D50]/10 px-4 py-2 text-sm font-bold text-[#2F5D50]">
+                    {listing.category}
+                  </div>
+
+                )}
+
+                <p className="mt-4 text-xl font-bold text-[#2F5D50]">
+                  ${listing.price ?? "Contact"}
                 </p>
 
               </div>

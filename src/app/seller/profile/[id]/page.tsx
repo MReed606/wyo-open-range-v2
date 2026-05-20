@@ -29,6 +29,7 @@ export default async function SellerPage({
     .from("listings")
     .select("*")
     .eq("owner_id", id)
+    .neq("status", "removed")
     .order("created_at", {
       ascending: false,
     });
