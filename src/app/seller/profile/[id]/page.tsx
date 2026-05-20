@@ -1,3 +1,4 @@
+import { FollowButton } from "@/components/social/FollowButton";
 import { LeaveReviewForm } from "@/components/reviews/LeaveReviewForm";
 import { supabase } from "@/lib/supabase";
 
@@ -114,7 +115,12 @@ export default async function SellerPage({
 
           </div>
 
-        </div>
+        
+            <div className="mt-6">
+              <FollowButton sellerId={id} />
+            </div>
+
+          </div>
 
         <p className="mt-5 text-lg text-[#374151]">
 
@@ -138,7 +144,21 @@ export default async function SellerPage({
 
           <br />
 
+          
+          Response Rate:
+          {" "}
+          {seller?.response_rate ?? 100}%
+
+          <br />
+
+          Response Speed:
+          {" "}
+          {seller?.response_time ?? "Fast"}
+
+          <br />
+
           Active Listings:
+
           {" "}
           {listings?.length ?? 0}
 

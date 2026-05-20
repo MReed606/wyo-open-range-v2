@@ -111,6 +111,30 @@ export default async function HomePage() {
 
       </section>
 
-    </main>
+    
+      {/* FEATURED */}
+
+      <section className="mt-16">
+
+        <div className="mb-8 flex items-center justify-between">
+
+          <div>
+
+            <h2 className="text-4xl font-black text-[#111827]">
+              Featured Listings
+            </h2>
+
+            <p className="mt-3 text-lg text-[#374151]">
+              Popular marketplace listings.
+            </p>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+</main>
   );
 }
