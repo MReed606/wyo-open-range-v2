@@ -11,6 +11,10 @@ export function MarketplaceFilters() {
     params.get("search") ?? ""
   );
 
+  const [category, setCategory] = useState(
+    params.get("category") ?? ""
+  );
+
   const [region, setRegion] = useState(
     params.get("region") ?? ""
   );
@@ -23,6 +27,7 @@ export function MarketplaceFilters() {
     const query = new URLSearchParams();
 
     if (search) query.set("search", search);
+    if (category) query.set("category", category);
     if (region) query.set("region", region);
     if (sort) query.set("sort", sort);
 
@@ -43,6 +48,25 @@ export function MarketplaceFilters() {
           }
           className="rounded-xl border border-gray-300 px-4 py-3 text-[#111827]"
         />
+
+        
+        <select
+          value={category}
+          onChange={(e) =>
+            setCategory(e.target.value)
+          }
+          className="rounded-xl border border-gray-300 bg-white px-4 py-3 text-[#111827]"
+        >
+          <option value="">All Categories</option>
+          <option value="Vehicles">Vehicles</option>
+          <option value="Livestock">Livestock</option>
+          <option value="Equipment">Equipment</option>
+          <option value="Housing">Housing</option>
+          <option value="Services">Services</option>
+          <option value="Jobs">Jobs</option>
+          <option value="Businesses">Businesses</option>
+          <option value="Community">Community</option>
+        </select>
 
         <select
           value={region}

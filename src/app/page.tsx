@@ -133,7 +133,7 @@ export default async function HomePage() {
 
             <Link
               key={category}
-              href="/listings"
+              href={`/listings?category=${category}`}
               className="rounded-2xl bg-white p-6 text-lg font-bold text-[#111827] shadow-sm transition hover:-translate-y-1 hover:shadow-md"
             >
               {category}
