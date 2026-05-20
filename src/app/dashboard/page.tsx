@@ -83,7 +83,14 @@ export default function DashboardPage() {
 
                 )}
 
-              </div>
+              
+            <Link
+              href="/saved"
+              className="rounded-2xl border border-[#2F5D50] px-6 py-4 text-lg font-bold text-[#2F5D50]"
+            >
+              Saved Listings
+            </Link>
+
 
             </div>
 

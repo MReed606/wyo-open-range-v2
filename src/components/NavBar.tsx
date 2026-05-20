@@ -93,6 +93,15 @@ export default function NavBar() {
                 Messages
               </Link>
 
+
+              <Link
+                href="/saved"
+                className="text-lg font-bold text-[#1F2933]"
+              >
+                Saved
+              </Link>
+
+
               {isAdmin && (
 
                 <>

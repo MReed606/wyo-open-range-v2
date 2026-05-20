@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import { FavoriteButton } from "@/components/listings/FavoriteButton";
 import { ImageGallery } from "@/components/listings/ImageGallery";
 import { supabase } from "@/lib/supabase";
 
@@ -164,7 +165,9 @@ export default function ListingPage() {
                 )}
 
                 <p className="mt-6 text-4xl font-black text-[#2F5D50]">
-                  ${listing.price ?? "Contact"}
+                  $Views: {listing.views ?? 0}
+                  <br />
+                  {listing.price ?? "Contact"}
                 </p>
 
               </div>
@@ -179,6 +182,8 @@ export default function ListingPage() {
                     ? "Saved ✓"
                     : "Save Listing"}
                 </button>
+
+                <FavoriteButton listingId={listing.id} />
 
                 <Link
                   href={`/seller/profile/${listing.owner_id}`}
