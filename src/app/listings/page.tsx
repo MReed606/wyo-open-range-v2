@@ -132,7 +132,7 @@ export default function ListingsPage() {
               <Link
                 key={listing.id}
                 href={`/listing/${listing.slug}`}
-                className="overflow-hidden rounded-3xl bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+                className="market-card overflow-hidden rounded-3xl bg-white shadow-sm"
               >
 
                 {listing.image_url ? (
@@ -140,7 +140,7 @@ export default function ListingsPage() {
                   <img
                     src={listing.image_url}
                     alt={listing.title}
-                    className="h-60 w-full object-cover"
+                    className="h-64 w-full object-cover"
                   />
 
                 ) : (
@@ -165,7 +165,7 @@ export default function ListingsPage() {
 
                   </div>
 
-                  <h2 className="text-2xl font-black text-[#111827]">
+                  <h2 className="line-clamp-2 text-2xl font-black text-[#111827]">
                     {listing.title}
                   </h2>
 

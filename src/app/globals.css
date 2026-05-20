@@ -24,3 +24,99 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* =====================================================
+   GLOBAL POLISH
+===================================================== */
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  color: #111827;
+  background: #F7F5F2;
+}
+
+/* =====================================================
+   CARD POLISH
+===================================================== */
+
+.market-card {
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.market-card:hover {
+  transform: translateY(-4px);
+
+  box-shadow:
+    0 12px 30px rgba(0,0,0,0.08);
+}
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 768px) {
+
+  h1 {
+    font-size: 2.5rem !important;
+    line-height: 1.1;
+  }
+
+  h2 {
+    font-size: 1.8rem !important;
+  }
+
+  .mobile-stack {
+    flex-direction: column !important;
+  }
+
+  .mobile-full {
+    width: 100% !important;
+  }
+
+  .mobile-text {
+    font-size: 1rem !important;
+  }
+
+  main {
+    padding-bottom: 100px !important;
+  }
+}
+
+/* =====================================================
+   SCROLLBAR
+===================================================== */
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.2);
+
+  border-radius: 999px;
+}
+
+/* =====================================================
+   INPUT POLISH
+===================================================== */
+
+input,
+textarea,
+select {
+  outline: none;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+
+  border-color: #2F5D50 !important;
+
+  box-shadow:
+    0 0 0 4px rgba(47,93,80,0.15);
+}

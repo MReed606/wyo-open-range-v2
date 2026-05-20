@@ -110,7 +110,7 @@ export default function SellerProfilePage() {
 
           <div className="rounded-3xl bg-white p-8 shadow-sm">
 
-            <div className="flex flex-wrap items-start justify-between gap-8">
+            <div className="mobile-stack flex flex-wrap items-start justify-between gap-8">
 
               <div>
 
@@ -162,6 +162,17 @@ export default function SellerProfilePage() {
                     {seller.public_phone
                       ? seller.phone
                       : "Private"}
+                  </p>
+
+                  
+                  <p>
+                    Member Since:
+                    {" "}
+                    {seller.created_at
+                      ? new Date(
+                          seller.created_at
+                        ).getFullYear()
+                      : "Unknown"}
                   </p>
 
                   <p>

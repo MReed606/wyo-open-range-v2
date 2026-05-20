@@ -173,7 +173,7 @@ export default function ForumsPage() {
 
               <div
                 key={post.id}
-                className="rounded-3xl bg-white p-8 shadow-sm"
+                className="market-card rounded-3xl bg-white p-8 shadow-sm"
               >
 
                 <div className="mb-4 flex flex-wrap items-center gap-3">
