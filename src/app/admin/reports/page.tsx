@@ -1,19 +1,56 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
 export default function AdminReportsPage() {
 
+  const router = useRouter();
+
   const [reports, setReports] =
     useState<any[]>([]);
 
   useEffect(() => {
+    checkAdmin();
+
     loadReports();
   }, []);
 
-  async function loadReports() {
+  
+  async function checkAdmin() {
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+
+      router.push("/");
+
+      return;
+    }
+
+    const { data: profile } =
+      await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .maybeSingle();
+
+    if (
+      profile?.role !== "admin"
+    ) {
+
+      router.push("/");
+
+    }
+
+  }
+
+
+async function loadReports() {
 
     const { data } =
       await supabase

@@ -1,18 +1,55 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
 export default function VerificationPage() {
+
+  const router = useRouter();
 
   const [profiles, setProfiles] =
     useState<any[]>([]);
 
   useEffect(() => {
+    checkAdmin();
+
     loadProfiles();
   }, []);
 
-  async function loadProfiles() {
+  
+  async function checkAdmin() {
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+
+      router.push("/");
+
+      return;
+    }
+
+    const { data: profile } =
+      await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .maybeSingle();
+
+    if (
+      profile?.role !== "admin"
+    ) {
+
+      router.push("/");
+
+    }
+
+  }
+
+
+async function loadProfiles() {
 
     const { data } =
       await supabase
