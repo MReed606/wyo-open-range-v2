@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 import { supabase } from "@/lib/supabase";
 
+import { ForumComments } from "@/components/forums/ForumComments";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 
 export default function ForumsPage() {
@@ -202,6 +203,10 @@ export default function ForumsPage() {
                 <p className="mt-5 whitespace-pre-wrap text-lg leading-8 text-[#374151]">
                   {post.content}
                 </p>
+
+                <ForumComments
+                  postId={post.id}
+                />
 
               </div>
 
