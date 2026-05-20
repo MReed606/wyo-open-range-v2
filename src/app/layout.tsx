@@ -1,13 +1,14 @@
-import { NotificationBell } from "@/components/NotificationBell";
 import type { Metadata } from "next";
 import "./globals.css";
+
 import NavBar from "../components/NavBar";
 import { Footer } from "../components/Footer";
-import { ActivityTracker } from "@/components/activity/ActivityTracker"; from "../components/Footer";
+import { ActivityTracker } from "@/components/activity/ActivityTracker";
 
 export const metadata: Metadata = {
   title: "Wyo Open Range",
-  description: "Wyoming’s modern marketplace",
+  description:
+    "Wyoming's community marketplace",
 };
 
 export default function RootLayout({
@@ -15,14 +16,22 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
   return (
     <html lang="en">
-      <body className="bg-[#F7F5F2] text-[#1F2933]">
+
+      <body>
+
         <NavBar />
+
         <ActivityTracker />
+
         {children}
+
         <Footer />
+
       </body>
+
     </html>
   );
 }
