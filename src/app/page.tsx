@@ -1,6 +1,7 @@
 import { MarketplaceAnnouncements } from "@/components/home/MarketplaceAnnouncements";
 import { MarketplaceStats } from "@/components/dashboard/MarketplaceStats";
 import { TrendingListings } from "@/components/home/TrendingListings";
+import { MarketplaceLiveFeed } from "@/components/home/MarketplaceLiveFeed"; from "@/components/home/TrendingListings";
 
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
@@ -147,6 +148,8 @@ export default async function HomePage() {
       <MarketplaceStats />
 
       <TrendingListings />
+
+      <MarketplaceLiveFeed />
 
 
 </main>
