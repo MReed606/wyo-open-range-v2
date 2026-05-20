@@ -8,7 +8,7 @@ export default function CompleteProfilePage() {
 
   const router = useRouter();
 
-  const [username, setUsername] =
+  const [fullName, setFullName] =
     useState("");
 
   const [loading, setLoading] =
@@ -31,7 +31,7 @@ export default function CompleteProfilePage() {
     await supabase
       .from("profiles")
       .update({
-        username,
+        full_name: fullName,
         onboarding_complete: true,
       })
       .eq("id", user.id);
@@ -58,11 +58,11 @@ export default function CompleteProfilePage() {
         >
 
           <input
-            value={username}
+            value={fullName}
             onChange={(e) =>
-              setUsername(e.target.value)
+              setFullName(e.target.value)
             }
-            placeholder="Choose Username"
+            placeholder="First Name + Last Initial (Example: Matt R)"
             required
             className="w-full rounded-xl border border-gray-300 px-4 py-3 text-[#111827]"
           />

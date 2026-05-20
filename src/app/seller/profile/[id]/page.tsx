@@ -44,7 +44,7 @@ export default async function SellerPage({
 
             <img
               src={seller.avatar_url}
-              alt={seller.username}
+              alt={seller.full_name}
               className="h-24 w-24 rounded-full object-cover"
             />
 
@@ -61,7 +61,7 @@ export default async function SellerPage({
           <div>
 
             <h1 className="text-4xl font-black text-[#111827]">
-              {seller?.username ?? "Seller"}
+              {seller?.full_name ?? "Seller"}
             </h1>
 
             <div className="mt-4 flex flex-wrap gap-3">

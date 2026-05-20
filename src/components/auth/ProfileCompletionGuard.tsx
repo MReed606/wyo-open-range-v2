@@ -21,13 +21,12 @@ export function ProfileCompletionGuard() {
       const { data: profile } =
         await supabase
           .from("profiles")
-          .select("username")
+          .select("full_name")
           .eq("id", user.id)
           .single();
 
       if (
-        !profile?.username ||
-        profile.username === "New U"
+        !profile?.full_name
       ) {
         router.push(
           "/complete-profile"
