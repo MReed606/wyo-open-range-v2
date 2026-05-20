@@ -10,6 +10,13 @@ export default function AdminPage() {
   const [authorized, setAuthorized] = useState(false);
   const [reports, setReports] = useState<any[]>([]);
 
+  const [stats, setStats] = useState({
+    users: 0,
+    listings: 0,
+    reports: 0,
+    removed: 0,
+  });
+
   useEffect(() => {
     async function checkAdmin() {
       const {
@@ -27,13 +34,35 @@ export default function AdminPage() {
 
       setAuthorized(true);
 
+      loadStats();
       loadReports();
     }
 
     checkAdmin();
   }, []);
 
-  async function loadReports() {
+  
+  async function loadStats() {
+    const [{ count: users }, { count: listings }, { count: reports }, { count: removed }] =
+      await Promise.all([
+        supabase.from("profiles").select("*", { count: "exact", head: true }),
+        supabase.from("listings").select("*", { count: "exact", head: true }),
+        supabase.from("reports").select("*", { count: "exact", head: true }),
+        supabase
+          .from("listings")
+          .select("*", { count: "exact", head: true })
+          .eq("status", "removed"),
+      ]);
+
+    setStats({
+      users: users ?? 0,
+      listings: listings ?? 0,
+      reports: reports ?? 0,
+      removed: removed ?? 0,
+    });
+  }
+
+async function loadReports() {
     const { data } = await supabase
       .from("reports")
       .select(`
@@ -69,6 +98,50 @@ export default function AdminPage() {
       <h1 className="mb-6 text-4xl font-bold text-[#111827]">
         Admin Reports
       </h1>
+
+      <div className="mb-8 grid gap-4 md:grid-cols-4">
+
+        <div className="rounded-2xl bg-white p-5 shadow">
+          <div className="text-sm font-bold uppercase tracking-wide text-gray-500">
+            Users
+          </div>
+
+          <div className="mt-2 text-4xl font-bold text-[#111827]">
+            {stats.users}
+          </div>
+        </div>
+
+        <div className="rounded-2xl bg-white p-5 shadow">
+          <div className="text-sm font-bold uppercase tracking-wide text-gray-500">
+            Listings
+          </div>
+
+          <div className="mt-2 text-4xl font-bold text-[#111827]">
+            {stats.listings}
+          </div>
+        </div>
+
+        <div className="rounded-2xl bg-white p-5 shadow">
+          <div className="text-sm font-bold uppercase tracking-wide text-gray-500">
+            Reports
+          </div>
+
+          <div className="mt-2 text-4xl font-bold text-[#111827]">
+            {stats.reports}
+          </div>
+        </div>
+
+        <div className="rounded-2xl bg-white p-5 shadow">
+          <div className="text-sm font-bold uppercase tracking-wide text-gray-500">
+            Removed
+          </div>
+
+          <div className="mt-2 text-4xl font-bold text-red-600">
+            {stats.removed}
+          </div>
+        </div>
+
+      </div>
 
       <div className="grid gap-4">
         {reports.map((report) => (
