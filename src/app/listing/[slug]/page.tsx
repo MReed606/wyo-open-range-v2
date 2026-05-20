@@ -49,26 +49,24 @@ export default async function ListingPage({ params }: PageProps) {
 
           {/* ACTIONS BLOCK */}
           <div className="mt-6 space-y-3 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+
             <div className="text-sm font-bold uppercase tracking-wide text-gray-500">
               Actions
             </div>
 
-            
-<div className="mt-6 space-y-3 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-  <div className="text-sm font-bold uppercase tracking-wide text-gray-500">
-    Actions
-  </div>
+            <ContactSellerButton
+              listingId={listing.id}
+              sellerId={listing.owner_id}
+            />
 
-  <ContactSellerButton
-    listingId={listing.id}
-    sellerId={listing.owner_id}
-  />
+            <SaveListingButton listingId={listing.id} />
 
-  <SaveListingButton listingId={listing.id} />
+            <ReportListingButton listingId={listing.id} />
 
-  <ReportListingButton listingId={listing.id} />
-</div>
-</aside>
+          </div>
+
+        </aside>
+
       </div>
     </main>
   );
