@@ -14,6 +14,16 @@ export default async function SellerPage({
     .eq("id", id)
     .single();
 
+
+  const { data: moderationActions } = await supabase
+    .from("moderation_actions")
+    .select("*")
+    .eq("target_user_id", id)
+    .order("created_at", {
+      ascending: false,
+    });
+
+
   const { data: listings } = await supabase
     .from("listings")
     .select("*")
@@ -73,6 +83,60 @@ export default async function SellerPage({
         ))}
 
       </div>
+
+    
+      <div className="mt-10 rounded-3xl bg-white p-8 shadow-sm">
+
+        <h2 className="text-3xl font-black text-[#111827]">
+          Moderation History
+        </h2>
+
+        <div className="mt-6 space-y-4">
+
+          {moderationActions?.length ? (
+
+            moderationActions.map((action) => (
+
+              <div
+                key={action.id}
+                className="rounded-2xl border border-gray-200 p-5"
+              >
+
+                <div className="flex flex-wrap items-center gap-3">
+
+                  <span className="rounded-full bg-red-100 px-3 py-1 text-sm font-bold text-red-700">
+                    {action.action_type}
+                  </span>
+
+                  <span className="text-sm text-gray-500">
+                    {new Date(
+                      action.created_at
+                    ).toLocaleString()}
+                  </span>
+
+                </div>
+
+                <p className="mt-4 text-[#374151]">
+                  {action.public_reason ??
+                    "No public reason"}
+                </p>
+
+              </div>
+
+            ))
+
+          ) : (
+
+            <p className="text-[#374151]">
+              No moderation history.
+            </p>
+
+          )}
+
+        </div>
+
+      </div>
+
 
     </main>
   );

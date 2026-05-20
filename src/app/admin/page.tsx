@@ -27,6 +27,7 @@ export default function AdminPage() {
 
   useEffect(() => {
     async function checkAdmin() {
+
       const {
         data: { user },
       } = await supabase.auth.getUser();
@@ -159,6 +160,8 @@ export default function AdminPage() {
 
     until.setDate(until.getDate() + days);
 
+    
+    
     await supabase
       .from("user_moderation")
       .upsert({
@@ -187,6 +190,8 @@ export default function AdminPage() {
 
     until.setDate(until.getDate() + days);
 
+    
+    
     await supabase
       .from("user_moderation")
       .upsert({
