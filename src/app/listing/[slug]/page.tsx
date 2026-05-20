@@ -37,6 +37,8 @@ export default function ListingPage() {
     const { data } = await supabase
       .from("listings")
       .select("*")
+    .or("status.is.null,status.neq.removed")
+    .or("hidden_by_system.is.null,hidden_by_system.neq.true")
       .eq("slug", slug)
       .single();
 
@@ -208,6 +210,8 @@ export default function ListingPage() {
                     } = await supabase
                       .from("conversations")
                       .select("*")
+    .or("status.is.null,status.neq.removed")
+    .or("hidden_by_system.is.null,hidden_by_system.neq.true")
                       .eq(
                         "listing_id",
                         listing.id

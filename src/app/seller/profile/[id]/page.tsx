@@ -12,12 +12,16 @@ export default async function SellerPage({
   const { data: seller } = await supabase
     .from("profiles")
     .select("*")
+    .or("status.is.null,status.neq.removed")
+    .or("hidden_by_system.is.null,hidden_by_system.neq.true")
     .eq("id", id)
     .single();
 
   const { data: reviews } = await supabase
     .from("user_reviews")
     .select("*")
+    .or("status.is.null,status.neq.removed")
+    .or("hidden_by_system.is.null,hidden_by_system.neq.true")
     .eq("reviewed_user_id", id)
     .order("created_at", {
       ascending: false,
@@ -26,8 +30,10 @@ export default async function SellerPage({
   const { data: listings } = await supabase
     .from("listings")
     .select("*")
+    .or("status.is.null,status.neq.removed")
+    .or("hidden_by_system.is.null,hidden_by_system.neq.true")
     .eq("owner_id", id)
-    .neq("status", "removed")
+    
     .order("created_at", {
       ascending: false,
     });

@@ -48,8 +48,10 @@ export default function ListingsPage() {
     let query = supabase
       .from("listings")
       .select("*")
-      .neq("status", "removed")
-      .neq("hidden_by_system", true);
+    .or("status.is.null,status.neq.removed")
+    .or("hidden_by_system.is.null,hidden_by_system.neq.true")
+      
+      ;
 
     // =====================================
     // SEARCH

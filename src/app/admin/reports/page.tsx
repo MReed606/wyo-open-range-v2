@@ -15,29 +15,49 @@ export default function AdminReportsPage() {
 
   async function loadReports() {
 
-    const { data } = await supabase
-      .from("reports")
-      .select(`
-        *,
-        listings (
-          id,
-          title,
-          image_url,
-          owner_id,
-          slug,
-          status
-        )
-      `)
-      .order("created_at", {
-        ascending: false,
-      });
+    const { data } =
+      await supabase
+        .from("reports")
+        .select("*")
+        .order("created_at", {
+          ascending: false,
+        });
 
-    setReports(data ?? []);
+    if (!data) {
+      setReports([]);
+      return;
+    }
+
+    // =====================================
+    // MANUAL LISTING LOAD
+    // =====================================
+    const enhanced =
+      await Promise.all(
+        data.map(async (report) => {
+
+          const {
+            data: listing
+          } = await supabase
+            .from("listings")
+            .select("*")
+            .eq(
+              "id",
+              report.listing_id
+            )
+            .single();
+
+          return {
+            ...report,
+            listing,
+          };
+        })
+      );
+
+    setReports(enhanced);
   }
 
   async function removeListing(
-    listingId: string,
-    ownerId: string
+    listingId: string
   ) {
 
     const confirmed =
@@ -47,64 +67,28 @@ export default function AdminReportsPage() {
 
     if (!confirmed) return;
 
-    
-    // =====================================
-    // INCREASE MODERATION SCORE
-    // =====================================
-    const {
-      data: listingData
-    } = await supabase
-      .from("listings")
-      .select("moderation_score")
-      .eq("id", listingId)
-      .single();
+    const { error } =
+      await supabase
+        .from("listings")
+        .update({
+          status: "removed"
+        })
+        .eq("id", listingId);
 
-    const nextScore =
-      (
-        listingData
-          ?.moderation_score ?? 0
-      ) + 1;
+    console.log(error);
 
-    await supabase
-      .from("listings")
-      .update({
-        moderation_score:
-          nextScore,
+    if (error) {
 
-        hidden_by_system:
-          nextScore >= 5,
-      })
-      .eq("id", listingId);
+      alert(
+        "Failed to remove listing."
+      );
 
+      return;
+    }
 
-
-    // =====================================
-    // REMOVE LISTING
-    // =====================================
-    await supabase
-      .from("listings")
-      .update({
-        status: "removed",
-      })
-      .eq("id", listingId);
-
-    // =====================================
-    // CREATE NOTIFICATION
-    // =====================================
-    await supabase
-      .from("notifications")
-      .insert({
-        user_id: ownerId,
-
-        type: "moderation",
-
-        title: "Listing Removed",
-
-        message:
-          "One of your listings was removed by moderation.",
-      });
-
-    alert("Listing removed.");
+    alert(
+      "Listing removed."
+    );
 
     loadReports();
   }
@@ -124,10 +108,6 @@ export default function AdminReportsPage() {
             No reports found
           </h2>
 
-          <p className="mt-3 text-[#374151]">
-            Everything currently looks clean.
-          </p>
-
         </div>
 
       )}
@@ -143,16 +123,16 @@ export default function AdminReportsPage() {
 
             <div className="flex flex-col gap-6 lg:flex-row">
 
-              {report.listings
+              {report.listing
                 ?.image_url && (
 
                 <img
                   src={
-                    report.listings
+                    report.listing
                       .image_url
                   }
                   alt={
-                    report.listings
+                    report.listing
                       .title
                   }
                   className="h-48 w-full rounded-2xl object-cover lg:w-72"
@@ -163,66 +143,35 @@ export default function AdminReportsPage() {
               <div className="flex-1">
 
                 <h2 className="text-3xl font-black text-[#111827]">
-                  {report.listings
+                  {report.listing
                     ?.title ??
                     "Unknown Listing"}
                 </h2>
 
-                {report.listings
-                  ?.status ===
-                  "removed" && (
-
-                  <div className="mt-3 inline-flex rounded-full bg-red-100 px-4 py-2 text-sm font-bold text-red-700">
-                    Removed
-                  </div>
-
-                )}
-
-                <div className="mt-4 space-y-2 text-[#374151]">
-
-                  <p>
-                    <span className="font-bold">
-                      Reason:
-                    </span>{" "}
-                    {report.reason ??
-                      "No reason"}
-                  </p>
-
-                  <p>
-                    <span className="font-bold">
-                      Reporter:
-                    </span>{" "}
-                    {report.reporter_id}
-                  </p>
-
-                  <p>
-                    <span className="font-bold">
-                      Listing Owner:
-                    </span>{" "}
-                    {report.listings
-                      ?.owner_id}
-                  </p>
-
+                <div className="mt-3 inline-flex rounded-full bg-gray-100 px-4 py-2 text-sm font-bold text-gray-700">
+                  Status:
+                  {" "}
+                  {report.listing
+                    ?.status ?? "none"}
                 </div>
 
                 <div className="mt-6 flex flex-wrap gap-4">
 
                   <Link
-                    href={`/listing/${report.listings?.slug}`}
+                    href={`/listing/${report.listing?.slug}`}
                     className="rounded-xl border border-[#2F5D50] px-5 py-3 font-bold text-[#2F5D50]"
                   >
                     Open Listing
                   </Link>
 
-                  {report.listings
+                  {report.listing
                     ?.status !==
                     "removed" && (
 
                     <button
                       onClick={() =>
                         removeListing(
-                          report.listings?.id,
-                          report.listings?.owner_id
+                          report.listing.id
                         )
                       }
                       className="rounded-xl bg-red-600 px-5 py-3 font-bold text-white"
