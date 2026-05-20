@@ -8,9 +8,12 @@ export default function AdminPage() {
   const router = useRouter();
 
   const [authorized, setAuthorized] = useState(false);
+
   const [reports, setReports] = useState<any[]>([]);
 
   const [restrictionDays, setRestrictionDays] = useState<Record<string, string>>({});
+  const [suspensionDays, setSuspensionDays] = useState<Record<string, string>>({});
+  const [notes, setNotes] = useState<Record<string, string>>({});
 
   const [stats, setStats] = useState({
     users: 0,
@@ -43,7 +46,6 @@ export default function AdminPage() {
     checkAdmin();
   }, []);
 
-  
   async function loadStats() {
     const [{ count: users }, { count: listings }, { count: reports }, { count: removed }] =
       await Promise.all([
@@ -64,7 +66,7 @@ export default function AdminPage() {
     });
   }
 
-async function loadReports() {
+  async function loadReports() {
     const { data } = await supabase
       .from("reports")
       .select(`
@@ -83,9 +85,19 @@ async function loadReports() {
     setReports(data ?? []);
   }
 
-  
+  async function removeListing(listingId: string) {
+    await supabase
+      .from("listings")
+      .update({ status: "removed" })
+      .eq("id", listingId);
+
+    loadReports();
+    loadStats();
+  }
+
   async function restrictPosting(userId: string, days: number) {
     const until = new Date();
+
     until.setDate(until.getDate() + days);
 
     await supabase
@@ -98,13 +110,30 @@ async function loadReports() {
     alert(`Posting restricted for ${days} day(s)`);
   }
 
-async function removeListing(listingId: string) {
-    await supabase
-      .from("listings")
-      .update({ status: "removed" })
-      .eq("id", listingId);
+  async function suspendUser(userId: string, days: number) {
+    const until = new Date();
 
-    loadReports();
+    until.setDate(until.getDate() + days);
+
+    await supabase
+      .from("user_moderation")
+      .upsert({
+        user_id: userId,
+        suspended_until: until.toISOString(),
+      });
+
+    alert(`User suspended for ${days} day(s)`);
+  }
+
+  async function saveAdminNotes(userId: string) {
+    await supabase
+      .from("user_moderation")
+      .upsert({
+        user_id: userId,
+        admin_notes: notes[userId] ?? "",
+      });
+
+    alert("Admin notes saved");
   }
 
   if (!authorized) {
@@ -113,10 +142,12 @@ async function removeListing(listingId: string) {
 
   return (
     <main className="min-h-screen bg-[#F7F5F2] p-10">
+
       <h1 className="mb-6 text-4xl font-bold text-[#111827]">
-        Admin Reports
+        Admin Dashboard
       </h1>
 
+      {/* STATS */}
       <div className="mb-8 grid gap-4 md:grid-cols-4">
 
         <div className="rounded-2xl bg-white p-5 shadow">
@@ -150,7 +181,7 @@ async function removeListing(listingId: string) {
         </div>
 
         <div className="rounded-2xl bg-white p-5 shadow">
-          <div className="text-sm font-bold uppercase tracking-wide text-gray-500">
+          <div className="text-sm font-bold uppercase tracking-wide text-red-600">
             Removed
           </div>
 
@@ -161,13 +192,17 @@ async function removeListing(listingId: string) {
 
       </div>
 
-      <div className="grid gap-4">
+      {/* REPORTS */}
+      <div className="grid gap-5">
+
         {reports.map((report) => (
+
           <div
             key={report.id}
-            className="rounded-xl border border-gray-200 bg-white p-5 shadow"
+            className="rounded-2xl border border-gray-200 bg-white p-6 shadow"
           >
-            <h2 className="text-lg font-bold text-[#111827]">
+
+            <h2 className="text-xl font-bold text-[#111827]">
               {report.listings?.title}
             </h2>
 
@@ -175,7 +210,8 @@ async function removeListing(listingId: string) {
               {report.reason}
             </p>
 
-            <div className="mt-4 flex flex-wrap gap-2">
+            {/* ACTIONS */}
+            <div className="mt-5 flex flex-wrap gap-3">
 
               <button
                 onClick={() =>
@@ -186,6 +222,7 @@ async function removeListing(listingId: string) {
                 Remove Listing
               </button>
 
+              {/* RESTRICT */}
               <div className="flex items-center gap-2">
 
                 <select
@@ -196,7 +233,7 @@ async function removeListing(listingId: string) {
                       [report.listings.owner_id]: e.target.value,
                     })
                   }
-                  className="rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                  className="rounded-lg border border-gray-300 px-3 py-2"
                 >
                   <option value="1">1 Day</option>
                   <option value="3">3 Days</option>
@@ -216,15 +253,81 @@ async function removeListing(listingId: string) {
                   }
                   className="rounded-lg bg-yellow-500 px-4 py-2 font-bold text-white"
                 >
-                  Restrict
+                  Restrict Posting
+                </button>
+
+              </div>
+
+              {/* SUSPEND */}
+              <div className="flex items-center gap-2">
+
+                <select
+                  value={suspensionDays[report.listings.owner_id] ?? "7"}
+                  onChange={(e) =>
+                    setSuspensionDays({
+                      ...suspensionDays,
+                      [report.listings.owner_id]: e.target.value,
+                    })
+                  }
+                  className="rounded-lg border border-gray-300 px-3 py-2"
+                >
+                  <option value="1">1 Day</option>
+                  <option value="3">3 Days</option>
+                  <option value="7">7 Days</option>
+                  <option value="30">30 Days</option>
+                  <option value="9999">Permanent</option>
+                </select>
+
+                <button
+                  onClick={() =>
+                    suspendUser(
+                      report.listings.owner_id,
+                      Number(
+                        suspensionDays[report.listings.owner_id] ?? "7"
+                      )
+                    )
+                  }
+                  className="rounded-lg bg-black px-4 py-2 font-bold text-white"
+                >
+                  Suspend User
                 </button>
 
               </div>
 
             </div>
+
+            {/* NOTES */}
+            <div className="mt-5">
+
+              <textarea
+                placeholder="Admin notes..."
+                value={notes[report.listings.owner_id] ?? ""}
+                onChange={(e) =>
+                  setNotes({
+                    ...notes,
+                    [report.listings.owner_id]: e.target.value,
+                  })
+                }
+                className="min-h-24 w-full rounded-xl border border-gray-300 px-4 py-3 text-[#111827]"
+              />
+
+              <button
+                onClick={() =>
+                  saveAdminNotes(report.listings.owner_id)
+                }
+                className="mt-3 rounded-lg bg-[#1F2933] px-4 py-2 font-bold text-white"
+              >
+                Save Notes
+              </button>
+
+            </div>
+
           </div>
+
         ))}
+
       </div>
+
     </main>
   );
 }
