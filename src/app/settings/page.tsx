@@ -130,7 +130,7 @@ export default function SettingsPage() {
 
             <div>
 
-              <h2 className="mb-4 text-2xl font-black text-[#111827]">
+              <h2 className="mb-4 text-2xl font-black tracking-tight text-[#111827]">
                 Profile Photo
               </h2>
 
@@ -169,7 +169,7 @@ export default function SettingsPage() {
 
             <div>
 
-              <h2 className="mb-4 text-2xl font-black text-[#111827]">
+              <h2 className="mb-4 text-2xl font-black tracking-tight text-[#111827]">
                 Seller Bio
               </h2>
 
@@ -181,7 +181,7 @@ export default function SettingsPage() {
                   )
                 }
                 placeholder="Tell people about yourself..."
-                className="min-h-40 w-full rounded-2xl border border-gray-300 px-5 py-4 text-lg text-[#111827]"
+                className="min-h-40 w-full rounded-2xl border border-gray-300 bg-white px-5 py-4 text-lg font-semibold text-[#111827] placeholder:text-gray-500"
               />
 
             </div>
@@ -190,7 +190,7 @@ export default function SettingsPage() {
 
             <div>
 
-              <h2 className="mb-4 text-2xl font-black text-[#111827]">
+              <h2 className="mb-4 text-2xl font-black tracking-tight text-[#111827]">
                 Contact Number
               </h2>
 
@@ -202,7 +202,7 @@ export default function SettingsPage() {
                   )
                 }
                 placeholder="Phone Number"
-                className="w-full rounded-2xl border border-gray-300 px-5 py-4 text-lg text-[#111827]"
+                className="w-full rounded-2xl border border-gray-300 bg-white px-5 py-4 text-lg font-semibold text-[#111827] placeholder:text-gray-500"
               />
 
             </div>
