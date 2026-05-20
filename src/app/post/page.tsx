@@ -1,238 +1,282 @@
 "use client";
 
 import { useState } from "react";
-import { containsProfanity } from "@/lib/safety";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { AuthGuard } from "@/components/auth/AuthGuard";
+import { containsProfanity } from "@/lib/safety";
 
-function createSlug(title: string) {
-  return title
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "")
-    .slice(0, 70);
-}
+export default function PostPage() {
 
-export default function PostListingPage() {
-  const [title, setTitle] = useState("");
-  const [price, setPrice] = useState("");
-  const [category, setCategory] = useState("Vehicles");
-  const [condition, setCondition] = useState("Good");
-  const [city, setCity] = useState("Cheyenne");
-  const [region, setRegion] = useState("Southeast");
-  const [description, setDescription] = useState("");
-  const [imageFiles, setImageFiles] = useState<File[]>([]);
-  const [status, setStatus] = useState("");
+  const router = useRouter();
 
-  async function submitListing() {
-    setStatus("Saving listing...");
+  const [loading, setLoading] =
+    useState(false);
+
+  const [title, setTitle] =
+    useState("");
+
+  const [description,
+    setDescription] =
+    useState("");
+
+  const [price, setPrice] =
+    useState("");
+
+  const [category,
+    setCategory] =
+    useState("");
+
+  const [region, setRegion] =
+    useState("");
+
+  const [images, setImages] =
+    useState<string[]>([]);
+
+  async function uploadImages(
+    files: FileList | null
+  ) {
+
+    if (!files) return;
+
+    const uploaded: string[] = [];
+
+    for (const file of Array.from(files)) {
+
+      const filename =
+        `${Date.now()}-${file.name}`;
+
+      const { error } =
+        await supabase.storage
+          .from("listing-images")
+          .upload(
+            filename,
+            file
+          );
+
+      if (error) {
+
+        console.log(error);
+
+        continue;
+      }
+
+      const {
+        data: publicUrl
+      } = supabase.storage
+        .from("listing-images")
+        .getPublicUrl(
+          filename
+        );
+
+      uploaded.push(
+        publicUrl.publicUrl
+      );
+    }
+
+    setImages(uploaded);
+  }
+
+  async function createListing(
+    e: React.FormEvent
+  ) {
+
+    e.preventDefault();
+
+    setLoading(true);
 
     const {
       data: { user },
     } = await supabase.auth.getUser();
 
-    if (!user) {
-      setStatus("You must be logged in.");
+    if (!user) return;
+
+    // =====================================
+    // PROFANITY FILTER
+    // =====================================
+    if (
+      containsProfanity(title) ||
+      containsProfanity(description)
+    ) {
+
+      alert(
+        "Listing contains blocked words."
+      );
+
+      setLoading(false);
+
       return;
     }
 
     const slug =
-      createSlug(title) +
-      "-" +
-      Date.now().toString().slice(-5);
+      title
+        .toLowerCase()
+        .replaceAll(" ", "-")
+        + "-"
+        + Date.now();
 
-    const uploadedUrls: string[] = [];
-
-    for (const file of imageFiles) {
-      const fileName =
-        Date.now() +
-        "-" +
-        Math.random().toString(36).substring(2) +
-        "-" +
-        file.name;
-
-      const { error: uploadError } = await supabase.storage
-        .from("listing-images")
-        .upload(fileName, file);
-
-      if (uploadError) {
-        setStatus(uploadError.message);
-        return;
-      }
-
-      const {
-        data: { publicUrl },
-      } = supabase.storage
-        .from("listing-images")
-        .getPublicUrl(fileName);
-
-      uploadedUrls.push(publicUrl);
-    }
-
-    const { data: listing, error } = await supabase
+    await supabase
       .from("listings")
       .insert({
         owner_id: user.id,
+
         title,
-        slug,
         description,
-        price,
+
+        price:
+          Number(price),
+
         category,
-        condition,
-        city,
         region,
-        image_url: uploadedUrls[0] ?? "",
-        seller_label: "Verified Seller",
+
         status: "active",
-      })
-      .select()
-      .single();
 
-    if (error || !listing) {
-      setStatus(error?.message ?? "Failed to create listing.");
-      return;
-    }
+        image_url:
+          images?.[0] ?? null,
 
-    if (uploadedUrls.length > 0) {
-      await supabase.from("listing_images").insert(
-        uploadedUrls.map((url) => ({
-          listing_id: listing.id,
-          image_url: url,
-        }))
-      );
-    }
+        images,
 
-    window.location.href = `/listing/${slug}`;
+        slug,
+      });
+
+    router.push(
+      "/dashboard"
+    );
   }
 
   return (
     <>
       <AuthGuard />
 
-      <main className="min-h-screen bg-[#F7F5F2] text-[#1F2933]">
-      <section className="border-b bg-white">
-        <div className="mx-auto max-w-5xl px-6 py-12">
-          <p className="text-sm font-bold uppercase tracking-[0.25em] text-[#2F5D50]">
-            Marketplace
-          </p>
+      <main className="min-h-screen bg-[#F7F5F2] p-6 md:p-10">
 
-          <h1 className="mt-3 text-5xl font-bold">
+        <div className="mx-auto max-w-3xl rounded-3xl bg-white p-8 shadow-sm">
+
+          <h1 className="text-5xl font-black text-[#111827]">
             Create Listing
           </h1>
-        </div>
-      </section>
 
-      <section className="mx-auto max-w-5xl px-6 py-12">
-        <div className="rounded-2xl bg-white p-8 shadow-md">
-          <div className="grid gap-5">
+          <form
+            onSubmit={createListing}
+            className="mt-8 space-y-5"
+          >
+
             <input
-              placeholder="Title"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="rounded-xl border border-gray-300 px-4 py-3"
-            />
-
-            <input
-              placeholder="Price"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              className="rounded-xl border border-gray-300 px-4 py-3"
-            />
-
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="rounded-xl border border-gray-300 px-4 py-3"
-            >
-              <option>Vehicles</option>
-              <option>Ranch & Ag</option>
-              <option>Local Services</option>
-              <option>General Marketplace</option>
-            </select>
-
-            <select
-              value={condition}
-              onChange={(e) => setCondition(e.target.value)}
-              className="rounded-xl border border-gray-300 px-4 py-3"
-            >
-              <option>New</option>
-              <option>Like New</option>
-              <option>Good</option>
-              <option>Fair</option>
-              <option>Service</option>
-            </select>
-
-            <input
-              placeholder="City"
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-              className="rounded-xl border border-gray-300 px-4 py-3"
-            />
-
-            <input
-              placeholder="Region"
-              value={region}
-              onChange={(e) => setRegion(e.target.value)}
-              className="rounded-xl border border-gray-300 px-4 py-3"
+              onChange={(e) =>
+                setTitle(
+                  e.target.value
+                )
+              }
+              placeholder="Listing Title"
+              required
+              className="w-full rounded-2xl border border-gray-300 px-5 py-4 text-lg text-[#111827]"
             />
 
             <textarea
-              placeholder="Description"
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="min-h-40 rounded-xl border border-gray-300 px-4 py-3"
+              onChange={(e) =>
+                setDescription(
+                  e.target.value
+                )
+              }
+              placeholder="Description"
+              required
+              className="min-h-40 w-full rounded-2xl border border-gray-300 px-5 py-4 text-lg text-[#111827]"
             />
 
             <input
-              type="file"
-              accept="image/*"
-              multiple
+              type="number"
+              value={price}
               onChange={(e) =>
-                setImageFiles(
-                  e.target.files
-                    ? Array.from(e.target.files)
-                    : []
+                setPrice(
+                  e.target.value
                 )
               }
-              className="rounded-xl border border-gray-300 px-4 py-3"
+              placeholder="Price"
+              required
+              className="w-full rounded-2xl border border-gray-300 px-5 py-4 text-lg text-[#111827]"
             />
 
-            {imageFiles.length > 0 && (
-              <div className="rounded-xl bg-[#F3F4F6] p-4">
-                <p className="font-bold">
-                  {imageFiles.length} image(s) selected
-                </p>
+            <input
+              value={category}
+              onChange={(e) =>
+                setCategory(
+                  e.target.value
+                )
+              }
+              placeholder="Category"
+              required
+              className="w-full rounded-2xl border border-gray-300 px-5 py-4 text-lg text-[#111827]"
+            />
 
-                <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-4">
-                  {imageFiles.map((file, index) => (
-                    <div
-                      key={index}
-                      className="rounded-xl border bg-white p-2 text-sm"
-                    >
-                      {file.name}
-                    </div>
+            <input
+              value={region}
+              onChange={(e) =>
+                setRegion(
+                  e.target.value
+                )
+              }
+              placeholder="Region"
+              required
+              className="w-full rounded-2xl border border-gray-300 px-5 py-4 text-lg text-[#111827]"
+            />
+
+            {/* IMAGE UPLOAD */}
+
+            <div className="rounded-3xl border border-dashed border-gray-300 p-6">
+
+              <h2 className="mb-4 text-2xl font-black text-[#111827]">
+                Listing Images
+              </h2>
+
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={(e) =>
+                  uploadImages(
+                    e.target.files
+                  )
+                }
+              />
+
+              {!!images.length && (
+
+                <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
+
+                  {images.map((img) => (
+
+                    <img
+                      key={img}
+                      src={img}
+                      alt=""
+                      className="h-32 w-full rounded-2xl object-cover"
+                    />
+
                   ))}
+
                 </div>
-              </div>
-            )}
+
+              )}
+
+            </div>
 
             <button
-              onClick={submitListing}
-              className="rounded-xl bg-[#2F5D50] px-5 py-3 text-lg font-bold text-white"
+              type="submit"
+              disabled={loading}
+              className="w-full rounded-2xl bg-[#2F5D50] px-6 py-4 text-xl font-black text-white"
             >
-              Publish Listing
+              {loading
+                ? "Creating..."
+                : "Create Listing"}
             </button>
 
-            {status && (
-              <div className="rounded-xl bg-[#F3F4F6] p-4 font-semibold">
-                {status}
-              </div>
-            )}
-          </div>
+          </form>
+
         </div>
-      </section>
-    </main>
+
+      </main>
     </>
   );
 }

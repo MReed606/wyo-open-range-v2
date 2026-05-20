@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import { ImageGallery } from "@/components/listings/ImageGallery";
 import { supabase } from "@/lib/supabase";
 
 export default function ListingPage() {
