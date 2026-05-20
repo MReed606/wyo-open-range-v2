@@ -1,189 +1,210 @@
 import Link from "next/link";
-import { ListingCard } from "@/components/ListingCard";
-import { listings } from "@/data/listings";
-import { businesses } from "@/data/businesses";
-import { forumThreads } from "@/data/forums";
+import { supabase } from "@/lib/supabase";
 
-const categories = [
-  "Vehicles",
-  "Firearms & Outdoors",
-  "Ranch & Ag",
-  "Local Services",
-  "Jobs",
-  "General Marketplace",
-];
+export default async function HomePage() {
 
-export default function Home() {
+  const { data: listings } = await supabase
+    .from("listings")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(6);
+
+  const { count: listingCount } = await supabase
+    .from("listings")
+    .select("*", { count: "exact", head: true });
+
+  const { count: userCount } = await supabase
+    .from("profiles")
+    .select("*", { count: "exact", head: true });
+
   return (
-    <main className="min-h-screen bg-[#F7F5F2] text-[#1F2933]">
-      <section className="relative flex min-h-[560px] items-center justify-center overflow-hidden bg-gradient-to-br from-[#1F2933] via-[#2F5D50] to-[#C2A878] px-6 text-white">
-        <div className="absolute inset-0 bg-black/25" />
+    <main className="min-h-screen bg-[#F7F5F2]">
 
-        <div className="relative z-10 max-w-4xl text-center">
-          <p className="mb-4 text-sm font-semibold uppercase tracking-[0.3em] text-white/80">
-            Better reach. Better options. Less BS.
-          </p>
+      {/* HERO */}
+      <section className="border-b border-black/10 bg-white">
 
-          <h1 className="text-4xl font-bold tracking-tight md:text-6xl">
-            Welcome to Wyoming’s Modern Marketplace
-          </h1>
+        <div className="mx-auto max-w-7xl px-6 py-20">
 
-          <p className="mx-auto mt-5 max-w-2xl text-lg text-white/85">
-            Buy, sell, trade, and connect across Wyoming with a cleaner,
-            safer, community-driven marketplace.
-          </p>
+          <div className="max-w-3xl">
 
-          <div className="mt-8 grid gap-3 rounded-2xl bg-white p-3 shadow-2xl md:grid-cols-[1fr_180px_160px_120px]">
-            <input
-              className="rounded-xl border px-4 py-3 text-black outline-none"
-              placeholder="Search listings, businesses, or discussions..."
-            />
+            <div className="mb-4 inline-flex rounded-full border border-[#2F5D50]/20 bg-[#2F5D50]/10 px-4 py-2 text-sm font-semibold text-[#2F5D50]">
+              Wyoming Marketplace • Businesses • Community
+            </div>
 
-            <select className="rounded-xl border px-4 py-3 text-black">
-              <option>All Categories</option>
-              <option>Vehicles</option>
-              <option>Firearms & Outdoors</option>
-              <option>Ranch & Ag</option>
-            </select>
+            <h1 className="text-5xl font-black leading-tight tracking-tight text-[#111827] sm:text-6xl">
+              Better reach.
+              <br />
+              Better options.
+              <br />
+              Less BS.
+            </h1>
 
-            <select className="rounded-xl border px-4 py-3 text-black">
-              <option>Statewide</option>
-              <option>Southeast</option>
-              <option>Central</option>
-              <option>Northwest</option>
-            </select>
+            <p className="mt-6 max-w-2xl text-xl text-[#374151]">
+              Wyoming’s modern marketplace for buying, selling,
+              businesses, services, jobs, and community.
+            </p>
 
-            <button className="rounded-xl bg-[#2F5D50] px-5 py-3 font-semibold text-white">
-              Search
-            </button>
+            <div className="mt-8 flex flex-wrap gap-4">
+
+              <Link
+                href="/listings"
+                className="rounded-2xl bg-[#2F5D50] px-6 py-4 text-lg font-bold text-white shadow transition hover:bg-[#24493f]"
+              >
+                Browse Marketplace
+              </Link>
+
+              <Link
+                href="/post"
+                className="rounded-2xl border border-gray-300 bg-white px-6 py-4 text-lg font-bold text-[#111827] shadow-sm transition hover:bg-gray-50"
+              >
+                Post Listing
+              </Link>
+
+            </div>
+
           </div>
+
         </div>
+
       </section>
 
+      {/* STATS */}
       <section className="mx-auto max-w-7xl px-6 py-12">
-        <h2 className="mb-6 text-2xl font-bold">
-          Explore Categories
-        </h2>
 
-        <div className="grid gap-5 md:grid-cols-3">
-          {categories.map((category) => (
-            <Link
-              href="/categories"
-              key={category}
-              className="flex h-40 items-end rounded-2xl bg-gradient-to-br from-[#2F5D50] to-[#1F2933] p-5 text-white shadow-md transition hover:-translate-y-1 hover:shadow-xl"
-            >
-              <div>
-                <h3 className="text-xl font-bold">
-                  {category}
-                </h3>
+        <div className="grid gap-4 sm:grid-cols-3">
 
-                <p className="text-sm text-white/75">
-                  Browse local listings
-                </p>
-              </div>
-            </Link>
-          ))}
+          <div className="rounded-2xl bg-white p-6 shadow-sm">
+            <div className="text-sm font-bold uppercase tracking-wide text-gray-500">
+              Listings
+            </div>
+
+            <div className="mt-2 text-4xl font-black text-[#111827]">
+              {listingCount ?? 0}
+            </div>
+          </div>
+
+          <div className="rounded-2xl bg-white p-6 shadow-sm">
+            <div className="text-sm font-bold uppercase tracking-wide text-gray-500">
+              Members
+            </div>
+
+            <div className="mt-2 text-4xl font-black text-[#111827]">
+              {userCount ?? 0}
+            </div>
+          </div>
+
+          <div className="rounded-2xl bg-white p-6 shadow-sm">
+            <div className="text-sm font-bold uppercase tracking-wide text-gray-500">
+              Marketplace
+            </div>
+
+            <div className="mt-2 text-4xl font-black text-[#2F5D50]">
+              Live
+            </div>
+          </div>
+
         </div>
+
       </section>
 
+      {/* CATEGORIES */}
       <section className="mx-auto max-w-7xl px-6 pb-12">
+
         <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-2xl font-bold">
-            Recently Listed
+
+          <h2 className="text-3xl font-black text-[#111827]">
+            Browse Categories
+          </h2>
+
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+
+          {[
+            "Vehicles",
+            "Livestock",
+            "Equipment",
+            "Housing",
+            "Services",
+            "Jobs",
+            "Businesses",
+            "Community",
+          ].map((category) => (
+
+            <Link
+              key={category}
+              href="/listings"
+              className="rounded-2xl bg-white p-6 text-lg font-bold text-[#111827] shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+            >
+              {category}
+            </Link>
+
+          ))}
+
+        </div>
+
+      </section>
+
+      {/* FEATURED LISTINGS */}
+      <section className="mx-auto max-w-7xl px-6 pb-20">
+
+        <div className="mb-6 flex items-center justify-between">
+
+          <h2 className="text-3xl font-black text-[#111827]">
+            Latest Listings
           </h2>
 
           <Link
             href="/listings"
-            className="text-sm font-semibold text-[#2F5D50] hover:text-[#24493f]"
+            className="font-bold text-[#2F5D50]"
           >
-            View all
+            View All →
           </Link>
+
         </div>
 
-        <div className="grid gap-5 md:grid-cols-4">
-          {listings.map((listing) => (
-            <ListingCard
-              key={listing.slug}
-              title={listing.title}
-              price={listing.price}
-              location={listing.location}
-              seller={listing.seller}
-              slug={listing.slug}
-              condition={listing.condition}
-            />
+        <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+
+          {listings?.map((listing) => (
+
+            <Link
+              key={listing.id}
+              href={`/listing/${listing.slug}`}
+              className="overflow-hidden rounded-2xl bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+            >
+
+              {listing.image_url && (
+                <img
+                  src={listing.image_url}
+                  alt={listing.title}
+                  className="h-56 w-full object-cover"
+                />
+              )}
+
+              <div className="p-5">
+
+                <h3 className="line-clamp-1 text-xl font-bold text-[#111827]">
+                  {listing.title}
+                </h3>
+
+                <p className="mt-2 text-lg font-bold text-[#2F5D50]">
+                  ${listing.price ?? "Contact"}
+                </p>
+
+                <p className="mt-2 line-clamp-2 text-sm text-[#374151]">
+                  {listing.description}
+                </p>
+
+              </div>
+
+            </Link>
+
           ))}
+
         </div>
+
       </section>
 
-      <section className="border-t bg-white px-6 py-12">
-        <div className="mx-auto grid max-w-7xl gap-6 md:grid-cols-2">
-          <div className="rounded-2xl bg-[#F7F5F2] p-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold">
-                Verified Businesses
-              </h2>
-
-              <Link
-                href="/businesses"
-                className="text-sm font-semibold text-[#2F5D50]"
-              >
-                View all
-              </Link>
-            </div>
-
-            <div className="mt-5 space-y-4">
-              {businesses.slice(0, 3).map((business) => (
-                <Link
-                  key={business.slug}
-                  href={`/businesses/${business.slug}`}
-                  className="block rounded-xl bg-white p-4 shadow-sm transition hover:shadow-md"
-                >
-                  <p className="font-bold text-[#1F2933]">
-                    {business.name}
-                  </p>
-
-                  <p className="mt-1 text-sm text-[#52606D]">
-                    {business.category} • {business.location}
-                  </p>
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          <div className="rounded-2xl bg-[#F7F5F2] p-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold">
-                Community Discussions
-              </h2>
-
-              <Link
-                href="/forums"
-                className="text-sm font-semibold text-[#2F5D50]"
-              >
-                View all
-              </Link>
-            </div>
-
-            <div className="mt-5 space-y-4">
-              {forumThreads.slice(0, 3).map((thread) => (
-                <Link
-                  key={thread.slug}
-                  href={`/forums/${thread.slug}`}
-                  className="block rounded-xl bg-white p-4 shadow-sm transition hover:shadow-md"
-                >
-                  <p className="font-bold text-[#1F2933]">
-                    {thread.title}
-                  </p>
-
-                  <p className="mt-1 text-sm text-[#52606D]">
-                    {thread.category} • {thread.replies} replies
-                  </p>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
     </main>
   );
 }
