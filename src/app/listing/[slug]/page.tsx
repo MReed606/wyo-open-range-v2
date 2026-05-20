@@ -184,6 +184,100 @@ export default function ListingPage() {
                   Seller Profile
                 </Link>
 
+
+                <button
+                  onClick={async () => {
+
+                    const {
+                      data: { user }
+                    } =
+                      await supabase.auth.getUser();
+
+                    if (!user) {
+                      alert(
+                        "Login required."
+                      );
+                      return;
+                    }
+
+                    // =========================
+                    // FIND EXISTING
+                    // =========================
+                    const {
+                      data: existing
+                    } = await supabase
+                      .from("conversations")
+                      .select("*")
+                      .eq(
+                        "listing_id",
+                        listing.id
+                      )
+                      .eq(
+                        "buyer_id",
+                        user.id
+                      )
+                      .single();
+
+                    if (existing) {
+
+                      window.location.href =
+                        `/messages/${existing.id}`;
+
+                      return;
+                    }
+
+                    // =========================
+                    // CREATE
+                    // =========================
+                    const { data } =
+                      await supabase
+                        .from(
+                          "conversations"
+                        )
+                        .insert({
+                          listing_id:
+                            listing.id,
+
+                          buyer_id:
+                            user.id,
+
+                          seller_id:
+                            listing.owner_id,
+                        })
+                        .select()
+                        .single();
+
+                    // =========================
+                    // NOTIFY SELLER
+                    // =========================
+                    await supabase
+                      .from(
+                        "notifications"
+                      )
+                      .insert({
+                        user_id:
+                          listing.owner_id,
+
+                        type:
+                          "message",
+
+                        title:
+                          "New Buyer Message",
+
+                        message:
+                          "A buyer started a conversation about your listing.",
+                      });
+
+                    window.location.href =
+                      `/messages/${data.id}`;
+
+                  }}
+                  className="rounded-2xl bg-blue-600 px-6 py-4 text-lg font-bold text-white transition hover:bg-blue-700"
+                >
+                  Contact Seller
+                </button>
+
+
               </div>
 
             </div>

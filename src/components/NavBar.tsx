@@ -27,7 +27,16 @@ export function NavBar() {
         </div>
 
         <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
-          <NotificationBell />
+          
+          <Link
+            href="/messages"
+            className="text-sm font-bold text-[#1F2933] hover:text-[#2F5D50]"
+          >
+            Messages
+          </Link>
+
+
+<NotificationBell />
 
           <AuthStatus />
 
