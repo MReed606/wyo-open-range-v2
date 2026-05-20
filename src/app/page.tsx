@@ -1,3 +1,6 @@
+import { MarketplaceStats } from "@/components/dashboard/MarketplaceStats";
+import { TrendingListings } from "@/components/home/TrendingListings";
+
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
@@ -133,6 +136,12 @@ export default async function HomePage() {
         </div>
 
       </section>
+
+
+
+      <MarketplaceStats />
+
+      <TrendingListings />
 
 
 </main>
