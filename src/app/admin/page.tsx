@@ -80,7 +80,10 @@ export default function AdminPage() {
           id,
           title,
           status,
-          owner_id
+          owner_id,
+          image_url,
+          created_at,
+          slug
         )
       `)
       .order("created_at", { ascending: false });
@@ -274,13 +277,64 @@ export default function AdminPage() {
             className="rounded-2xl border border-gray-200 bg-white p-6 shadow"
           >
 
-            <h2 className="text-xl font-bold text-[#111827]">
-              {report.listings?.title}
-            </h2>
+            {report.listings?.image_url && (
+              <img
+                src={report.listings.image_url}
+                alt={report.listings.title}
+                className="mb-5 h-48 w-full rounded-xl object-cover"
+              />
+            )}
 
-            <p className="mt-2 text-sm text-[#374151]">
-              {report.reason}
-            </p>
+            <div className="flex flex-wrap items-start justify-between gap-4">
+
+              <div>
+
+                <h2 className="text-xl font-bold text-[#111827]">
+                  {report.listings?.title}
+                </h2>
+
+                <div className="mt-2 space-y-1 text-sm text-[#374151]">
+
+                  <p>
+                    <span className="font-bold">Listing ID:</span>{" "}
+                    {report.listings?.id}
+                  </p>
+
+                  <p>
+                    <span className="font-bold">Status:</span>{" "}
+                    {report.listings?.status ?? "active"}
+                  </p>
+
+                  <p>
+                    <span className="font-bold">Created:</span>{" "}
+                    {new Date(
+                      report.listings?.created_at
+                    ).toLocaleDateString()}
+                  </p>
+
+                </div>
+
+              </div>
+
+              <a
+                href={`/listing/${report.listings?.slug}`}
+                target="_blank"
+                className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-bold text-[#111827] shadow-sm hover:bg-gray-50"
+              >
+                Open Listing
+              </a>
+
+            </div>
+
+            <div className="mt-4 rounded-xl bg-red-50 p-4">
+              <div className="text-sm font-bold uppercase tracking-wide text-red-600">
+                Report Reason
+              </div>
+
+              <p className="mt-2 text-sm text-[#374151]">
+                {report.reason}
+              </p>
+            </div>
 
             {/* INTERNAL NOTES */}
             <div className="mt-5">
