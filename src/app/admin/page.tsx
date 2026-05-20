@@ -77,11 +77,6 @@ export default function AdminPage() {
         reason,
         created_at,
         reporter_id,
-        profiles:reporter_id (
-          id,
-          username,
-          created_at
-        ),
         listings (
           id,
           title,
@@ -355,22 +350,8 @@ export default function AdminPage() {
                 <div className="mt-2 space-y-1 text-sm text-[#374151]">
 
                   <p>
-                    <span className="font-bold">Username:</span>{" "}
-                    {report.profiles?.username ?? "Unknown"}
-                  </p>
-
-                  <p>
                     <span className="font-bold">Reporter ID:</span>{" "}
                     {report.reporter_id}
-                  </p>
-
-                  <p>
-                    <span className="font-bold">Account Created:</span>{" "}
-                    {report.profiles?.created_at
-                      ? new Date(
-                          report.profiles.created_at
-                        ).toLocaleDateString()
-                      : "Unknown"}
                   </p>
 
                 </div>
