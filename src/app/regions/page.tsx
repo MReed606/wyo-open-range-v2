@@ -1,9 +1,12 @@
 import Link from "next/link";
 import { PageHeader } from "@/components/PageHeader";
 import { regions } from "@/data/regions";
+import { AuthGuard } from "@/components/auth/AuthGuard";
 
 export default function RegionsPage() {
   return (
+    <>
+      <AuthGuard />
     <main className="min-h-screen bg-[#F7F5F2]">
       <PageHeader
         eyebrow="Wyoming Regional Network"
@@ -46,5 +49,6 @@ export default function RegionsPage() {
         </div>
       </section>
     </main>
+      </>
   );
 }

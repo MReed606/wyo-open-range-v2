@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { businesses } from "@/data/businesses";
+import { AuthGuard } from "@/components/auth/AuthGuard";
 
 export default function BusinessesPage() {
   return (
+    <>
+      <AuthGuard />
     <main className="min-h-screen bg-[#F7F5F2]">
       <section className="mx-auto max-w-7xl px-6 py-12">
         <h1 className="text-4xl font-bold text-[#1F2933]">
@@ -49,5 +52,6 @@ export default function BusinessesPage() {
         </div>
       </section>
     </main>
+      </>
   );
 }

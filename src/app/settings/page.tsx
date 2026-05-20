@@ -21,6 +21,14 @@ export default function SettingsPage() {
   const [avatar, setAvatar] =
     useState("");
 
+  const [publicPhone,
+    setPublicPhone] =
+    useState(false);
+
+  const [publicEmail,
+    setPublicEmail] =
+    useState(false);
+
   useEffect(() => {
     loadProfile();
   }, []);
@@ -48,6 +56,14 @@ export default function SettingsPage() {
 
     setAvatar(
       data?.avatar_url ?? ""
+    );
+
+    setPublicPhone(
+      data?.public_phone ?? false
+    );
+
+    setPublicEmail(
+      data?.public_email ?? false
     );
   }
 
@@ -102,6 +118,12 @@ export default function SettingsPage() {
         bio,
         phone,
         avatar_url: avatar,
+
+        public_phone:
+          publicPhone,
+
+        public_email:
+          publicEmail,
       })
       .eq("id", user.id);
 
@@ -207,6 +229,54 @@ export default function SettingsPage() {
               />
 
             </div>
+
+            
+            {/* PRIVACY */}
+
+            <div className="rounded-3xl border border-gray-200 p-6">
+
+              <h2 className="mb-6 text-2xl font-black tracking-tight text-[#111827]">
+                Public Contact Settings
+              </h2>
+
+              <div className="space-y-5">
+
+                <label className="flex items-center gap-4 text-lg font-semibold text-[#111827]">
+
+                  <input
+                    type="checkbox"
+                    checked={publicPhone}
+                    onChange={(e) =>
+                      setPublicPhone(
+                        e.target.checked
+                      )
+                    }
+                  />
+
+                  Show phone number publicly
+
+                </label>
+
+                <label className="flex items-center gap-4 text-lg font-semibold text-[#111827]">
+
+                  <input
+                    type="checkbox"
+                    checked={publicEmail}
+                    onChange={(e) =>
+                      setPublicEmail(
+                        e.target.checked
+                      )
+                    }
+                  />
+
+                  Show email publicly
+
+                </label>
+
+              </div>
+
+            </div>
+
 
             <button
               onClick={saveSettings}

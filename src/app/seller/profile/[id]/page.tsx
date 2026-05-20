@@ -1,6 +1,7 @@
 import { FollowButton } from "@/components/social/FollowButton";
 import { LeaveReviewForm } from "@/components/reviews/LeaveReviewForm";
 import { supabase } from "@/lib/supabase";
+import { AuthGuard } from "@/components/auth/AuthGuard";
 
 export default async function SellerPage({
   params,
@@ -14,7 +15,8 @@ export default async function SellerPage({
     .from("profiles")
     .select("*")
     .eq("id", id)
-    .maybeSingle();
+    .maybeSingle(    </>
+  );
 
   const { data: reviews } = await supabase
     .from("user_reviews")
@@ -34,6 +36,8 @@ export default async function SellerPage({
     });
 
   return (
+    <>
+      <AuthGuard />
     <main className="min-h-screen bg-[#F7F5F2] p-10">
 
       {/* SELLER HEADER */}
