@@ -7,6 +7,8 @@ export default async function HomePage() {
     .from("listings")
     .select("*")
     .neq("status", "removed")
+    .neq("hidden_by_system", true)
+    .neq("hidden_by_system", true)
     .order("created_at", {
       ascending: false,
     })

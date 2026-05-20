@@ -1,210 +1,380 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ListingCard } from "@/components/ListingCard";
-import { MarketplaceFilters } from "@/components/MarketplaceFilters";
 import { supabase } from "@/lib/supabase";
 
-type Listing = {
-  id: string;
-  owner_id: string | null;
-  title: string;
-  slug: string;
-  price: string | null;
-  city: string | null;
-  region: string | null;
-  seller_label: string | null;
-  condition: string | null;
-  image_url: string | null;
-  category: string | null;
-  description: string | null;
-  created_at: string;
-};
-
 export default function ListingsPage() {
-  const [listings, setListings] = useState<Listing[]>([]);
-  const [filtered, setFiltered] = useState<Listing[]>([]);
-  const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("All");
-  const [region, setRegion] = useState("All");
-  const [condition, setCondition] = useState("All");
-  const [sort, setSort] = useState("newest");
-  const [status, setStatus] = useState("Loading listings...");
+
+  const [listings, setListings] =
+    useState<any[]>([]);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [search, setSearch] =
+    useState("");
+
+  const [category, setCategory] =
+    useState("");
+
+  const [region, setRegion] =
+    useState("");
+
+  const [sort, setSort] =
+    useState("newest");
+
+  const [minPrice, setMinPrice] =
+    useState("");
+
+  const [maxPrice, setMaxPrice] =
+    useState("");
 
   useEffect(() => {
-    async function loadListings() {
-      const { data, error } = await supabase
-        .from("listings")
-        .select("*")
-        .neq("status", "removed")
-        .eq("status", "active")
-        .order("created_at", { ascending: false });
-
-      if (error) {
-        setStatus(error.message);
-        return;
-      }
-
-      setListings(data ?? []);
-      setFiltered(data ?? []);
-      setStatus("");
-    }
-
     loadListings();
-  }, []);
+  }, [
+    search,
+    category,
+    region,
+    sort,
+    minPrice,
+    maxPrice,
+  ]);
 
-  useEffect(() => {
-    let results = [...listings];
+  async function loadListings() {
 
-    if (search) {
-      results = results.filter((listing) =>
-        `${listing.title} ${listing.description ?? ""}`
-          .toLowerCase()
-          .includes(search.toLowerCase())
+    setLoading(true);
+
+    let query = supabase
+      .from("listings")
+      .select("*")
+      .neq("status", "removed")
+      .neq("hidden_by_system", true);
+
+    // =====================================
+    // SEARCH
+    // =====================================
+    if (search.trim()) {
+
+      query = query.ilike(
+        "title",
+        `%${search}%`
       );
+
     }
 
-    if (category !== "All") {
-      results = results.filter(
-        (listing) => listing.category === category
+    // =====================================
+    // CATEGORY
+    // =====================================
+    if (category) {
+
+      query = query.eq(
+        "category",
+        category
       );
+
     }
 
-    if (region !== "All") {
-      results = results.filter(
-        (listing) => listing.region === region
+    // =====================================
+    // REGION
+    // =====================================
+    if (region.trim()) {
+
+      query = query.ilike(
+        "region",
+        `%${region}%`
       );
+
     }
 
-    if (condition !== "All") {
-      results = results.filter(
-        (listing) => listing.condition === condition
+    // =====================================
+    // MIN PRICE
+    // =====================================
+    if (minPrice) {
+
+      query = query.gte(
+        "price",
+        Number(minPrice)
       );
+
     }
 
-    if (sort === "newest") {
-      results.sort(
-        (a, b) =>
-          new Date(b.created_at).getTime() -
-          new Date(a.created_at).getTime()
+    // =====================================
+    // MAX PRICE
+    // =====================================
+    if (maxPrice) {
+
+      query = query.lte(
+        "price",
+        Number(maxPrice)
       );
+
     }
 
-    if (sort === "oldest") {
-      results.sort(
-        (a, b) =>
-          new Date(a.created_at).getTime() -
-          new Date(b.created_at).getTime()
+    // =====================================
+    // SORTING
+    // =====================================
+    if (sort === "price_low") {
+
+      query = query.order(
+        "price",
+        {
+          ascending: true,
+        }
       );
+
+    } else if (
+      sort === "price_high"
+    ) {
+
+      query = query.order(
+        "price",
+        {
+          ascending: false,
+        }
+      );
+
+    } else {
+
+      query = query.order(
+        "created_at",
+        {
+          ascending: false,
+        }
+      );
+
     }
 
-    setFiltered(results);
-  }, [search, category, region, condition, sort, listings]);
+    const { data } =
+      await query;
+
+    setListings(data ?? []);
+
+    setLoading(false);
+  }
+
+  const categories = [
+    "Vehicles",
+    "Livestock",
+    "Equipment",
+    "Housing",
+    "Services",
+    "Jobs",
+  ];
 
   return (
-    <main className="min-h-screen bg-[#F7F5F2]">
-      <section className="border-b bg-white">
-        <div className="mx-auto max-w-7xl px-6 py-12">
-          <p className="text-sm font-bold uppercase tracking-[0.25em] text-[#2F5D50]">
-            Marketplace
-          </p>
+    <main className="min-h-screen bg-[#F7F5F2] p-6 md:p-10">
 
-          <h1 className="mt-3 text-5xl font-bold text-[#1F2933]">
-            Browse Listings
+      <div className="mx-auto max-w-7xl">
+
+        {/* HEADER */}
+        <div className="mb-10">
+
+          <h1 className="text-5xl font-black text-[#111827]">
+            Marketplace Listings
           </h1>
 
-          <p className="mt-4 max-w-3xl text-lg text-[#52606D]">
-            Search, filter, and discover listings across Wyoming.
+          <p className="mt-4 text-xl text-[#374151]">
+            Discover listings across Wyoming.
           </p>
-        </div>
-      </section>
 
-      <section className="mx-auto max-w-7xl px-6 py-8">
-        <div className="grid gap-4 rounded-2xl bg-white p-6 shadow-md lg:grid-cols-5">
-          <input
-            placeholder="Search listings..."
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            className="rounded-xl border border-gray-300 px-4 py-3 font-medium text-[#111827]"
-          />
-
-          <select
-            value={category}
-            onChange={(event) => setCategory(event.target.value)}
-            className="rounded-xl border border-gray-300 px-4 py-3 font-medium text-[#111827]"
-          >
-            <option>All</option>
-            <option>Vehicles</option>
-            <option>Ranch & Ag</option>
-            <option>Local Services</option>
-            <option>General Marketplace</option>
-          </select>
-
-          <select
-            value={region}
-            onChange={(event) => setRegion(event.target.value)}
-            className="rounded-xl border border-gray-300 px-4 py-3 font-medium text-[#111827]"
-          >
-            <option>All</option>
-            <option>Southeast</option>
-            <option>South Central</option>
-            <option>Northeast</option>
-            <option>Northwest</option>
-          </select>
-
-          <select
-            value={condition}
-            onChange={(event) => setCondition(event.target.value)}
-            className="rounded-xl border border-gray-300 px-4 py-3 font-medium text-[#111827]"
-          >
-            <option>All</option>
-            <option>New</option>
-            <option>Like New</option>
-            <option>Good</option>
-            <option>Fair</option>
-            <option>Service</option>
-          </select>
-
-          <select
-            value={sort}
-            onChange={(event) => setSort(event.target.value)}
-            className="rounded-xl border border-gray-300 px-4 py-3 font-medium text-[#111827]"
-          >
-            <option value="newest">Newest</option>
-            <option value="oldest">Oldest</option>
-          </select>
         </div>
 
-        {status && (
-          <div className="mt-6 rounded-2xl bg-white p-6 font-semibold text-[#1F2933] shadow-md">
-            {status}
-          </div>
-        )}
+        {/* FILTERS */}
+        <div className="mb-10 rounded-3xl bg-white p-6 shadow-sm">
 
-        {!status && (
-          <div className="mt-6 flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-[#1F2933]">
-              {filtered.length} Listings Found
-            </h2>
-          </div>
-        )}
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
 
-        <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((listing) => (
-            <ListingCard
-              key={listing.id}
-              title={listing.title}
-              price={listing.price ?? "Contact"}
-              location={`${listing.city ?? "Wyoming"} • ${listing.region ?? "Statewide"}`}
-              seller={listing.seller_label ?? "Seller"}
-              sellerSlug={listing.owner_id ?? ""}
-              slug={listing.slug}
-              condition={listing.condition ?? "Used"}
-              imageUrl={listing.image_url ?? ""}
+            <input
+              value={search}
+              onChange={(e) =>
+                setSearch(
+                  e.target.value
+                )
+              }
+              placeholder="Search listings..."
+              className="rounded-2xl border border-gray-300 px-5 py-4 text-[#111827]"
             />
-          ))}
+
+            <select
+              value={category}
+              onChange={(e) =>
+                setCategory(
+                  e.target.value
+                )
+              }
+              className="rounded-2xl border border-gray-300 bg-white px-5 py-4 text-[#111827]"
+            >
+
+              <option value="">
+                All Categories
+              </option>
+
+              {categories.map(
+                (cat) => (
+
+                <option
+                  key={cat}
+                  value={cat}
+                >
+                  {cat}
+                </option>
+
+              ))}
+
+            </select>
+
+            <input
+              value={region}
+              onChange={(e) =>
+                setRegion(
+                  e.target.value
+                )
+              }
+              placeholder="Region"
+              className="rounded-2xl border border-gray-300 px-5 py-4 text-[#111827]"
+            />
+
+            <input
+              type="number"
+              value={minPrice}
+              onChange={(e) =>
+                setMinPrice(
+                  e.target.value
+                )
+              }
+              placeholder="Min Price"
+              className="rounded-2xl border border-gray-300 px-5 py-4 text-[#111827]"
+            />
+
+            <input
+              type="number"
+              value={maxPrice}
+              onChange={(e) =>
+                setMaxPrice(
+                  e.target.value
+                )
+              }
+              placeholder="Max Price"
+              className="rounded-2xl border border-gray-300 px-5 py-4 text-[#111827]"
+            />
+
+            <select
+              value={sort}
+              onChange={(e) =>
+                setSort(
+                  e.target.value
+                )
+              }
+              className="rounded-2xl border border-gray-300 bg-white px-5 py-4 text-[#111827]"
+            >
+
+              <option value="newest">
+                Newest
+              </option>
+
+              <option value="price_low">
+                Price: Low to High
+              </option>
+
+              <option value="price_high">
+                Price: High to Low
+              </option>
+
+            </select>
+
+          </div>
+
         </div>
-      </section>
+
+        {/* LOADING */}
+        {loading && (
+
+          <div className="rounded-3xl bg-white p-10 text-center shadow-sm">
+
+            <h2 className="text-2xl font-black text-[#111827]">
+              Loading listings...
+            </h2>
+
+          </div>
+
+        )}
+
+        {/* EMPTY */}
+        {!loading &&
+          !listings.length && (
+
+          <div className="rounded-3xl bg-white p-10 text-center shadow-sm">
+
+            <h2 className="text-3xl font-black text-[#111827]">
+              No listings found
+            </h2>
+
+            <p className="mt-4 text-lg text-[#374151]">
+              Try adjusting your filters or search terms.
+            </p>
+
+          </div>
+
+        )}
+
+        {/* GRID */}
+        <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+
+          {listings.map((listing) => (
+
+            <Link
+              key={listing.id}
+              href={`/listing/${listing.slug}`}
+              className="overflow-hidden rounded-3xl bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+            >
+
+              {listing.image_url && (
+
+                <img
+                  src={listing.image_url}
+                  alt={listing.title}
+                  className="h-56 w-full object-cover"
+                />
+
+              )}
+
+              <div className="p-6">
+
+                <h2 className="text-2xl font-black text-[#111827]">
+                  {listing.title}
+                </h2>
+
+                {listing.category && (
+
+                  <div className="mt-3 inline-flex rounded-full bg-[#2F5D50]/10 px-4 py-2 text-sm font-bold text-[#2F5D50]">
+                    {listing.category}
+                  </div>
+
+                )}
+
+                {listing.region && (
+
+                  <div className="mt-3 text-sm font-semibold text-gray-500">
+                    {listing.region}
+                  </div>
+
+                )}
+
+                <p className="mt-5 text-3xl font-black text-[#2F5D50]">
+                  ${listing.price ?? "Contact"}
+                </p>
+
+              </div>
+
+            </Link>
+
+          ))}
+
+        </div>
+
+      </div>
+
     </main>
   );
 }
