@@ -20,8 +20,7 @@ export function NavBar() {
 
           <AdminNavLink />
 
-          <Link href="/admin/verification" className="text-sm font-bold text-[#1F2933] hover:text-[#2F5D50]">
-            Verification
+          <Link href="/admin/verification-disabled" className="text-sm font-bold text-[#1F2933] hover:text-[#2F5D50]">
           </Link>
 
         </div>
