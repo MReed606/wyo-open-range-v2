@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { ListingCard } from "@/components/ListingCard";
+import { MarketplaceFilters } from "@/components/MarketplaceFilters";
 import { supabase } from "@/lib/supabase";
 
 type Listing = {
