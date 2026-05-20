@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { containsProfanity } from "@/lib/safety";
 import { supabase } from "@/lib/supabase";
 
 function createSlug(title: string) {

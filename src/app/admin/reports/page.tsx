@@ -47,6 +47,37 @@ export default function AdminReportsPage() {
 
     if (!confirmed) return;
 
+    
+    // =====================================
+    // INCREASE MODERATION SCORE
+    // =====================================
+    const {
+      data: listingData
+    } = await supabase
+      .from("listings")
+      .select("moderation_score")
+      .eq("id", listingId)
+      .single();
+
+    const nextScore =
+      (
+        listingData
+          ?.moderation_score ?? 0
+      ) + 1;
+
+    await supabase
+      .from("listings")
+      .update({
+        moderation_score:
+          nextScore,
+
+        hidden_by_system:
+          nextScore >= 5,
+      })
+      .eq("id", listingId);
+
+
+
     // =====================================
     // REMOVE LISTING
     // =====================================
