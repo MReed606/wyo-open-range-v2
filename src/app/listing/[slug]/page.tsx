@@ -3,6 +3,7 @@ import { supabase } from "@/lib/supabase";
 import { SaveListingButton } from "@/components/SaveListingButton";
 import { ContactSellerButton } from "@/components/ContactSellerButton";
 import { ReportListingButton } from "@/components/ReportListingButton";
+import { ListingGallery } from "@/components/ListingGallery";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
