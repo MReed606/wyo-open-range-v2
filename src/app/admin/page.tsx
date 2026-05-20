@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
@@ -13,7 +14,9 @@ export default function AdminPage() {
 
   const [restrictionDays, setRestrictionDays] = useState<Record<string, string>>({});
   const [suspensionDays, setSuspensionDays] = useState<Record<string, string>>({});
-  const [notes, setNotes] = useState<Record<string, string>>({});
+
+  const [internalNotes, setInternalNotes] = useState<Record<string, string>>({});
+  const [publicReasons, setPublicReasons] = useState<Record<string, string>>({});
 
   const [stats, setStats] = useState({
     users: 0,
@@ -85,17 +88,69 @@ export default function AdminPage() {
     setReports(data ?? []);
   }
 
-  async function removeListing(listingId: string) {
+  async function createModerationNote(
+    targetUserId: string,
+    noteType: string
+  ) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!internalNotes[targetUserId]?.trim()) {
+      alert("Internal admin note required.");
+      return false;
+    }
+
+    await supabase
+      .from("moderation_notes")
+      .insert({
+        target_user_id: targetUserId,
+        admin_user_id: user?.id,
+        note_type: noteType,
+        internal_note: internalNotes[targetUserId],
+        public_reason: publicReasons[targetUserId] ?? "",
+      });
+
+    return true;
+  }
+
+  async function removeListing(
+    listingId: string,
+    ownerId: string
+  ) {
+    const success = await createModerationNote(
+      ownerId,
+      "listing_removed"
+    );
+
+    if (!success) return;
+
     await supabase
       .from("listings")
-      .update({ status: "removed" })
+      .update({
+        status: "removed",
+        removal_reason:
+          publicReasons[ownerId] ?? "",
+      })
       .eq("id", listingId);
 
     loadReports();
     loadStats();
+
+    alert("Listing removed");
   }
 
-  async function restrictPosting(userId: string, days: number) {
+  async function restrictPosting(
+    userId: string,
+    days: number
+  ) {
+    const success = await createModerationNote(
+      userId,
+      "posting_restricted"
+    );
+
+    if (!success) return;
+
     const until = new Date();
 
     until.setDate(until.getDate() + days);
@@ -104,13 +159,26 @@ export default function AdminPage() {
       .from("user_moderation")
       .upsert({
         user_id: userId,
-        posting_restricted_until: until.toISOString(),
+        posting_restricted_until:
+          until.toISOString(),
+        public_reason:
+          publicReasons[userId] ?? "",
       });
 
     alert(`Posting restricted for ${days} day(s)`);
   }
 
-  async function suspendUser(userId: string, days: number) {
+  async function suspendUser(
+    userId: string,
+    days: number
+  ) {
+    const success = await createModerationNote(
+      userId,
+      "user_suspended"
+    );
+
+    if (!success) return;
+
     const until = new Date();
 
     until.setDate(until.getDate() + days);
@@ -119,21 +187,13 @@ export default function AdminPage() {
       .from("user_moderation")
       .upsert({
         user_id: userId,
-        suspended_until: until.toISOString(),
+        suspended_until:
+          until.toISOString(),
+        public_reason:
+          publicReasons[userId] ?? "",
       });
 
     alert(`User suspended for ${days} day(s)`);
-  }
-
-  async function saveAdminNotes(userId: string) {
-    await supabase
-      .from("user_moderation")
-      .upsert({
-        user_id: userId,
-        admin_notes: notes[userId] ?? "",
-      });
-
-    alert("Admin notes saved");
   }
 
   if (!authorized) {
@@ -147,10 +207,13 @@ export default function AdminPage() {
         Admin Dashboard
       </h1>
 
-      {/* STATS */}
+      {/* STAT CARDS */}
       <div className="mb-8 grid gap-4 md:grid-cols-4">
 
-        <div className="rounded-2xl bg-white p-5 shadow">
+        <Link
+          href="/admin/users"
+          className="rounded-2xl bg-white p-5 shadow transition hover:scale-[1.02]"
+        >
           <div className="text-sm font-bold uppercase tracking-wide text-gray-500">
             Users
           </div>
@@ -158,9 +221,12 @@ export default function AdminPage() {
           <div className="mt-2 text-4xl font-bold text-[#111827]">
             {stats.users}
           </div>
-        </div>
+        </Link>
 
-        <div className="rounded-2xl bg-white p-5 shadow">
+        <Link
+          href="/admin/listings"
+          className="rounded-2xl bg-white p-5 shadow transition hover:scale-[1.02]"
+        >
           <div className="text-sm font-bold uppercase tracking-wide text-gray-500">
             Listings
           </div>
@@ -168,9 +234,12 @@ export default function AdminPage() {
           <div className="mt-2 text-4xl font-bold text-[#111827]">
             {stats.listings}
           </div>
-        </div>
+        </Link>
 
-        <div className="rounded-2xl bg-white p-5 shadow">
+        <Link
+          href="/admin/reports"
+          className="rounded-2xl bg-white p-5 shadow transition hover:scale-[1.02]"
+        >
           <div className="text-sm font-bold uppercase tracking-wide text-gray-500">
             Reports
           </div>
@@ -178,9 +247,12 @@ export default function AdminPage() {
           <div className="mt-2 text-4xl font-bold text-[#111827]">
             {stats.reports}
           </div>
-        </div>
+        </Link>
 
-        <div className="rounded-2xl bg-white p-5 shadow">
+        <Link
+          href="/admin/removed"
+          className="rounded-2xl bg-white p-5 shadow transition hover:scale-[1.02]"
+        >
           <div className="text-sm font-bold uppercase tracking-wide text-red-600">
             Removed
           </div>
@@ -188,7 +260,7 @@ export default function AdminPage() {
           <div className="mt-2 text-4xl font-bold text-red-600">
             {stats.removed}
           </div>
-        </div>
+        </Link>
 
       </div>
 
@@ -210,12 +282,59 @@ export default function AdminPage() {
               {report.reason}
             </p>
 
+            {/* INTERNAL NOTES */}
+            <div className="mt-5">
+
+              <label className="mb-2 block text-sm font-bold text-[#111827]">
+                Internal Admin Note
+              </label>
+
+              <textarea
+                placeholder="Required internal moderation note..."
+                value={internalNotes[report.listings.owner_id] ?? ""}
+                onChange={(e) =>
+                  setInternalNotes({
+                    ...internalNotes,
+                    [report.listings.owner_id]:
+                      e.target.value,
+                  })
+                }
+                className="min-h-24 w-full rounded-xl border border-gray-300 px-4 py-3 text-[#111827]"
+              />
+
+            </div>
+
+            {/* USER REASON */}
+            <div className="mt-5">
+
+              <label className="mb-2 block text-sm font-bold text-[#111827]">
+                User-Facing Reason
+              </label>
+
+              <textarea
+                placeholder="Reason visible to the affected user..."
+                value={publicReasons[report.listings.owner_id] ?? ""}
+                onChange={(e) =>
+                  setPublicReasons({
+                    ...publicReasons,
+                    [report.listings.owner_id]:
+                      e.target.value,
+                  })
+                }
+                className="min-h-24 w-full rounded-xl border border-gray-300 px-4 py-3 text-[#111827]"
+              />
+
+            </div>
+
             {/* ACTIONS */}
             <div className="mt-5 flex flex-wrap gap-3">
 
               <button
                 onClick={() =>
-                  removeListing(report.listings.id)
+                  removeListing(
+                    report.listings.id,
+                    report.listings.owner_id
+                  )
                 }
                 className="rounded-lg bg-red-600 px-4 py-2 font-bold text-white"
               >
@@ -226,14 +345,19 @@ export default function AdminPage() {
               <div className="flex items-center gap-2">
 
                 <select
-                  value={restrictionDays[report.listings.owner_id] ?? "7"}
+                  value={
+                    restrictionDays[
+                      report.listings.owner_id
+                    ] ?? "7"
+                  }
                   onChange={(e) =>
                     setRestrictionDays({
                       ...restrictionDays,
-                      [report.listings.owner_id]: e.target.value,
+                      [report.listings.owner_id]:
+                        e.target.value,
                     })
                   }
-                  className="rounded-lg border border-gray-300 px-3 py-2"
+                  className="rounded-lg border border-gray-300 bg-white px-3 py-2 font-semibold text-[#111827] shadow-sm"
                 >
                   <option value="1">1 Day</option>
                   <option value="3">3 Days</option>
@@ -247,7 +371,9 @@ export default function AdminPage() {
                     restrictPosting(
                       report.listings.owner_id,
                       Number(
-                        restrictionDays[report.listings.owner_id] ?? "7"
+                        restrictionDays[
+                          report.listings.owner_id
+                        ] ?? "7"
                       )
                     )
                   }
@@ -262,14 +388,19 @@ export default function AdminPage() {
               <div className="flex items-center gap-2">
 
                 <select
-                  value={suspensionDays[report.listings.owner_id] ?? "7"}
+                  value={
+                    suspensionDays[
+                      report.listings.owner_id
+                    ] ?? "7"
+                  }
                   onChange={(e) =>
                     setSuspensionDays({
                       ...suspensionDays,
-                      [report.listings.owner_id]: e.target.value,
+                      [report.listings.owner_id]:
+                        e.target.value,
                     })
                   }
-                  className="rounded-lg border border-gray-300 px-3 py-2"
+                  className="rounded-lg border border-gray-300 bg-white px-3 py-2 font-semibold text-[#111827] shadow-sm"
                 >
                   <option value="1">1 Day</option>
                   <option value="3">3 Days</option>
@@ -283,7 +414,9 @@ export default function AdminPage() {
                     suspendUser(
                       report.listings.owner_id,
                       Number(
-                        suspensionDays[report.listings.owner_id] ?? "7"
+                        suspensionDays[
+                          report.listings.owner_id
+                        ] ?? "7"
                       )
                     )
                   }
@@ -293,32 +426,6 @@ export default function AdminPage() {
                 </button>
 
               </div>
-
-            </div>
-
-            {/* NOTES */}
-            <div className="mt-5">
-
-              <textarea
-                placeholder="Admin notes..."
-                value={notes[report.listings.owner_id] ?? ""}
-                onChange={(e) =>
-                  setNotes({
-                    ...notes,
-                    [report.listings.owner_id]: e.target.value,
-                  })
-                }
-                className="min-h-24 w-full rounded-xl border border-gray-300 px-4 py-3 text-[#111827]"
-              />
-
-              <button
-                onClick={() =>
-                  saveAdminNotes(report.listings.owner_id)
-                }
-                className="mt-3 rounded-lg bg-[#1F2933] px-4 py-2 font-bold text-white"
-              >
-                Save Notes
-              </button>
 
             </div>
 
