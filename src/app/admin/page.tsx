@@ -1,23 +1,37 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { redirect } from "next/navigation";
 
-export default async function AdminPage() {
+export default function AdminPage() {
+  const router = useRouter();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  const ADMIN_EMAILS = [
-    "mathewrreed88@gmail.com"
-  ];
-
-  if (!user || !ADMIN_EMAILS.includes(user.email ?? "")) {
-    redirect("/");
-  }
+  const [authorized, setAuthorized] = useState(false);
   const [reports, setReports] = useState<any[]>([]);
+
+  useEffect(() => {
+    async function checkAdmin() {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      const ADMIN_EMAILS = [
+        "mathewrreed88@gmail.com"
+      ];
+
+      if (!user || !ADMIN_EMAILS.includes(user.email ?? "")) {
+        router.push("/");
+        return;
+      }
+
+      setAuthorized(true);
+
+      loadReports();
+    }
+
+    checkAdmin();
+  }, []);
 
   async function loadReports() {
     const { data } = await supabase
@@ -46,11 +60,13 @@ export default async function AdminPage() {
     loadReports();
   }
 
-  await loadReports();
+  if (!authorized) {
+    return null;
+  }
 
   return (
     <main className="min-h-screen bg-[#F7F5F2] p-10">
-      <h1 className="text-4xl font-bold mb-6 text-[#111827]">
+      <h1 className="mb-6 text-4xl font-bold text-[#111827]">
         Admin Reports
       </h1>
 
@@ -58,9 +74,9 @@ export default async function AdminPage() {
         {reports.map((report) => (
           <div
             key={report.id}
-            className="rounded-xl bg-white p-5 shadow border border-gray-200"
+            className="rounded-xl border border-gray-200 bg-white p-5 shadow"
           >
-            <h2 className="font-bold text-lg text-[#111827]">
+            <h2 className="text-lg font-bold text-[#111827]">
               {report.listings?.title}
             </h2>
 
@@ -72,7 +88,7 @@ export default async function AdminPage() {
               onClick={() =>
                 removeListing(report.listings.id)
               }
-              className="mt-4 rounded-lg bg-red-600 px-4 py-2 text-white font-bold"
+              className="mt-4 rounded-lg bg-red-600 px-4 py-2 font-bold text-white"
             >
               Remove Listing
             </button>
