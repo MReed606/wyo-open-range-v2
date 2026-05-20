@@ -53,17 +53,22 @@ export default async function ListingPage({ params }: PageProps) {
               Actions
             </div>
 
-            <ContactSellerButton
-              listingId={listing.id}
-              sellerId={listing.owner_id}
-            />
+            
+<div className="mt-6 space-y-3 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+  <div className="text-sm font-bold uppercase tracking-wide text-gray-500">
+    Actions
+  </div>
 
-            <SaveListingButton listingId={listing.id} />
+  <ContactSellerButton
+    listingId={listing.id}
+    sellerId={listing.owner_id}
+  />
 
-            <ReportListingButton listingId={listing.id} />
-          </div>
+  <SaveListingButton listingId={listing.id} />
 
-        </aside>
+  <ReportListingButton listingId={listing.id} />
+</div>
+</aside>
       </div>
     </main>
   );
