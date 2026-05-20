@@ -19,6 +19,11 @@ export function NavBar() {
           <Link href="/dashboard" className="text-sm font-bold text-[#1F2933] hover:text-[#2F5D50]">Dashboard</Link>
 
           <AdminNavLink />
+
+          <Link href="/admin/verification" className="text-sm font-bold text-[#1F2933] hover:text-[#2F5D50]">
+            Verification
+          </Link>
+
         </div>
 
         <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-3">

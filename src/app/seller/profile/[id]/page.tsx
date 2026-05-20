@@ -1,3 +1,4 @@
+import { LeaveReviewForm } from "@/components/reviews/LeaveReviewForm";
 import { supabase } from "@/lib/supabase";
 
 export default async function SellerPage({
@@ -15,10 +16,10 @@ export default async function SellerPage({
     .single();
 
 
-  const { data: moderationActions } = await supabase
-    .from("moderation_actions")
+  const { data: reviews } = await supabase
+    .from("user_reviews")
     .select("*")
-    .eq("target_user_id", id)
+    .eq("reviewed_user_id", id)
     .order("created_at", {
       ascending: false,
     });
@@ -35,18 +36,20 @@ export default async function SellerPage({
   return (
     <main className="min-h-screen bg-[#F7F5F2] p-10">
 
+      {/* SELLER HEADER */}
       <div className="rounded-3xl bg-white p-8 shadow-sm">
 
         <h1 className="text-4xl font-black text-[#111827]">
           {seller?.username ?? "Seller"}
         </h1>
 
+        {/* BADGES */}
         <div className="mt-4 flex flex-wrap gap-3">
 
-          {seller?.verified && (
+          {seller?.role === "owner" && (
 
-            <div className="rounded-full bg-blue-100 px-4 py-2 text-sm font-bold text-blue-700">
-              Verified Seller
+            <div className="rounded-full bg-purple-100 px-4 py-2 text-sm font-bold text-purple-700">
+              Site Owner
             </div>
 
           )}
@@ -67,15 +70,27 @@ export default async function SellerPage({
 
           )}
 
+          {seller?.verified && (
+
+            <div className="rounded-full bg-blue-100 px-4 py-2 text-sm font-bold text-blue-700">
+              Verified Seller
+            </div>
+
+          )}
+
         </div>
 
-
-        <p className="mt-3 text-lg text-[#374151]">
+        <p className="mt-5 text-lg text-[#374151]">
+          Seller Rating: {seller?.review_score ?? 0} ⭐
+          {" • "}
+          Reviews: {seller?.review_count ?? 0}
+          <br />
           Active Listings: {listings?.length ?? 0}
         </p>
 
       </div>
 
+      {/* LISTINGS */}
       <div className="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
 
         {listings?.map((listing) => (
@@ -114,40 +129,41 @@ export default async function SellerPage({
       </div>
 
     
+      <LeaveReviewForm sellerId={id} />
+
       <div className="mt-10 rounded-3xl bg-white p-8 shadow-sm">
 
         <h2 className="text-3xl font-black text-[#111827]">
-          Moderation History
+          Customer Reviews
         </h2>
 
-        <div className="mt-6 space-y-4">
+        <div className="mt-6 space-y-5">
 
-          {moderationActions?.length ? (
+          {reviews?.length ? (
 
-            moderationActions.map((action) => (
+            reviews.map((review) => (
 
               <div
-                key={action.id}
+                key={review.id}
                 className="rounded-2xl border border-gray-200 p-5"
               >
 
                 <div className="flex flex-wrap items-center gap-3">
 
-                  <span className="rounded-full bg-red-100 px-3 py-1 text-sm font-bold text-red-700">
-                    {action.action_type}
-                  </span>
+                  <div className="rounded-full bg-[#2F5D50]/10 px-4 py-2 text-sm font-bold text-[#2F5D50]">
+                    {review.rating} ⭐
+                  </div>
 
-                  <span className="text-sm text-gray-500">
+                  <div className="text-sm text-gray-500">
                     {new Date(
-                      action.created_at
-                    ).toLocaleString()}
-                  </span>
+                      review.created_at
+                    ).toLocaleDateString()}
+                  </div>
 
                 </div>
 
-                <p className="mt-4 text-[#374151]">
-                  {action.public_reason ??
-                    "No public reason"}
+                <p className="mt-4 text-lg text-[#374151]">
+                  {review.review}
                 </p>
 
               </div>
@@ -157,7 +173,7 @@ export default async function SellerPage({
           ) : (
 
             <p className="text-[#374151]">
-              No moderation history.
+              No reviews yet.
             </p>
 
           )}
