@@ -1,3 +1,4 @@
+import { MarketplaceAnnouncements } from "@/components/home/MarketplaceAnnouncements";
 import { MarketplaceStats } from "@/components/dashboard/MarketplaceStats";
 import { TrendingListings } from "@/components/home/TrendingListings";
 
@@ -137,6 +138,10 @@ export default async function HomePage() {
 
       </section>
 
+
+
+      
+      <MarketplaceAnnouncements />
 
 
       <MarketplaceStats />

@@ -87,6 +87,16 @@ export default async function SellerPage({
 
             <div className="mt-5 flex flex-wrap gap-3">
 
+              
+              {seller?.premium_seller && (
+
+                <div className="rounded-full bg-purple-100 px-4 py-2 text-sm font-bold text-purple-700">
+                  Premium Seller
+                </div>
+
+              )}
+
+
               {seller?.verified && (
 
                 <div className="rounded-full bg-blue-100 px-4 py-2 text-sm font-bold text-blue-700">

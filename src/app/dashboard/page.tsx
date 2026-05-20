@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { SellerAnalytics } from "@/components/dashboard/SellerAnalytics";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 
 export default function DashboardPage() {
@@ -118,6 +119,8 @@ export default function DashboardPage() {
           </div>
 
         </div>
+
+                <SellerAnalytics />
 
       </main>
     </>
