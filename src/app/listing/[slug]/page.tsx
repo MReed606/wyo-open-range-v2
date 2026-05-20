@@ -165,7 +165,7 @@ export default function ListingPage() {
                 )}
 
                 <p className="mt-6 text-4xl font-black text-[#2F5D50]">
-                  $Views: {listing.views ?? 0}
+                  Views: {listing.views ?? 0}
                   <br />
                   {listing.price ?? "Contact"}
                 </p>
