@@ -28,9 +28,6 @@ export default function AdminReportsPage() {
       return;
     }
 
-    // =====================================
-    // MANUAL LISTING LOAD
-    // =====================================
     const enhanced =
       await Promise.all(
         data.map(async (report) => {
@@ -44,7 +41,7 @@ export default function AdminReportsPage() {
               "id",
               report.listing_id
             )
-            .single();
+            .maybeSingle();
 
           return {
             ...report,
@@ -133,7 +130,7 @@ export default function AdminReportsPage() {
                   }
                   alt={
                     report.listing
-                      .title
+                      ?.title ?? ""
                   }
                   className="h-48 w-full rounded-2xl object-cover lg:w-72"
                 />
@@ -143,41 +140,57 @@ export default function AdminReportsPage() {
               <div className="flex-1">
 
                 <h2 className="text-3xl font-black text-[#111827]">
+
                   {report.listing
                     ?.title ??
-                    "Unknown Listing"}
+
+                    "Removed Listing"}
+
                 </h2>
 
                 <div className="mt-3 inline-flex rounded-full bg-gray-100 px-4 py-2 text-sm font-bold text-gray-700">
+
                   Status:
                   {" "}
+
                   {report.listing
-                    ?.status ?? "none"}
+                    ?.status ??
+
+                    "removed"}
+
                 </div>
 
                 <div className="mt-6 flex flex-wrap gap-4">
 
-                  <Link
-                    href={`/listing/${report.listing?.slug}`}
-                    className="rounded-xl border border-[#2F5D50] px-5 py-3 font-bold text-[#2F5D50]"
-                  >
-                    Open Listing
-                  </Link>
+                  {report.listing && (
 
-                  {report.listing
-                    ?.status !==
-                    "removed" && (
+                    <>
 
-                    <button
-                      onClick={() =>
-                        removeListing(
-                          report.listing.id
-                        )
-                      }
-                      className="rounded-xl bg-red-600 px-5 py-3 font-bold text-white"
-                    >
-                      Remove Listing
-                    </button>
+                      <Link
+                        href={`/listing/${report.listing.slug}`}
+                        className="rounded-xl border border-[#2F5D50] px-5 py-3 font-bold text-[#2F5D50]"
+                      >
+                        Open Listing
+                      </Link>
+
+                      {report.listing
+                        ?.status !==
+                        "removed" && (
+
+                        <button
+                          onClick={() =>
+                            removeListing(
+                              report.listing.id
+                            )
+                          }
+                          className="rounded-xl bg-red-600 px-5 py-3 font-bold text-white"
+                        >
+                          Remove Listing
+                        </button>
+
+                      )}
+
+                    </>
 
                   )}
 
