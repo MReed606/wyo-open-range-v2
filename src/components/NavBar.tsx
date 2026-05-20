@@ -36,8 +36,7 @@ export function NavBar() {
           </Link>
 
 
-<AdminVerificationLink />
-          <NotificationBell />
+<NotificationBell />
 
           <AuthStatus />
 
