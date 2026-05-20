@@ -13,28 +13,22 @@ export default function VerificationPage() {
     useState<any[]>([]);
 
   useEffect(() => {
+
     checkAdmin();
 
     loadProfiles();
+
   }, []);
 
-  
   async function checkAdmin() {
 
     const {
       data: { user },
     } = await supabase.auth.getUser();
 
-    if (!user) {
-
-      router.push("/");
-
-      return;
-    }
-
     if (
       !isAdminEmail(
-        user.email
+        user?.email
       )
     ) {
 
@@ -44,8 +38,7 @@ export default function VerificationPage() {
 
   }
 
-
-async function loadProfiles() {
+  async function loadProfiles() {
 
     const { data } =
       await supabase
@@ -58,12 +51,20 @@ async function loadProfiles() {
         .eq(
           "verified",
           false
-        )
-        .order("created_at", {
-          ascending: false,
-        });
+        );
 
-    setProfiles(data ?? []);
+    // =====================================
+    // REMOVE ADMINS FROM QUEUE
+    // =====================================
+    const filtered =
+      (data ?? []).filter(
+        (profile) =>
+          !isAdminEmail(
+            profile.email
+          )
+      );
+
+    setProfiles(filtered);
   }
 
   async function verifyUser(
@@ -153,14 +154,6 @@ async function loadProfiles() {
                     {profile.phone ??
                       "No phone"}
                   </p>
-
-                </div>
-
-                <div className="mt-5 flex flex-wrap gap-3">
-
-                  <div className="rounded-full bg-yellow-100 px-4 py-2 text-sm font-bold text-yellow-700">
-                    Verification Pending
-                  </div>
 
                 </div>
 
