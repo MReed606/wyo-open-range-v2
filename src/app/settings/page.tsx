@@ -1,29 +1,48 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
 import { supabase } from "@/lib/supabase";
+
 import { AuthGuard } from "@/components/auth/AuthGuard";
 
 export default function SettingsPage() {
 
-  const [loading, setLoading] =
-    useState(false);
+  const [loading,
+    setLoading] =
+    useState(true);
 
-  const [profile, setProfile] =
-    useState<any>(null);
-
-  const [bio, setBio] =
+  const [fullName,
+    setFullName] =
     useState("");
 
-  const [phone, setPhone] =
+  const [phone,
+    setPhone] =
     useState("");
 
-  const [avatar, setAvatar] =
+  const [bio,
+    setBio] =
     useState("");
+
+  const [avatar,
+    setAvatar] =
+    useState("");
+
+  // =====================================
+  // PRIVACY
+  // =====================================
 
   const [publicPhone,
     setPublicPhone] =
     useState(false);
+
+  const [publicEmail,
+    setPublicEmail] =
+    useState(false);
+
+  // =====================================
+  // NOTIFICATIONS
+  // =====================================
 
   const [emailNotifications,
     setEmailNotifications] =
@@ -45,10 +64,6 @@ export default function SettingsPage() {
     setListingNotifications] =
     useState(true);
 
-  const [publicEmail,
-    setPublicEmail] =
-    useState(false);
-
   useEffect(() => {
     loadProfile();
   }, []);
@@ -68,19 +83,37 @@ export default function SettingsPage() {
         .eq("id", user.id)
         .maybeSingle();
 
-    setProfile(data);
+    setFullName(
+      data?.full_name ?? ""
+    );
 
-    setBio(data?.bio ?? "");
+    setPhone(
+      data?.phone ?? ""
+    );
 
-    setPhone(data?.phone ?? "");
+    setBio(
+      data?.bio ?? ""
+    );
 
     setAvatar(
       data?.avatar_url ?? ""
     );
 
+    // =====================================
+    // PRIVACY
+    // =====================================
+
     setPublicPhone(
       data?.public_phone ?? false
     );
+
+    setPublicEmail(
+      data?.public_email ?? false
+    );
+
+    // =====================================
+    // NOTIFICATIONS
+    // =====================================
 
     setEmailNotifications(
       data?.email_notifications ?? true
@@ -102,49 +135,10 @@ export default function SettingsPage() {
       data?.listing_notifications ?? true
     );
 
-    setPublicEmail(
-      data?.public_email ?? false
-    );
+    setLoading(false);
   }
 
-  async function uploadAvatar(
-    file: File
-  ) {
-
-    const filename =
-      `${Date.now()}-${file.name}`;
-
-    const { error } =
-      await supabase.storage
-        .from("avatars")
-        .upload(
-          filename,
-          file
-        );
-
-    if (error) {
-
-      console.log(error);
-
-      return;
-    }
-
-    const {
-      data: publicUrl
-    } = supabase.storage
-      .from("avatars")
-      .getPublicUrl(
-        filename
-      );
-
-    setAvatar(
-      publicUrl.publicUrl
-    );
-  }
-
-  async function saveSettings() {
-
-    setLoading(true);
+  async function saveProfile() {
 
     const {
       data: { user },
@@ -155,12 +149,29 @@ export default function SettingsPage() {
     await supabase
       .from("profiles")
       .update({
-        bio,
+        full_name:
+          fullName,
+
         phone,
-        avatar_url: avatar,
+
+        bio,
+
+        avatar_url:
+          avatar,
+
+        // =====================================
+        // PRIVACY
+        // =====================================
 
         public_phone:
           publicPhone,
+
+        public_email:
+          publicEmail,
+
+        // =====================================
+        // NOTIFICATIONS
+        // =====================================
 
         email_notifications:
           emailNotifications,
@@ -176,17 +187,33 @@ export default function SettingsPage() {
 
         listing_notifications:
           listingNotifications,
-
-        public_email:
-          publicEmail,
       })
       .eq("id", user.id);
 
     alert(
-      "Profile updated."
+      "Settings saved"
     );
+  }
 
-    setLoading(false);
+  if (loading) {
+
+    return (
+      <>
+        <AuthGuard />
+
+        <main className="min-h-screen bg-[#F7F5F2] p-10">
+
+          <div className="mx-auto max-w-4xl rounded-3xl bg-white p-10 shadow-sm">
+
+            <h1 className="text-4xl font-black text-[#111827]">
+              Loading Settings...
+            </h1>
+
+          </div>
+
+        </main>
+      </>
+    );
   }
 
   return (
@@ -195,82 +222,32 @@ export default function SettingsPage() {
 
       <main className="min-h-screen bg-[#F7F5F2] p-6 md:p-10">
 
-        <div className="mx-auto max-w-3xl rounded-3xl bg-white p-8 shadow-sm">
+        <div className="mx-auto max-w-4xl rounded-3xl bg-white p-8 shadow-sm">
 
-          <h1 className="text-5xl font-black text-[#111827]">
+          <h1 className="mb-10 text-5xl font-black text-[#111827]">
             Account Settings
           </h1>
 
-          <div className="mt-8 space-y-6">
+          <div className="space-y-8">
 
-            {/* AVATAR */}
+            {/* PROFILE */}
 
-            <div>
+            <div className="space-y-5">
 
-              <h2 className="mb-4 text-2xl font-black tracking-tight text-[#111827]">
-                Profile Photo
+              <h2 className="text-2xl font-black text-[#111827]">
+                Profile Information
               </h2>
-
-              {avatar && (
-
-                <img
-                  src={avatar}
-                  alt=""
-                  className="mb-5 h-40 w-40 rounded-full object-cover"
-                />
-
-              )}
 
               <input
-                type="file"
-                className="block w-full rounded-2xl border border-gray-300 bg-white px-5 py-4 text-lg font-semibold text-[#111827] file:mr-4 file:rounded-xl file:border-0 file:bg-[#2F5D50] file:px-4 file:py-2 file:font-bold file:text-white hover:file:bg-[#24473d]"
-                accept="image/*"
-                onChange={(e) => {
-
-                  const file =
-                    e.target.files?.[0];
-
-                  if (file) {
-
-                    uploadAvatar(
-                      file
-                    );
-
-                  }
-
-                }}
-              />
-
-            </div>
-
-            {/* BIO */}
-
-            <div>
-
-              <h2 className="mb-4 text-2xl font-black tracking-tight text-[#111827]">
-                Seller Bio
-              </h2>
-
-              <textarea
-                value={bio}
+                value={fullName}
                 onChange={(e) =>
-                  setBio(
+                  setFullName(
                     e.target.value
                   )
                 }
-                placeholder="Tell people about yourself..."
-                className="min-h-40 w-full rounded-2xl border border-gray-300 bg-white px-5 py-4 text-lg font-semibold text-[#111827] placeholder:text-gray-500"
+                placeholder="Full name"
+                className="w-full rounded-2xl border border-gray-300 bg-white px-5 py-4 text-lg font-semibold text-[#111827]"
               />
-
-            </div>
-
-            {/* PHONE */}
-
-            <div>
-
-              <h2 className="mb-4 text-2xl font-black tracking-tight text-[#111827]">
-                Contact Number
-              </h2>
 
               <input
                 value={phone}
@@ -279,19 +256,86 @@ export default function SettingsPage() {
                     e.target.value
                   )
                 }
-                placeholder="Phone Number"
-                className="w-full rounded-2xl border border-gray-300 bg-white px-5 py-4 text-lg font-semibold text-[#111827] placeholder:text-gray-500"
+                placeholder="Phone number"
+                className="w-full rounded-2xl border border-gray-300 bg-white px-5 py-4 text-lg font-semibold text-[#111827]"
+              />
+
+              <input
+                value={avatar}
+                onChange={(e) =>
+                  setAvatar(
+                    e.target.value
+                  )
+                }
+                placeholder="Avatar image URL"
+                className="w-full rounded-2xl border border-gray-300 bg-white px-5 py-4 text-lg font-semibold text-[#111827]"
+              />
+
+              <textarea
+                value={bio}
+                onChange={(e) =>
+                  setBio(
+                    e.target.value
+                  )
+                }
+                placeholder="Bio"
+                rows={6}
+                className="w-full rounded-2xl border border-gray-300 bg-white px-5 py-4 text-lg font-semibold text-[#111827]"
               />
 
             </div>
 
-            
-            {
+            {/* PRIVACY */}
+
+            <div className="rounded-3xl border border-gray-200 p-6">
+
+              <h2 className="mb-6 text-2xl font-black text-[#111827]">
+                Public Contact Settings
+              </h2>
+
+              <div className="space-y-5">
+
+                <label className="flex items-center gap-4 text-lg font-semibold text-[#111827]">
+
+                  <input
+                    type="checkbox"
+                    checked={publicPhone}
+                    onChange={(e) =>
+                      setPublicPhone(
+                        e.target.checked
+                      )
+                    }
+                  />
+
+                  Show phone number publicly
+
+                </label>
+
+                <label className="flex items-center gap-4 text-lg font-semibold text-[#111827]">
+
+                  <input
+                    type="checkbox"
+                    checked={publicEmail}
+                    onChange={(e) =>
+                      setPublicEmail(
+                        e.target.checked
+                      )
+                    }
+                  />
+
+                  Show email publicly
+
+                </label>
+
+              </div>
+
+            </div>
+
             {/* NOTIFICATIONS */}
 
             <div className="rounded-3xl border border-gray-200 p-6">
 
-              <h2 className="mb-6 text-2xl font-black tracking-tight text-[#111827]">
+              <h2 className="mb-6 text-2xl font-black text-[#111827]">
                 Notification Preferences
               </h2>
 
@@ -381,82 +425,13 @@ export default function SettingsPage() {
 
             </div>
 
-
-            /* PRIVACY */}
-
-            <div className="rounded-3xl border border-gray-200 p-6">
-
-              <h2 className="mb-6 text-2xl font-black tracking-tight text-[#111827]">
-                Public Contact Settings
-              </h2>
-
-              <div className="space-y-5">
-
-                <label className="flex items-center gap-4 text-lg font-semibold text-[#111827]">
-
-                  <input
-                    type="checkbox"
-                    checked={publicPhone}
-                    onChange={(e) =>
-                      setPublicPhone(
-                        e.target.checked
-                      )
-                    }
-                  />
-
-                  Show phone number publicly
-
-                </label>
-
-                <label className="flex items-center gap-4 text-lg font-semibold text-[#111827]">
-
-                  <input
-                    type="checkbox"
-                    checked={publicEmail}
-                    onChange={(e) =>
-                      setEmailNotifications(
-      data?.email_notifications ?? true
-    );
-
-    setSmsNotifications(
-      data?.sms_notifications ?? false
-    );
-
-    setMessageNotifications(
-      data?.message_notifications ?? true
-    );
-
-    setForumNotifications(
-      data?.forum_notifications ?? true
-    );
-
-    setListingNotifications(
-      data?.listing_notifications ?? true
-    );
-
-    setPublicEmail(
-                        e.target.checked
-                      )
-                    }
-                  />
-
-                  Show email publicly
-
-                </label>
-
-              </div>
-
-            </div>
-
+            {/* SAVE */}
 
             <button
-              onClick={saveSettings}
-              disabled={loading}
-              className="w-full rounded-2xl bg-[#2F5D50] px-6 py-4 text-xl font-black text-white"
+              onClick={saveProfile}
+              className="w-full rounded-2xl bg-[#2F5D50] px-8 py-5 text-xl font-black text-white"
             >
-              {loading
-                ? "Saving..."
-                : "Save Settings"}
+              Save Settings
             </button>
 
           </div>
