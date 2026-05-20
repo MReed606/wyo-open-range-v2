@@ -2,8 +2,21 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { redirect } from "next/navigation";
 
-export default function AdminPage() {
+export default async function AdminPage() {
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const ADMIN_EMAILS = [
+    "mathewrreed88@gmail.com"
+  ];
+
+  if (!user || !ADMIN_EMAILS.includes(user.email ?? "")) {
+    redirect("/");
+  }
   const [reports, setReports] = useState<any[]>([]);
 
   async function loadReports() {
@@ -33,9 +46,7 @@ export default function AdminPage() {
     loadReports();
   }
 
-  useEffect(() => {
-    loadReports();
-  }, []);
+  await loadReports();
 
   return (
     <main className="min-h-screen bg-[#F7F5F2] p-10">
