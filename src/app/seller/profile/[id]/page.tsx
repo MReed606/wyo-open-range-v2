@@ -12,16 +12,12 @@ export default async function SellerPage({
   const { data: seller } = await supabase
     .from("profiles")
     .select("*")
-    .or("status.is.null,status.neq.removed")
-    .or("hidden_by_system.is.null,hidden_by_system.neq.true")
     .eq("id", id)
-    .single();
+    .maybeSingle();
 
   const { data: reviews } = await supabase
     .from("user_reviews")
     .select("*")
-    .or("status.is.null,status.neq.removed")
-    .or("hidden_by_system.is.null,hidden_by_system.neq.true")
     .eq("reviewed_user_id", id)
     .order("created_at", {
       ascending: false,
@@ -30,10 +26,8 @@ export default async function SellerPage({
   const { data: listings } = await supabase
     .from("listings")
     .select("*")
-    .or("status.is.null,status.neq.removed")
-    .or("hidden_by_system.is.null,hidden_by_system.neq.true")
     .eq("owner_id", id)
-    
+    .eq("status", "active")
     .order("created_at", {
       ascending: false,
     });
@@ -50,16 +44,17 @@ export default async function SellerPage({
 
             <img
               src={seller.avatar_url}
-              alt={seller.full_name}
+              alt={seller.full_name ?? ""}
               className="h-24 w-24 rounded-full object-cover"
             />
 
           ) : (
 
             <div className="flex h-24 w-24 items-center justify-center rounded-full bg-[#2F5D50]/10 text-3xl font-black text-[#2F5D50]">
-              {(seller?.username ?? "U")
-                .charAt(0)
+
+              {(seller?.first_name?.[0] ?? "U")
                 .toUpperCase()}
+
             </div>
 
           )}
@@ -67,15 +62,34 @@ export default async function SellerPage({
           <div>
 
             <h1 className="text-4xl font-black text-[#111827]">
-              {seller?.full_name ?? "Seller"}
+
+              {seller?.full_name ??
+                "Seller"}
+
             </h1>
 
-            <div className="mt-4 flex flex-wrap gap-3">
+            <div className="mt-4 space-y-2 text-[#374151]">
 
-              {seller?.role === "owner" && (
+              {seller?.email && (
+                <p>
+                  {seller.email}
+                </p>
+              )}
 
-                <div className="rounded-full bg-purple-100 px-4 py-2 text-sm font-bold text-purple-700">
-                  Site Owner
+              {seller?.phone && (
+                <p>
+                  {seller.phone}
+                </p>
+              )}
+
+            </div>
+
+            <div className="mt-5 flex flex-wrap gap-3">
+
+              {seller?.verified && (
+
+                <div className="rounded-full bg-blue-100 px-4 py-2 text-sm font-bold text-blue-700">
+                  Verified Seller
                 </div>
 
               )}
@@ -96,14 +110,6 @@ export default async function SellerPage({
 
               )}
 
-              {seller?.verified && (
-
-                <div className="rounded-full bg-blue-100 px-4 py-2 text-sm font-bold text-blue-700">
-                  Verified Seller
-                </div>
-
-              )}
-
             </div>
 
           </div>
@@ -111,11 +117,24 @@ export default async function SellerPage({
         </div>
 
         <p className="mt-5 text-lg text-[#374151]">
-          Seller Rating: {seller?.review_score ?? 0} ⭐
+
+          Seller Rating:
+          {" "}
+          {seller?.review_score ?? 0}
+          ⭐
+
           {" • "}
-          Reviews: {seller?.review_count ?? 0}
+
+          Reviews:
+          {" "}
+          {seller?.review_count ?? 0}
+
           <br />
-          Active Listings: {listings?.length ?? 0}
+
+          Active Listings:
+          {" "}
+          {listings?.length ?? 0}
+
         </p>
 
       </div>
@@ -158,7 +177,10 @@ export default async function SellerPage({
 
       </div>
 
-      <LeaveReviewForm sellerId={id} />
+      {/* REVIEW FORM */}
+      <div className="mt-10">
+        <LeaveReviewForm sellerId={id} />
+      </div>
 
       {/* REVIEWS */}
       <div className="mt-10 rounded-3xl bg-white p-8 shadow-sm">
@@ -185,9 +207,11 @@ export default async function SellerPage({
                   </div>
 
                   <div className="text-sm text-gray-500">
+
                     {new Date(
                       review.created_at
                     ).toLocaleDateString()}
+
                   </div>
 
                 </div>

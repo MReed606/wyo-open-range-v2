@@ -41,6 +41,7 @@ export default function AdminReportsPage() {
               "id",
               report.listing_id
             )
+            .neq("status", "removed")
             .maybeSingle();
 
           return {
@@ -96,6 +97,15 @@ export default function AdminReportsPage() {
       <h1 className="mb-8 text-4xl font-black text-[#111827]">
         Reported Listings
       </h1>
+
+
+        <Link
+          href="/admin/removed"
+          className="rounded-xl border border-red-600 px-5 py-3 font-bold text-red-700"
+        >
+          Removed Listings
+        </Link>
+
 
       {!reports.length && (
 

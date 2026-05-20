@@ -9,35 +9,40 @@ export function ProfileCompletionGuard() {
   const router = useRouter();
 
   useEffect(() => {
+    checkProfile();
+  }, []);
 
-    async function checkProfile() {
+  async function checkProfile() {
 
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-      if (!user) return;
+    if (!user) return;
 
-      const { data: profile } =
-        await supabase
-          .from("profiles")
-          .select("full_name")
-          .eq("id", user.id)
-          .single();
+    const { data: profile } =
+      await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .maybeSingle();
 
-      if (
-        !profile?.full_name
-      ) {
-        router.push(
-          "/complete-profile"
-        );
-      }
+    // =====================================
+    // ONLY REDIRECT IF TRULY INCOMPLETE
+    // =====================================
+    if (
+      !profile ||
+      !profile.full_name ||
+      !profile.email
+    ) {
+
+      router.push(
+        "/complete-profile"
+      );
 
     }
 
-    checkProfile();
-
-  }, [router]);
+  }
 
   return null;
 }

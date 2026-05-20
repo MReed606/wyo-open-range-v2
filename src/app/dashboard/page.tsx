@@ -1,27 +1,102 @@
 "use client";
 
-import { ProfileCompletionGuard } from "@/components/auth/ProfileCompletionGuard";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 export default function DashboardPage() {
+
+  const [profile, setProfile] =
+    useState<any>(null);
+
+  useEffect(() => {
+    loadProfile();
+  }, []);
+
+  async function loadProfile() {
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) return;
+
+    const { data } =
+      await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .maybeSingle();
+
+    setProfile(data);
+  }
+
   return (
-    <>
-      <ProfileCompletionGuard />
+    <main className="min-h-screen bg-[#F7F5F2] p-6 md:p-10">
 
-      <main className="min-h-screen bg-[#F7F5F2] px-6 py-10">
+      <div className="mx-auto max-w-5xl">
 
-        <div className="mx-auto max-w-7xl">
+        <div className="rounded-3xl bg-white p-8 shadow-sm">
 
-          <h1 className="text-4xl font-black text-[#111827]">
-            Dashboard
-          </h1>
+          <div className="flex flex-wrap items-center justify-between gap-6">
 
-          <p className="mt-3 text-lg text-[#374151]">
-            Manage your listings, messages, and marketplace activity.
-          </p>
+            <div>
+
+              <h1 className="text-5xl font-black text-[#111827]">
+
+                {profile?.full_name ??
+                  "User"}
+
+              </h1>
+
+              <div className="mt-4 space-y-2 text-[#374151]">
+
+                <p>
+                  {profile?.email}
+                </p>
+
+                <p>
+                  {profile?.phone}
+                </p>
+
+              </div>
+
+              <div className="mt-5 flex flex-wrap gap-3">
+
+                {profile?.verified && (
+
+                  <div className="rounded-full bg-blue-100 px-4 py-2 text-sm font-bold text-blue-700">
+                    Verified
+                  </div>
+
+                )}
+
+                {profile
+                  ?.verification_submitted && (
+
+                  <div className="rounded-full bg-yellow-100 px-4 py-2 text-sm font-bold text-yellow-700">
+                    Verification Submitted
+                  </div>
+
+                )}
+
+              </div>
+
+            </div>
+
+            <Link
+              href="/complete-profile"
+              className="rounded-2xl border border-[#2F5D50] px-6 py-4 text-lg font-bold text-[#2F5D50]"
+            >
+              Edit Profile
+            </Link>
+
+          </div>
 
         </div>
 
-      </main>
-    </>
+      </div>
+
+    </main>
   );
 }
