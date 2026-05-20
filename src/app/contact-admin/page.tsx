@@ -3,6 +3,7 @@
 
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { AuthGuard } from "@/components/auth/AuthGuard";
 
 export default function ContactAdminPage() {
 
@@ -36,7 +37,10 @@ export default function ContactAdminPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#F7F5F2] px-6 py-10">
+    <>
+      <AuthGuard />
+
+      <main className="min-h-screen bg-[#F7F5F2] px-6 py-10">
 
       <div className="mx-auto max-w-3xl rounded-3xl bg-white p-8 shadow-sm">
 
@@ -79,5 +83,6 @@ export default function ContactAdminPage() {
       </div>
 
     </main>
+    </>
   );
 }

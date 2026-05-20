@@ -1,11 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import { AuthGuard } from "@/components/auth/AuthGuard";
 
 export default function AdminPage() {
 
   return (
-    <main className="min-h-screen bg-[#F7F5F2] p-10">
+    <>
+      <AuthGuard />
+
+      <main className="min-h-screen bg-[#F7F5F2] p-10">
 
       <h1 className="mb-8 text-4xl font-black text-[#111827]">
         Admin Dashboard
@@ -112,5 +116,6 @@ export default function AdminPage() {
       </div>
 
     </main>
+    </>
   );
 }

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { AuthGuard } from "@/components/auth/AuthGuard";
 
 export default function ConversationPage() {
 
@@ -63,7 +64,10 @@ export default function ConversationPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#F7F5F2] p-6 md:p-10">
+    <>
+      <AuthGuard />
+
+      <main className="min-h-screen bg-[#F7F5F2] p-6 md:p-10">
 
       <div className="mx-auto max-w-4xl">
 
@@ -125,5 +129,6 @@ export default function ConversationPage() {
       </div>
 
     </main>
+    </>
   );
 }

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { AuthGuard } from "@/components/auth/AuthGuard";
 
 export default function MessagesPage() {
 
@@ -36,7 +37,10 @@ export default function MessagesPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#F7F5F2] p-6 md:p-10">
+    <>
+      <AuthGuard />
+
+      <main className="min-h-screen bg-[#F7F5F2] p-6 md:p-10">
 
       <div className="mx-auto max-w-5xl">
 
@@ -102,5 +106,6 @@ export default function MessagesPage() {
       </div>
 
     </main>
+    </>
   );
 }

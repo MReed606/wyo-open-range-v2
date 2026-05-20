@@ -55,61 +55,59 @@ export default function NavBar() {
             Browse
           </Link>
 
-          <Link
-            href="/regions"
-            className="text-lg font-bold text-[#1F2933]"
-          >
-            Regions
-          </Link>
-
-          <Link
-            href="/forums"
-            className="text-lg font-bold text-[#1F2933]"
-          >
-            Forums
-          </Link>
-
-          <Link
-            href="/businesses"
-            className="text-lg font-bold text-[#1F2933]"
-          >
-            Businesses
-          </Link>
-
           {loggedIn && (
-
-            <Link
-              href="/dashboard"
-              className="text-lg font-bold text-[#1F2933]"
-            >
-              Dashboard
-            </Link>
-
-          )}
-
-          {isAdmin && (
 
             <>
               <Link
-                href="/admin"
+                href="/regions"
                 className="text-lg font-bold text-[#1F2933]"
               >
-                Admin
+                Regions
               </Link>
 
-              <AdminVerificationLink />
+              <Link
+                href="/forums"
+                className="text-lg font-bold text-[#1F2933]"
+              >
+                Forums
+              </Link>
+
+              <Link
+                href="/businesses"
+                className="text-lg font-bold text-[#1F2933]"
+              >
+                Businesses
+              </Link>
+
+              <Link
+                href="/dashboard"
+                className="text-lg font-bold text-[#1F2933]"
+              >
+                Dashboard
+              </Link>
+
+              <Link
+                href="/messages"
+                className="text-lg font-bold text-[#1F2933]"
+              >
+                Messages
+              </Link>
+
+              {isAdmin && (
+
+                <>
+                  <Link
+                    href="/admin"
+                    className="text-lg font-bold text-[#1F2933]"
+                  >
+                    Admin
+                  </Link>
+
+                  <AdminVerificationLink />
+                </>
+
+              )}
             </>
-
-          )}
-
-          {loggedIn && (
-
-            <Link
-              href="/messages"
-              className="text-lg font-bold text-[#1F2933]"
-            >
-              Messages
-            </Link>
 
           )}
 

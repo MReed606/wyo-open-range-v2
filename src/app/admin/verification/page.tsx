@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { AuthGuard } from "@/components/auth/AuthGuard";
 import { isAdminEmail } from "@/lib/admin";
 
 export default function VerificationPage() {
@@ -105,7 +106,10 @@ export default function VerificationPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#F7F5F2] p-10">
+    <>
+      <AuthGuard />
+
+      <main className="min-h-screen bg-[#F7F5F2] p-10">
 
       <h1 className="mb-8 text-4xl font-black text-[#111827]">
         Verification Queue
@@ -179,5 +183,6 @@ export default function VerificationPage() {
       </div>
 
     </main>
+    </>
   );
 }

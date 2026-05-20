@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { containsProfanity } from "@/lib/safety";
 import { supabase } from "@/lib/supabase";
+import { AuthGuard } from "@/components/auth/AuthGuard";
 
 function createSlug(title: string) {
   return title
@@ -106,7 +107,10 @@ export default function PostListingPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#F7F5F2] text-[#1F2933]">
+    <>
+      <AuthGuard />
+
+      <main className="min-h-screen bg-[#F7F5F2] text-[#1F2933]">
       <section className="border-b bg-white">
         <div className="mx-auto max-w-5xl px-6 py-12">
           <p className="text-sm font-bold uppercase tracking-[0.25em] text-[#2F5D50]">
@@ -229,5 +233,6 @@ export default function PostListingPage() {
         </div>
       </section>
     </main>
+    </>
   );
 }

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { AuthGuard } from "@/components/auth/AuthGuard";
 import { isAdminEmail } from "@/lib/admin";
 
 export default function RemovedListingsPage() {
@@ -61,7 +62,10 @@ async function loadListings() {
   }
 
   return (
-    <main className="min-h-screen bg-[#F7F5F2] p-10">
+    <>
+      <AuthGuard />
+
+      <main className="min-h-screen bg-[#F7F5F2] p-10">
 
       <div className="mb-10 flex items-center justify-between">
 
@@ -143,5 +147,6 @@ async function loadListings() {
       </div>
 
     </main>
+    </>
   );
 }
