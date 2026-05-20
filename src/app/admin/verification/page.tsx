@@ -3,41 +3,71 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
-export default function AdminVerificationPage() {
+export default function VerificationPage() {
 
-  const [users, setUsers] =
+  const [profiles, setProfiles] =
     useState<any[]>([]);
 
   useEffect(() => {
-    loadUsers();
+    loadProfiles();
   }, []);
 
-  async function loadUsers() {
+  async function loadProfiles() {
 
-    const { data } = await supabase
-      .from("profiles")
-      .select("*")
-      .order("created_at", {
-        ascending: false,
-      });
+    const { data } =
+      await supabase
+        .from("profiles")
+        .select("*")
+        .eq(
+          "verification_submitted",
+          true
+        )
+        .eq(
+          "verified",
+          false
+        )
+        .order("created_at", {
+          ascending: false,
+        });
 
-    setUsers(data ?? []);
+    setProfiles(data ?? []);
   }
 
   async function verifyUser(
-    id: string
+    userId: string
   ) {
 
-    await supabase
-      .from("profiles")
-      .update({
-        verified: true,
-        verification_status:
-          "verified",
-      })
-      .eq("id", id);
+    const confirmed =
+      confirm(
+        "Verify this user?"
+      );
 
-    loadUsers();
+    if (!confirmed) return;
+
+    const { error } =
+      await supabase
+        .from("profiles")
+        .update({
+          verified: true
+        })
+        .eq("id", userId);
+
+    console.log(error);
+
+    if (error) {
+
+      alert(
+        "Verification failed."
+      );
+
+      return;
+    }
+
+    alert(
+      "User verified."
+    );
+
+    loadProfiles();
   }
 
   return (
@@ -47,60 +77,72 @@ export default function AdminVerificationPage() {
         Verification Queue
       </h1>
 
-      <div className="grid gap-5">
+      {!profiles.length && (
 
-        {users.map((user) => (
+        <div className="rounded-3xl bg-white p-10 shadow-sm">
+
+          <h2 className="text-2xl font-black text-[#111827]">
+            No pending verifications
+          </h2>
+
+        </div>
+
+      )}
+
+      <div className="space-y-6">
+
+        {profiles.map((profile) => (
 
           <div
-            key={user.id}
-            className="rounded-2xl bg-white p-6 shadow-sm"
+            key={profile.id}
+            className="rounded-3xl bg-white p-6 shadow-sm"
           >
 
-            <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex flex-wrap items-start justify-between gap-6">
 
               <div>
 
-                <h2 className="text-2xl font-bold text-[#111827]">
-                  {user.username ??
+                <h2 className="text-3xl font-black text-[#111827]">
+
+                  {profile.full_name ??
                     "Unnamed User"}
+
                 </h2>
 
-                <div className="mt-2 flex flex-wrap gap-3">
+                <div className="mt-4 space-y-2 text-[#374151]">
 
-                  <div className="rounded-full bg-gray-100 px-3 py-1 text-sm font-bold text-gray-700">
-                    {user.role ?? "user"}
+                  <p>
+                    {profile.email ??
+                      "No email"}
+                  </p>
+
+                  <p>
+                    {profile.phone ??
+                      "No phone"}
+                  </p>
+
+                </div>
+
+                <div className="mt-5 flex flex-wrap gap-3">
+
+                  <div className="rounded-full bg-yellow-100 px-4 py-2 text-sm font-bold text-yellow-700">
+                    Verification Pending
                   </div>
-
-                  {user.verified ? (
-
-                    <div className="rounded-full bg-blue-100 px-3 py-1 text-sm font-bold text-blue-700">
-                      Verified
-                    </div>
-
-                  ) : (
-
-                    <div className="rounded-full bg-yellow-100 px-3 py-1 text-sm font-bold text-yellow-700">
-                      Pending Verification
-                    </div>
-
-                  )}
 
                 </div>
 
               </div>
 
-              {!user.verified && (
-
-                <button
-                  onClick={() =>
-                    verifyUser(user.id)
-                  }
-                  className="rounded-xl bg-[#2F5D50] px-5 py-3 font-bold text-white"
-                >
-                  Verify User
-                </button>
-
-              )}
+              <button
+                onClick={() =>
+                  verifyUser(
+                    profile.id
+                  )
+                }
+                className="rounded-2xl bg-[#2F5D50] px-6 py-4 text-lg font-black text-white"
+              >
+                Verify User
+              </button>
 
             </div>
 
