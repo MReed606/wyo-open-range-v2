@@ -10,6 +10,8 @@ export default function AdminPage() {
   const [authorized, setAuthorized] = useState(false);
   const [reports, setReports] = useState<any[]>([]);
 
+  const [restrictionDays, setRestrictionDays] = useState<Record<string, string>>({});
+
   const [stats, setStats] = useState({
     users: 0,
     listings: 0,
@@ -72,7 +74,8 @@ async function loadReports() {
         listings (
           id,
           title,
-          status
+          status,
+          owner_id
         )
       `)
       .order("created_at", { ascending: false });
@@ -80,7 +83,22 @@ async function loadReports() {
     setReports(data ?? []);
   }
 
-  async function removeListing(listingId: string) {
+  
+  async function restrictPosting(userId: string, days: number) {
+    const until = new Date();
+    until.setDate(until.getDate() + days);
+
+    await supabase
+      .from("user_moderation")
+      .upsert({
+        user_id: userId,
+        posting_restricted_until: until.toISOString(),
+      });
+
+    alert(`Posting restricted for ${days} day(s)`);
+  }
+
+async function removeListing(listingId: string) {
     await supabase
       .from("listings")
       .update({ status: "removed" })
@@ -157,14 +175,53 @@ async function loadReports() {
               {report.reason}
             </p>
 
-            <button
-              onClick={() =>
-                removeListing(report.listings.id)
-              }
-              className="mt-4 rounded-lg bg-red-600 px-4 py-2 font-bold text-white"
-            >
-              Remove Listing
-            </button>
+            <div className="mt-4 flex flex-wrap gap-2">
+
+              <button
+                onClick={() =>
+                  removeListing(report.listings.id)
+                }
+                className="rounded-lg bg-red-600 px-4 py-2 font-bold text-white"
+              >
+                Remove Listing
+              </button>
+
+              <div className="flex items-center gap-2">
+
+                <select
+                  value={restrictionDays[report.listings.owner_id] ?? "7"}
+                  onChange={(e) =>
+                    setRestrictionDays({
+                      ...restrictionDays,
+                      [report.listings.owner_id]: e.target.value,
+                    })
+                  }
+                  className="rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                >
+                  <option value="1">1 Day</option>
+                  <option value="3">3 Days</option>
+                  <option value="7">7 Days</option>
+                  <option value="30">30 Days</option>
+                  <option value="9999">Permanent</option>
+                </select>
+
+                <button
+                  onClick={() =>
+                    restrictPosting(
+                      report.listings.owner_id,
+                      Number(
+                        restrictionDays[report.listings.owner_id] ?? "7"
+                      )
+                    )
+                  }
+                  className="rounded-lg bg-yellow-500 px-4 py-2 font-bold text-white"
+                >
+                  Restrict
+                </button>
+
+              </div>
+
+            </div>
           </div>
         ))}
       </div>
