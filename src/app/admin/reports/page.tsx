@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import { isAdminEmail } from "@/lib/admin";
 
 export default function AdminReportsPage() {
 
@@ -32,15 +33,10 @@ export default function AdminReportsPage() {
       return;
     }
 
-    const { data: profile } =
-      await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", user.id)
-        .maybeSingle();
-
     if (
-      profile?.role !== "admin"
+      !isAdminEmail(
+        user.email
+      )
     ) {
 
       router.push("/");
