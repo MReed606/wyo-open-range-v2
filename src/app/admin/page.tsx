@@ -39,7 +39,7 @@ export default function AdminPage() {
 
   return (
     <main className="min-h-screen bg-[#F7F5F2] p-10">
-      <h1 className="text-4xl font-bold mb-6">
+      <h1 className="text-4xl font-bold mb-6 text-[#111827]">
         Admin Reports
       </h1>
 
@@ -47,13 +47,13 @@ export default function AdminPage() {
         {reports.map((report) => (
           <div
             key={report.id}
-            className="rounded-xl bg-white p-5 shadow"
+            className="rounded-xl bg-white p-5 shadow border border-gray-200"
           >
-            <h2 className="font-bold text-lg">
+            <h2 className="font-bold text-lg text-[#111827]">
               {report.listings?.title}
             </h2>
 
-            <p className="mt-2 text-sm text-gray-600">
+            <p className="mt-2 text-sm text-[#374151]">
               {report.reason}
             </p>
 

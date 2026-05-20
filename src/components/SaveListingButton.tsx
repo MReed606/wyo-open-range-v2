@@ -77,7 +77,7 @@ export function SaveListingButton({ listingId }: SaveListingButtonProps) {
     <div>
       <button
         onClick={toggleSave}
-        className="w-full rounded-xl border border-black/10 px-5 py-3 font-semibold text-[#1F2933] transition hover:bg-[#F7F5F2]"
+        className="w-full rounded-xl border border-gray-300 bg-white px-5 py-3 font-semibold text-[#1F2933] transition hover:bg-[#F7F5F2]"
       >
         {saved ? "Saved ✓" : "Save Listing"}
       </button>

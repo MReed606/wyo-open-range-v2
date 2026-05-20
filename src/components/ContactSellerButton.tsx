@@ -86,7 +86,7 @@ export function ContactSellerButton({
       {!open ? (
         <button
           onClick={() => setOpen(true)}
-          className="w-full rounded-xl bg-[#2F5D50] px-5 py-3 font-bold text-white"
+          className="w-full rounded-xl bg-[#1F2933] px-5 py-3 font-bold text-white"
         >
           Contact Seller
         </button>
@@ -101,7 +101,7 @@ export function ContactSellerButton({
 
           <button
             onClick={sendMessage}
-            className="mt-4 w-full rounded-xl bg-[#2F5D50] px-5 py-3 font-bold text-white"
+            className="mt-4 w-full rounded-xl bg-[#1F2933] px-5 py-3 font-bold text-white"
           >
             Send Message
           </button>

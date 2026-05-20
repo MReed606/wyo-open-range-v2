@@ -52,7 +52,7 @@ export function ReportListingButton({
       {!open ? (
         <button
           onClick={() => setOpen(true)}
-          className="text-sm text-red-600 hover:underline"
+          className="text-sm text-red-700 font-semibold hover:underline"
         >
           Report Listing
         </button>
