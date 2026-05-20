@@ -113,6 +113,21 @@ export function LeaveReviewForm({
       })
       .eq("id", sellerId);
 
+    
+    // =====================================
+    // CREATE NOTIFICATION
+    // =====================================
+    await supabase
+      .from("notifications")
+      .insert({
+        user_id: sellerId,
+        type: "review",
+        title: "New Seller Review",
+        message:
+          "You received a new seller review.",
+      });
+
+
     alert("Review submitted.");
 
     location.reload();

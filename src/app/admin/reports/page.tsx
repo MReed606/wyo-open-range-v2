@@ -24,7 +24,8 @@ export default function AdminReportsPage() {
           title,
           image_url,
           owner_id,
-          slug
+          slug,
+          status
         )
       `)
       .order("created_at", {
@@ -35,7 +36,8 @@ export default function AdminReportsPage() {
   }
 
   async function removeListing(
-    listingId: string
+    listingId: string,
+    ownerId: string
   ) {
 
     const confirmed =
@@ -45,12 +47,31 @@ export default function AdminReportsPage() {
 
     if (!confirmed) return;
 
+    // =====================================
+    // REMOVE LISTING
+    // =====================================
     await supabase
       .from("listings")
       .update({
         status: "removed",
       })
       .eq("id", listingId);
+
+    // =====================================
+    // CREATE NOTIFICATION
+    // =====================================
+    await supabase
+      .from("notifications")
+      .insert({
+        user_id: ownerId,
+
+        type: "moderation",
+
+        title: "Listing Removed",
+
+        message:
+          "One of your listings was removed by moderation.",
+      });
 
     alert("Listing removed.");
 
@@ -116,6 +137,16 @@ export default function AdminReportsPage() {
                     "Unknown Listing"}
                 </h2>
 
+                {report.listings
+                  ?.status ===
+                  "removed" && (
+
+                  <div className="mt-3 inline-flex rounded-full bg-red-100 px-4 py-2 text-sm font-bold text-red-700">
+                    Removed
+                  </div>
+
+                )}
+
                 <div className="mt-4 space-y-2 text-[#374151]">
 
                   <p>
@@ -152,17 +183,23 @@ export default function AdminReportsPage() {
                     Open Listing
                   </Link>
 
-                  <button
-                    onClick={() =>
-                      removeListing(
-                        report.listings
-                          ?.id
-                      )
-                    }
-                    className="rounded-xl bg-red-600 px-5 py-3 font-bold text-white"
-                  >
-                    Remove Listing
-                  </button>
+                  {report.listings
+                    ?.status !==
+                    "removed" && (
+
+                    <button
+                      onClick={() =>
+                        removeListing(
+                          report.listings?.id,
+                          report.listings?.owner_id
+                        )
+                      }
+                      className="rounded-xl bg-red-600 px-5 py-3 font-bold text-white"
+                    >
+                      Remove Listing
+                    </button>
+
+                  )}
 
                 </div>
 
