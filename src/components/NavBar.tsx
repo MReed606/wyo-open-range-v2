@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AuthStatus } from "@/components/auth/AuthStatus";
 import { NotificationBell } from "@/components/NotificationBell";
+import { AdminNavLink } from "@/components/AdminNavLink";
 
 export function NavBar() {
   return (
@@ -16,6 +17,8 @@ export function NavBar() {
           <Link href="/forums" className="text-sm font-bold text-[#1F2933] hover:text-[#2F5D50]">Forums</Link>
           <Link href="/businesses" className="text-sm font-bold text-[#1F2933] hover:text-[#2F5D50]">Businesses</Link>
           <Link href="/dashboard" className="text-sm font-bold text-[#1F2933] hover:text-[#2F5D50]">Dashboard</Link>
+
+          <AdminNavLink />
         </div>
 
         <div className="flex items-center gap-3">
