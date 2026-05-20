@@ -47,6 +47,23 @@ export default function AdminMessagesPage() {
 
       <div className="space-y-5">
 
+        
+        {!messages.length && (
+
+          <div className="rounded-3xl bg-white p-10 text-center shadow-sm">
+
+            <h2 className="text-2xl font-black text-[#111827]">
+              No data found
+            </h2>
+
+            <p className="mt-3 text-[#374151]">
+              Everything is currently clear.
+            </p>
+
+          </div>
+
+        )}
+
         {messages.map((message) => (
 
           <div

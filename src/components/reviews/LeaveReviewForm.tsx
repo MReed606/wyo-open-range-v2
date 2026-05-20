@@ -35,6 +35,29 @@ export function LeaveReviewForm({
       return;
     }
 
+    
+    // =====================================
+    // CHECK EXISTING REVIEW
+    // =====================================
+    const { data: existingReview } =
+      await supabase
+        .from("user_reviews")
+        .select("id")
+        .eq("reviewer_id", user.id)
+        .eq(
+          "reviewed_user_id",
+          sellerId
+        )
+        .single();
+
+    if (existingReview) {
+      alert(
+        "You already reviewed this seller."
+      );
+      return;
+    }
+
+
     // =====================================
     // CREATE REVIEW
     // =====================================

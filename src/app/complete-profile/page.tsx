@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
@@ -32,6 +32,7 @@ export default function CompleteProfilePage() {
       .from("profiles")
       .update({
         username,
+        onboarding_complete: true,
       })
       .eq("id", user.id);
 

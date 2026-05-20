@@ -15,7 +15,6 @@ export default async function SellerPage({
     .eq("id", id)
     .single();
 
-
   const { data: reviews } = await supabase
     .from("user_reviews")
     .select("*")
@@ -23,7 +22,6 @@ export default async function SellerPage({
     .order("created_at", {
       ascending: false,
     });
-
 
   const { data: listings } = await supabase
     .from("listings")
@@ -40,44 +38,69 @@ export default async function SellerPage({
       {/* SELLER HEADER */}
       <div className="rounded-3xl bg-white p-8 shadow-sm">
 
-        <h1 className="text-4xl font-black text-[#111827]">
-          {seller?.username ?? "Seller"}
-        </h1>
+        <div className="mb-6 flex items-center gap-5">
 
-        {/* BADGES */}
-        <div className="mt-4 flex flex-wrap gap-3">
+          {seller?.avatar_url ? (
 
-          {seller?.role === "owner" && (
+            <img
+              src={seller.avatar_url}
+              alt={seller.username}
+              className="h-24 w-24 rounded-full object-cover"
+            />
 
-            <div className="rounded-full bg-purple-100 px-4 py-2 text-sm font-bold text-purple-700">
-              Site Owner
+          ) : (
+
+            <div className="flex h-24 w-24 items-center justify-center rounded-full bg-[#2F5D50]/10 text-3xl font-black text-[#2F5D50]">
+              {(seller?.username ?? "U")
+                .charAt(0)
+                .toUpperCase()}
             </div>
 
           )}
 
-          {seller?.role === "admin" && (
+          <div>
 
-            <div className="rounded-full bg-red-100 px-4 py-2 text-sm font-bold text-red-700">
-              Admin
+            <h1 className="text-4xl font-black text-[#111827]">
+              {seller?.username ?? "Seller"}
+            </h1>
+
+            <div className="mt-4 flex flex-wrap gap-3">
+
+              {seller?.role === "owner" && (
+
+                <div className="rounded-full bg-purple-100 px-4 py-2 text-sm font-bold text-purple-700">
+                  Site Owner
+                </div>
+
+              )}
+
+              {seller?.role === "admin" && (
+
+                <div className="rounded-full bg-red-100 px-4 py-2 text-sm font-bold text-red-700">
+                  Admin
+                </div>
+
+              )}
+
+              {seller?.role === "moderator" && (
+
+                <div className="rounded-full bg-yellow-100 px-4 py-2 text-sm font-bold text-yellow-700">
+                  Moderator
+                </div>
+
+              )}
+
+              {seller?.verified && (
+
+                <div className="rounded-full bg-blue-100 px-4 py-2 text-sm font-bold text-blue-700">
+                  Verified Seller
+                </div>
+
+              )}
+
             </div>
 
-          )}
-
-          {seller?.role === "moderator" && (
-
-            <div className="rounded-full bg-yellow-100 px-4 py-2 text-sm font-bold text-yellow-700">
-              Moderator
-            </div>
-
-          )}
-
-          {seller?.verified && (
-
-            <div className="rounded-full bg-blue-100 px-4 py-2 text-sm font-bold text-blue-700">
-              Verified Seller
-            </div>
-
-          )}
+          </div>
 
         </div>
 
@@ -129,9 +152,9 @@ export default async function SellerPage({
 
       </div>
 
-    
       <LeaveReviewForm sellerId={id} />
 
+      {/* REVIEWS */}
       <div className="mt-10 rounded-3xl bg-white p-8 shadow-sm">
 
         <h2 className="text-3xl font-black text-[#111827]">
@@ -182,7 +205,6 @@ export default async function SellerPage({
         </div>
 
       </div>
-
 
     </main>
   );
