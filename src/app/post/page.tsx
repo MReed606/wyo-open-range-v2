@@ -1,229 +1,232 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
-export default function PostPage() {
+function createSlug(title: string) {
+  return title
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 70);
+}
 
-  const router = useRouter();
-
+export default function PostListingPage() {
   const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
-  const [category, setCategory] = useState("");
-  const [images, setImages] = useState<FileList | null>(null);
+  const [category, setCategory] = useState("Vehicles");
+  const [condition, setCondition] = useState("Good");
+  const [city, setCity] = useState("Cheyenne");
+  const [region, setRegion] = useState("Southeast");
+  const [description, setDescription] = useState("");
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [status, setStatus] = useState("");
 
-  const [loading, setLoading] = useState(false);
-
-  async function handleSubmit(
-    e: React.FormEvent
-  ) {
-    e.preventDefault();
-
-    setLoading(true);
+  async function submitListing() {
+    setStatus("Saving listing...");
 
     const {
       data: { user },
     } = await supabase.auth.getUser();
 
     if (!user) {
-      alert("You must be logged in.");
+      setStatus("You must be logged in.");
       return;
     }
 
+    const slug =
+      createSlug(title) +
+      "-" +
+      Date.now().toString().slice(-5);
+
     const uploadedUrls: string[] = [];
 
-    // =========================================
-    // MULTI IMAGE UPLOAD
-    // =========================================
-    if (images) {
+    for (const file of imageFiles) {
+      const fileName =
+        Date.now() +
+        "-" +
+        Math.random().toString(36).substring(2) +
+        "-" +
+        file.name;
 
-      for (const image of Array.from(images)) {
+      const { error: uploadError } = await supabase.storage
+        .from("listing-images")
+        .upload(fileName, file);
 
-        const fileName = `${Date.now()}-${image.name}`;
-
-        const { error } = await supabase.storage
-          .from("listing-images")
-          .upload(fileName, image);
-
-        if (!error) {
-
-          const {
-            data: { publicUrl },
-          } = supabase.storage
-            .from("listing-images")
-            .getPublicUrl(fileName);
-
-          uploadedUrls.push(publicUrl);
-
-        }
-
+      if (uploadError) {
+        setStatus(uploadError.message);
+        return;
       }
 
+      const {
+        data: { publicUrl },
+      } = supabase.storage
+        .from("listing-images")
+        .getPublicUrl(fileName);
+
+      uploadedUrls.push(publicUrl);
     }
 
-    // =========================================
-    // CREATE SLUG
-    // =========================================
-    const slug =
-      title
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-|-$/g, "") +
-      "-" +
-      Date.now();
-
-    // =========================================
-    // INSERT LISTING
-    // =========================================
-    const { error } = await supabase
+    const { data: listing, error } = await supabase
       .from("listings")
       .insert({
         owner_id: user.id,
         title,
-        description,
-        price: price || null,
-        category,
         slug,
+        description,
+        price,
+        category,
+        condition,
+        city,
+        region,
+        image_url: uploadedUrls[0] ?? "",
+        seller_label: "Verified Seller",
+        status: "active",
+      })
+      .select()
+      .single();
 
-        image_url:
-          uploadedUrls[0] ?? null,
-
-        image_urls:
-          uploadedUrls,
-      });
-
-    setLoading(false);
-
-    if (error) {
-      console.error(error);
-      alert("Failed to create listing");
+    if (error || !listing) {
+      setStatus(error?.message ?? "Failed to create listing.");
       return;
     }
 
-    router.push("/dashboard");
+    if (uploadedUrls.length > 0) {
+      await supabase.from("listing_images").insert(
+        uploadedUrls.map((url) => ({
+          listing_id: listing.id,
+          image_url: url,
+        }))
+      );
+    }
+
+    window.location.href = `/listing/${slug}`;
   }
 
   return (
-    <main className="min-h-screen bg-[#F7F5F2] px-6 py-10">
+    <main className="min-h-screen bg-[#F7F5F2] text-[#1F2933]">
+      <section className="border-b bg-white">
+        <div className="mx-auto max-w-5xl px-6 py-12">
+          <p className="text-sm font-bold uppercase tracking-[0.25em] text-[#2F5D50]">
+            Marketplace
+          </p>
 
-      <div className="mx-auto max-w-3xl rounded-3xl bg-white p-8 shadow-sm">
+          <h1 className="mt-3 text-5xl font-bold">
+            Create Listing
+          </h1>
+        </div>
+      </section>
 
-        <h1 className="text-4xl font-black text-[#111827]">
-          Post Listing
-        </h1>
+      <section className="mx-auto max-w-5xl px-6 py-12">
+        <div className="rounded-2xl bg-white p-8 shadow-md">
+          <div className="grid gap-5">
+            <input
+              placeholder="Title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="rounded-xl border border-gray-300 px-4 py-3"
+            />
 
-        <p className="mt-3 text-lg text-[#374151]">
-          Create a new marketplace listing.
-        </p>
+            <input
+              placeholder="Price"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              className="rounded-xl border border-gray-300 px-4 py-3"
+            />
 
-        <form
-          onSubmit={handleSubmit}
-          className="mt-8 space-y-5"
-        >
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="rounded-xl border border-gray-300 px-4 py-3"
+            >
+              <option>Vehicles</option>
+              <option>Ranch & Ag</option>
+              <option>Local Services</option>
+              <option>General Marketplace</option>
+            </select>
 
-          <input
-            type="text"
-            placeholder="Title"
-            value={title}
-            onChange={(e) =>
-              setTitle(e.target.value)
-            }
-            required
-            className="w-full rounded-xl border border-gray-300 px-4 py-3 text-[#111827]"
-          />
+            <select
+              value={condition}
+              onChange={(e) => setCondition(e.target.value)}
+              className="rounded-xl border border-gray-300 px-4 py-3"
+            >
+              <option>New</option>
+              <option>Like New</option>
+              <option>Good</option>
+              <option>Fair</option>
+              <option>Service</option>
+            </select>
 
-          <textarea
-            placeholder="Description"
-            value={description}
-            onChange={(e) =>
-              setDescription(e.target.value)
-            }
-            required
-            className="min-h-40 w-full rounded-xl border border-gray-300 px-4 py-3 text-[#111827]"
-          />
+            <input
+              placeholder="City"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              className="rounded-xl border border-gray-300 px-4 py-3"
+            />
 
-          {/* CATEGORY */}
-          <select
-            value={category}
-            onChange={(e) =>
-              setCategory(e.target.value)
-            }
-            required
-            className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-[#111827]"
-          >
-            <option value="">
-              Select Category
-            </option>
+            <input
+              placeholder="Region"
+              value={region}
+              onChange={(e) => setRegion(e.target.value)}
+              className="rounded-xl border border-gray-300 px-4 py-3"
+            />
 
-            <option value="Vehicles">
-              Vehicles
-            </option>
+            <textarea
+              placeholder="Description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="min-h-40 rounded-xl border border-gray-300 px-4 py-3"
+            />
 
-            <option value="Livestock">
-              Livestock
-            </option>
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={(e) =>
+                setImageFiles(
+                  e.target.files
+                    ? Array.from(e.target.files)
+                    : []
+                )
+              }
+              className="rounded-xl border border-gray-300 px-4 py-3"
+            />
 
-            <option value="Equipment">
-              Equipment
-            </option>
+            {imageFiles.length > 0 && (
+              <div className="rounded-xl bg-[#F3F4F6] p-4">
+                <p className="font-bold">
+                  {imageFiles.length} image(s) selected
+                </p>
 
-            <option value="Housing">
-              Housing
-            </option>
+                <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-4">
+                  {imageFiles.map((file, index) => (
+                    <div
+                      key={index}
+                      className="rounded-xl border bg-white p-2 text-sm"
+                    >
+                      {file.name}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
-            <option value="Services">
-              Services
-            </option>
+            <button
+              onClick={submitListing}
+              className="rounded-xl bg-[#2F5D50] px-5 py-3 text-lg font-bold text-white"
+            >
+              Publish Listing
+            </button>
 
-            <option value="Jobs">
-              Jobs
-            </option>
-
-            <option value="Businesses">
-              Businesses
-            </option>
-
-            <option value="Community">
-              Community
-            </option>
-          </select>
-
-          <input
-            type="number"
-            placeholder="Price"
-            value={price}
-            onChange={(e) =>
-              setPrice(e.target.value)
-            }
-            className="w-full rounded-xl border border-gray-300 px-4 py-3 text-[#111827]"
-          />
-
-          <input
-            type="file"
-            multiple
-            accept="image/*"
-            onChange={(e) =>
-              setImages(e.target.files)
-            }
-            className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-[#111827]"
-          />
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-2xl bg-[#2F5D50] px-6 py-4 text-lg font-bold text-white transition hover:bg-[#24493f]"
-          >
-            {loading
-              ? "Posting..."
-              : "Post Listing"}
-          </button>
-
-        </form>
-
-      </div>
-
+            {status && (
+              <div className="rounded-xl bg-[#F3F4F6] p-4 font-semibold">
+                {status}
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
     </main>
   );
 }

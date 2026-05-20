@@ -41,6 +41,35 @@ export default async function SellerPage({
           {seller?.username ?? "Seller"}
         </h1>
 
+        <div className="mt-4 flex flex-wrap gap-3">
+
+          {seller?.verified && (
+
+            <div className="rounded-full bg-blue-100 px-4 py-2 text-sm font-bold text-blue-700">
+              Verified Seller
+            </div>
+
+          )}
+
+          {seller?.role === "admin" && (
+
+            <div className="rounded-full bg-red-100 px-4 py-2 text-sm font-bold text-red-700">
+              Admin
+            </div>
+
+          )}
+
+          {seller?.role === "moderator" && (
+
+            <div className="rounded-full bg-yellow-100 px-4 py-2 text-sm font-bold text-yellow-700">
+              Moderator
+            </div>
+
+          )}
+
+        </div>
+
+
         <p className="mt-3 text-lg text-[#374151]">
           Active Listings: {listings?.length ?? 0}
         </p>

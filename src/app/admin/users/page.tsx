@@ -46,15 +46,15 @@ export default function AdminUsersPage() {
 
           <table className="min-w-full">
 
-            <thead className="bg-[#F8FAFC]">
+            <thead className="border-b border-gray-200 bg-[#E5E7EB]">
 
               <tr>
 
-                <th className="px-6 py-4 text-left">User</th>
-                <th className="px-6 py-4 text-left">Joined</th>
-                <th className="px-6 py-4 text-left">Restriction</th>
-                <th className="px-6 py-4 text-left">Suspension</th>
-                <th className="px-6 py-4 text-left">Reason</th>
+                <th className="px-6 py-4 text-left text-[#111827]">User</th>
+                <th className="px-6 py-4 text-left text-[#111827]">Joined</th>
+                <th className="px-6 py-4 text-left text-[#111827]">Restriction</th>
+                <th className="px-6 py-4 text-left text-[#111827]">Suspension</th>
+                <th className="px-6 py-4 text-left text-[#111827]">Reason</th>
 
               </tr>
 
@@ -83,13 +83,13 @@ export default function AdminUsersPage() {
                       </Link>
                     </td>
 
-                    <td className="px-6 py-5">
+                    <td className="px-6 py-5 text-[#111827]">
                       {new Date(
                         user.created_at
                       ).toLocaleDateString()}
                     </td>
 
-                    <td className="px-6 py-5">
+                    <td className="px-6 py-5 text-[#111827]">
 
                       {moderation?.posting_restricted_until
                         ? "Restricted"
@@ -97,7 +97,7 @@ export default function AdminUsersPage() {
 
                     </td>
 
-                    <td className="px-6 py-5">
+                    <td className="px-6 py-5 text-[#111827]">
 
                       {moderation?.suspended_until
                         ? "Suspended"
@@ -105,7 +105,7 @@ export default function AdminUsersPage() {
 
                     </td>
 
-                    <td className="px-6 py-5">
+                    <td className="px-6 py-5 text-[#111827]">
                       {moderation?.public_reason ?? "-"}
                     </td>
 

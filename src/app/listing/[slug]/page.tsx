@@ -30,6 +30,15 @@ export default async function ListingPage({ params }: PageProps) {
         <div className="rounded-2xl bg-white p-6 shadow">
           <h1 className="text-4xl font-bold text-[#111827]">
             {listing.title}
+
+          {listing.category && (
+
+            <div className="mt-4 inline-flex rounded-full bg-[#2F5D50]/10 px-4 py-2 text-sm font-bold text-[#2F5D50]">
+              {listing.category}
+            </div>
+
+          )}
+
           </h1>
 
           <p className="mt-4 text-lg text-[#374151]">

@@ -1,0 +1,16 @@
+
+DELETE TEST USERS:
+delete from profiles
+where email not like '%mathewrreed88@gmail.com%';
+
+DELETE TEST LISTINGS:
+delete from listings;
+
+RESET REPORTS:
+delete from reports;
+
+RESET MODERATION:
+delete from moderation_actions;
+
+RESET REVIEWS:
+delete from user_reviews;
