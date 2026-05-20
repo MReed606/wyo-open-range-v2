@@ -131,6 +131,13 @@ export default async function SellerPage({
 
           <br />
 
+          Member Since: {" "}
+          {seller?.created_at
+            ? new Date(seller.created_at).getFullYear()
+            : "Unknown"}
+
+          <br />
+
           Active Listings:
           {" "}
           {listings?.length ?? 0}
@@ -138,6 +145,26 @@ export default async function SellerPage({
         </p>
 
       </div>
+
+
+        {/* BIO */}
+
+        {seller?.bio && (
+
+          <div className="mt-8 rounded-3xl bg-white p-8 shadow-sm">
+
+            <h2 className="text-3xl font-black text-[#111827]">
+              Seller Bio
+            </h2>
+
+            <p className="mt-5 text-lg leading-8 text-[#374151]">
+              {seller.bio}
+            </p>
+
+          </div>
+
+        )}
+
 
       {/* LISTINGS */}
       <div className="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
