@@ -14,9 +14,9 @@ export function AdminNavLink() {
       } = await supabase.auth.getUser();
 
       const ADMIN_EMAILS = [
-        "mathewrreed88@gmail.com"
-        "vince.green.4@outlook.com"
-      ];
+  "mathewrreed88@gmail.com",
+  "vince.green.4@outlook.com"
+];
 
       if (
         user &&
