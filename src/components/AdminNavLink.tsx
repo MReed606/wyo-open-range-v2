@@ -15,6 +15,7 @@ export function AdminNavLink() {
 
       const ADMIN_EMAILS = [
         "mathewrreed88@gmail.com"
+        "vince.green.4@outlook.com"
       ];
 
       if (
