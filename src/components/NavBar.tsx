@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AuthStatus } from "@/components/auth/AuthStatus";
 import { NotificationBell } from "@/components/NotificationBell";
+import { AdminVerificationLink } from "@/components/AdminVerificationLink";
 import { AdminNavLink } from "@/components/AdminNavLink";
 
 export function NavBar() {
@@ -35,7 +36,8 @@ export function NavBar() {
           </Link>
 
 
-<NotificationBell />
+<AdminVerificationLink />
+          <NotificationBell />
 
           <AuthStatus />
 

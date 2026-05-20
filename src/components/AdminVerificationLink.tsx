@@ -25,7 +25,6 @@ export function AdminVerificationLink() {
         user?.email
       )
     );
-
   }
 
   if (!isAdmin) {
