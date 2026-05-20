@@ -146,6 +146,7 @@ export default function SettingsPage() {
 
               <input
                 type="file"
+                className="block w-full rounded-2xl border border-gray-300 bg-white px-5 py-4 text-lg font-semibold text-[#111827] file:mr-4 file:rounded-xl file:border-0 file:bg-[#2F5D50] file:px-4 file:py-2 file:font-bold file:text-white hover:file:bg-[#24473d]"
                 accept="image/*"
                 onChange={(e) => {
 
