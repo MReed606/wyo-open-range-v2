@@ -10,7 +10,7 @@ export default function ContactAdminPage() {
   const [message, setMessage] = useState("");
 
   async function handleSubmit(
-    e
+    e: React.FormEvent
   ) {
 
     e.preventDefault();
