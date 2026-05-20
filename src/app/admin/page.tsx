@@ -1,36 +1,73 @@
-import { PageHeader } from "@/components/PageHeader";
+"use client";
 
-const queues = [
-  ["Flagged Listings", "7"],
-  ["User Reports", "12"],
-  ["Business Verifications", "4"],
-  ["Forum Reports", "5"],
-  ["Appeals", "2"],
-  ["Risk Alerts", "9"],
-];
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 export default function AdminPage() {
-  return (
-    <main className="min-h-screen bg-[#F7F5F2]">
-      <PageHeader
-        eyebrow="Admin Control Center"
-        title="Platform Operations"
-        description="Prototype dashboard for moderation queues, trust systems, reports, business verification, and regional platform health."
-      />
+  const [reports, setReports] = useState<any[]>([]);
 
-      <section className="mx-auto max-w-7xl px-6 py-12">
-        <div className="grid gap-6 md:grid-cols-3">
-          {queues.map(([label, value]) => (
-            <div key={label} className="rounded-2xl bg-white p-6 shadow-md">
-              <p className="text-sm font-bold uppercase tracking-wide text-[#52606D]">{label}</p>
-              <p className="mt-3 text-4xl font-bold text-[#1F2933]">{value}</p>
-              <button className="mt-5 rounded-xl bg-[#2F5D50] px-4 py-2 text-sm font-semibold text-white">
-                Review Queue
-              </button>
-            </div>
-          ))}
-        </div>
-      </section>
+  async function loadReports() {
+    const { data } = await supabase
+      .from("reports")
+      .select(`
+        id,
+        reason,
+        created_at,
+        listings (
+          id,
+          title,
+          status
+        )
+      `)
+      .order("created_at", { ascending: false });
+
+    setReports(data ?? []);
+  }
+
+  async function removeListing(listingId: string) {
+    await supabase
+      .from("listings")
+      .update({ status: "removed" })
+      .eq("id", listingId);
+
+    loadReports();
+  }
+
+  useEffect(() => {
+    loadReports();
+  }, []);
+
+  return (
+    <main className="min-h-screen bg-[#F7F5F2] p-10">
+      <h1 className="text-4xl font-bold mb-6">
+        Admin Reports
+      </h1>
+
+      <div className="grid gap-4">
+        {reports.map((report) => (
+          <div
+            key={report.id}
+            className="rounded-xl bg-white p-5 shadow"
+          >
+            <h2 className="font-bold text-lg">
+              {report.listings?.title}
+            </h2>
+
+            <p className="mt-2 text-sm text-gray-600">
+              {report.reason}
+            </p>
+
+            <button
+              onClick={() =>
+                removeListing(report.listings.id)
+              }
+              className="mt-4 rounded-lg bg-red-600 px-4 py-2 text-white font-bold"
+            >
+              Remove Listing
+            </button>
+          </div>
+        ))}
+      </div>
     </main>
   );
 }

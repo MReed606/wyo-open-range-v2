@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ListingGallery } from "@/components/ListingGallery";
 import { SaveListingButton } from "@/components/SaveListingButton";
 import { ContactSellerButton } from "@/components/ContactSellerButton";
+import { ReportListingButton } from "@/components/ReportListingButton";
 import { supabase } from "@/lib/supabase";
 
 type ListingPageProps = {
@@ -113,6 +114,8 @@ export default async function ListingDetailPage({
                 </div>
               </div>
             </div>
+
+            <ReportListingButton listingId={listing.id} />
           </div>
 
           <aside className="h-fit rounded-2xl bg-white p-6 shadow-md lg:sticky lg:top-24">
