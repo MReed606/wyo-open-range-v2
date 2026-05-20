@@ -38,76 +38,88 @@ export default function DashboardPage() {
 
       <main className="min-h-screen bg-[#F7F5F2] p-6 md:p-10">
 
-      <div className="mx-auto max-w-5xl">
+        <div className="mx-auto max-w-5xl">
 
-        <div className="rounded-3xl bg-white p-8 shadow-sm">
+          <div className="rounded-3xl bg-white p-8 shadow-sm">
 
-          <div className="flex flex-wrap items-center justify-between gap-6">
+            <div className="flex flex-wrap items-center justify-between gap-6">
 
-            <div>
+              <div>
 
-              <h1 className="text-5xl font-black text-[#111827]">
+                <h1 className="text-5xl font-black text-[#111827]">
 
-                {profile?.full_name ??
-                  "User"}
+                  {profile?.full_name ??
+                    "User"}
 
-              </h1>
+                </h1>
 
-              <div className="mt-4 space-y-2 text-[#374151]">
+                <div className="mt-4 space-y-2 text-[#374151]">
 
-                <p>
-                  {profile?.email}
-                </p>
+                  <p>
+                    {profile?.email}
+                  </p>
 
-                <p>
-                  {profile?.phone}
-                </p>
+                  <p>
+                    {profile?.phone}
+                  </p>
+
+                </div>
+
+                <div className="mt-5 flex flex-wrap gap-3">
+
+                  {profile?.verified && (
+
+                    <div className="rounded-full bg-blue-100 px-4 py-2 text-sm font-bold text-blue-700">
+                      Verified
+                    </div>
+
+                  )}
+
+                  {profile
+                    ?.verification_submitted && (
+
+                    <div className="rounded-full bg-yellow-100 px-4 py-2 text-sm font-bold text-yellow-700">
+                      Verification Submitted
+                    </div>
+
+                  )}
+
+                </div>
 
               </div>
 
-              <div className="mt-5 flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-4">
 
-                {profile?.verified && (
+                <Link
+                  href="/settings"
+                  className="rounded-2xl border border-[#2F5D50] px-6 py-4 text-lg font-bold text-[#2F5D50]"
+                >
+                  Account Settings
+                </Link>
 
-                  <div className="rounded-full bg-blue-100 px-4 py-2 text-sm font-bold text-blue-700">
-                    Verified
-                  </div>
+                <Link
+                  href="/saved"
+                  className="rounded-2xl border border-[#2F5D50] px-6 py-4 text-lg font-bold text-[#2F5D50]"
+                >
+                  Saved Listings
+                </Link>
 
-                )}
+                <Link
+                  href="/post"
+                  className="rounded-2xl bg-[#2F5D50] px-6 py-4 text-lg font-bold text-white"
+                >
+                  Create Listing
+                </Link>
 
-                {profile
-                  ?.verification_submitted && (
-
-                  <div className="rounded-full bg-yellow-100 px-4 py-2 text-sm font-bold text-yellow-700">
-                  </div>
-
-                )}
-
-              
-            <Link
-              href="/saved"
-              className="rounded-2xl border border-[#2F5D50] px-6 py-4 text-lg font-bold text-[#2F5D50]"
-            >
-              Saved Listings
-            </Link>
-
+              </div>
 
             </div>
-
-            <Link
-              href="/settings"
-              className="rounded-2xl border border-[#2F5D50] px-6 py-4 text-lg font-bold text-[#2F5D50]"
-            >
-              Account Settings
-            </Link>
 
           </div>
 
         </div>
 
-      </div>
-
-    </main>
+      </main>
     </>
   );
 }
