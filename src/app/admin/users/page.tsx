@@ -1,12 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+
 import { supabase } from "@/lib/supabase";
+
+import { AuthGuard } from "@/components/auth/AuthGuard";
 
 export default function AdminUsersPage() {
 
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] =
+    useState<any[]>([]);
 
   useEffect(() => {
     loadUsers();
@@ -14,115 +17,147 @@ export default function AdminUsersPage() {
 
   async function loadUsers() {
 
-    const { data } = await supabase
-      .from("profiles")
-      .select(`
-        id,
-        username,
-        created_at,
-        user_moderation (
-          posting_restricted_until,
-          suspended_until,
-          public_reason
-        )
-      `)
-      .order("created_at", {
-        ascending: false,
-      });
+    const { data } =
+      await supabase
+        .from("profiles")
+        .select("*")
+        .order("created_at", {
+          ascending: false,
+        });
 
     setUsers(data ?? []);
   }
 
+  async function setBadge(
+    userId: string,
+    badge: string
+  ) {
+
+    await supabase
+      .from("profiles")
+      .update({
+        badge
+      })
+      .eq("id", userId);
+
+    loadUsers();
+  }
+
+  async function suspendUser(
+    userId: string
+  ) {
+
+    await supabase
+      .from("profiles")
+      .update({
+        suspended: true
+      })
+      .eq("id", userId);
+
+    loadUsers();
+  }
+
   return (
-    <main className="min-h-screen bg-[#F7F5F2] p-10">
+    <>
+      <AuthGuard />
 
-      <h1 className="mb-8 text-4xl font-black text-[#111827]">
-        Admin Users
-      </h1>
+      <main className="min-h-screen bg-[#F7F5F2] p-6 md:p-10">
 
-      <div className="overflow-hidden rounded-3xl bg-white shadow-sm">
+        <div className="mx-auto max-w-7xl">
 
-        <div className="overflow-x-auto">
+          <h1 className="mb-8 text-5xl font-black text-[#111827]">
+            User Management
+          </h1>
 
-          <table className="min-w-full">
+          <div className="space-y-6">
 
-            <thead className="border-b border-gray-200 bg-[#E5E7EB]">
+            {users.map((user) => (
 
-              <tr>
+              <div
+                key={user.id}
+                className="rounded-3xl bg-white p-6 shadow-sm"
+              >
 
-                <th className="px-6 py-4 text-left text-[#111827]">User</th>
-                <th className="px-6 py-4 text-left text-[#111827]">Joined</th>
-                <th className="px-6 py-4 text-left text-[#111827]">Restriction</th>
-                <th className="px-6 py-4 text-left text-[#111827]">Suspension</th>
-                <th className="px-6 py-4 text-left text-[#111827]">Reason</th>
+                <div className="flex flex-wrap items-start justify-between gap-6">
 
-              </tr>
+                  <div>
 
-            </thead>
+                    <h2 className="text-3xl font-black text-[#111827]">
+                      {user.full_name ?? "Unnamed User"}
+                    </h2>
 
-            <tbody>
+                    <div className="mt-4 space-y-2 text-[#374151]">
 
-              {users.map((user) => {
+                      <p>{user.email}</p>
 
-                const moderation =
-                  user.user_moderation?.[0];
+                      <p>{user.phone}</p>
 
-                return (
+                      <p>
+                        Badge:
+                        {" "}
+                        {user.badge ?? "None"}
+                      </p>
 
-                  <tr
-                    key={user.id}
-                    className="border-t border-gray-100"
-                  >
+                      <p>
+                        Trust Score:
+                        {" "}
+                        {user.trust_score ?? 100}
+                      </p>
 
-                    <td className="px-6 py-5 font-bold text-[#111827]">
-                      <Link
-                        href={`/seller/profile/${user.id}`}
-                        className="hover:text-[#2F5D50]"
-                      >
-                        {user.username ?? "Unnamed User"}
-                      </Link>
-                    </td>
+                    </div>
 
-                    <td className="px-6 py-5 text-[#111827]">
-                      {new Date(
-                        user.created_at
-                      ).toLocaleDateString()}
-                    </td>
+                  </div>
 
-                    <td className="px-6 py-5 text-[#111827]">
+                  <div className="flex flex-wrap gap-3">
 
-                      {moderation?.posting_restricted_until
-                        ? "Restricted"
-                        : "Active"}
+                    <button
+                      onClick={() =>
+                        setBadge(
+                          user.id,
+                          "Trusted Seller"
+                        )
+                      }
+                      className="rounded-2xl bg-blue-600 px-4 py-3 font-bold text-white"
+                    >
+                      Trusted
+                    </button>
 
-                    </td>
+                    <button
+                      onClick={() =>
+                        setBadge(
+                          user.id,
+                          "Business"
+                        )
+                      }
+                      className="rounded-2xl bg-purple-600 px-4 py-3 font-bold text-white"
+                    >
+                      Business
+                    </button>
 
-                    <td className="px-6 py-5 text-[#111827]">
+                    <button
+                      onClick={() =>
+                        suspendUser(
+                          user.id
+                        )
+                      }
+                      className="rounded-2xl bg-red-600 px-4 py-3 font-bold text-white"
+                    >
+                      Suspend
+                    </button>
 
-                      {moderation?.suspended_until
-                        ? "Suspended"
-                        : "Active"}
+                  </div>
 
-                    </td>
+                </div>
 
-                    <td className="px-6 py-5 text-[#111827]">
-                      {moderation?.public_reason ?? "-"}
-                    </td>
+              </div>
 
-                  </tr>
+            ))}
 
-                );
-
-              })}
-
-            </tbody>
-
-          </table>
+          </div>
 
         </div>
 
-      </div>
-
-    </main>
+      </main>
+    </>
   );
 }
