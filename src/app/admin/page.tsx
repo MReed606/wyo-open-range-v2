@@ -76,6 +76,12 @@ export default function AdminPage() {
         id,
         reason,
         created_at,
+        reporter_id,
+        profiles:reporter_id (
+          id,
+          username,
+          created_at
+        ),
         listings (
           id,
           title,
@@ -326,14 +332,51 @@ export default function AdminPage() {
 
             </div>
 
-            <div className="mt-4 rounded-xl bg-red-50 p-4">
-              <div className="text-sm font-bold uppercase tracking-wide text-red-600">
-                Report Reason
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+
+              <div className="rounded-xl bg-red-50 p-4">
+
+                <div className="text-sm font-bold uppercase tracking-wide text-red-600">
+                  Report Reason
+                </div>
+
+                <p className="mt-2 text-sm text-[#374151]">
+                  {report.reason}
+                </p>
+
               </div>
 
-              <p className="mt-2 text-sm text-[#374151]">
-                {report.reason}
-              </p>
+              <div className="rounded-xl bg-[#F7F5F2] p-4 border border-gray-200">
+
+                <div className="text-sm font-bold uppercase tracking-wide text-[#1F2933]">
+                  Reporter Information
+                </div>
+
+                <div className="mt-2 space-y-1 text-sm text-[#374151]">
+
+                  <p>
+                    <span className="font-bold">Username:</span>{" "}
+                    {report.profiles?.username ?? "Unknown"}
+                  </p>
+
+                  <p>
+                    <span className="font-bold">Reporter ID:</span>{" "}
+                    {report.reporter_id}
+                  </p>
+
+                  <p>
+                    <span className="font-bold">Account Created:</span>{" "}
+                    {report.profiles?.created_at
+                      ? new Date(
+                          report.profiles.created_at
+                        ).toLocaleDateString()
+                      : "Unknown"}
+                  </p>
+
+                </div>
+
+              </div>
+
             </div>
 
             {/* INTERNAL NOTES */}
