@@ -25,6 +25,26 @@ export default function SettingsPage() {
     setPublicPhone] =
     useState(false);
 
+  const [emailNotifications,
+    setEmailNotifications] =
+    useState(true);
+
+  const [smsNotifications,
+    setSmsNotifications] =
+    useState(false);
+
+  const [messageNotifications,
+    setMessageNotifications] =
+    useState(true);
+
+  const [forumNotifications,
+    setForumNotifications] =
+    useState(true);
+
+  const [listingNotifications,
+    setListingNotifications] =
+    useState(true);
+
   const [publicEmail,
     setPublicEmail] =
     useState(false);
@@ -60,6 +80,26 @@ export default function SettingsPage() {
 
     setPublicPhone(
       data?.public_phone ?? false
+    );
+
+    setEmailNotifications(
+      data?.email_notifications ?? true
+    );
+
+    setSmsNotifications(
+      data?.sms_notifications ?? false
+    );
+
+    setMessageNotifications(
+      data?.message_notifications ?? true
+    );
+
+    setForumNotifications(
+      data?.forum_notifications ?? true
+    );
+
+    setListingNotifications(
+      data?.listing_notifications ?? true
     );
 
     setPublicEmail(
@@ -121,6 +161,21 @@ export default function SettingsPage() {
 
         public_phone:
           publicPhone,
+
+        email_notifications:
+          emailNotifications,
+
+        sms_notifications:
+          smsNotifications,
+
+        message_notifications:
+          messageNotifications,
+
+        forum_notifications:
+          forumNotifications,
+
+        listing_notifications:
+          listingNotifications,
 
         public_email:
           publicEmail,
@@ -231,7 +286,103 @@ export default function SettingsPage() {
             </div>
 
             
-            {/* PRIVACY */}
+            {
+            {/* NOTIFICATIONS */}
+
+            <div className="rounded-3xl border border-gray-200 p-6">
+
+              <h2 className="mb-6 text-2xl font-black tracking-tight text-[#111827]">
+                Notification Preferences
+              </h2>
+
+              <div className="space-y-5">
+
+                <label className="flex items-center gap-4 text-lg font-semibold text-[#111827]">
+
+                  <input
+                    type="checkbox"
+                    checked={emailNotifications}
+                    onChange={(e) =>
+                      setEmailNotifications(
+                        e.target.checked
+                      )
+                    }
+                  />
+
+                  Email Notifications
+
+                </label>
+
+                <label className="flex items-center gap-4 text-lg font-semibold text-[#111827]">
+
+                  <input
+                    type="checkbox"
+                    checked={smsNotifications}
+                    onChange={(e) =>
+                      setSmsNotifications(
+                        e.target.checked
+                      )
+                    }
+                  />
+
+                  SMS Notifications
+
+                </label>
+
+                <label className="flex items-center gap-4 text-lg font-semibold text-[#111827]">
+
+                  <input
+                    type="checkbox"
+                    checked={messageNotifications}
+                    onChange={(e) =>
+                      setMessageNotifications(
+                        e.target.checked
+                      )
+                    }
+                  />
+
+                  New Message Alerts
+
+                </label>
+
+                <label className="flex items-center gap-4 text-lg font-semibold text-[#111827]">
+
+                  <input
+                    type="checkbox"
+                    checked={forumNotifications}
+                    onChange={(e) =>
+                      setForumNotifications(
+                        e.target.checked
+                      )
+                    }
+                  />
+
+                  Forum Reply Alerts
+
+                </label>
+
+                <label className="flex items-center gap-4 text-lg font-semibold text-[#111827]">
+
+                  <input
+                    type="checkbox"
+                    checked={listingNotifications}
+                    onChange={(e) =>
+                      setListingNotifications(
+                        e.target.checked
+                      )
+                    }
+                  />
+
+                  Listing Activity Alerts
+
+                </label>
+
+              </div>
+
+            </div>
+
+
+            /* PRIVACY */}
 
             <div className="rounded-3xl border border-gray-200 p-6">
 
@@ -263,7 +414,27 @@ export default function SettingsPage() {
                     type="checkbox"
                     checked={publicEmail}
                     onChange={(e) =>
-                      setPublicEmail(
+                      setEmailNotifications(
+      data?.email_notifications ?? true
+    );
+
+    setSmsNotifications(
+      data?.sms_notifications ?? false
+    );
+
+    setMessageNotifications(
+      data?.message_notifications ?? true
+    );
+
+    setForumNotifications(
+      data?.forum_notifications ?? true
+    );
+
+    setListingNotifications(
+      data?.listing_notifications ?? true
+    );
+
+    setPublicEmail(
                         e.target.checked
                       )
                     }
