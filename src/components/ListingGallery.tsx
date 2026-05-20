@@ -24,7 +24,7 @@ export function ListingGallery({
         <img
           src={selected}
           alt="Listing"
-          className="h-[420px] w-full object-contain"
+          className="h-[260px] w-full object-contain sm:h-[420px]"
         />
 
       </div>
@@ -47,7 +47,7 @@ export function ListingGallery({
             <img
               src={image}
               alt={`Thumbnail ${index + 1}`}
-              className="h-20 w-20 object-cover"
+              className="h-16 w-16 object-cover sm:h-20 sm:w-20"
             />
 
           </button>

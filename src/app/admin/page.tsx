@@ -405,7 +405,7 @@ export default function AdminPage() {
             </div>
 
             {/* ACTIONS */}
-            <div className="mt-5 flex flex-wrap gap-3">
+            <div className="mt-5 flex flex-col gap-3 xl:flex-row xl:flex-wrap">
 
               <button
                 onClick={() =>
@@ -420,7 +420,7 @@ export default function AdminPage() {
               </button>
 
               {/* RESTRICT */}
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
 
                 <select
                   value={
@@ -463,7 +463,7 @@ export default function AdminPage() {
               </div>
 
               {/* SUSPEND */}
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
 
                 <select
                   value={

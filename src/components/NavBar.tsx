@@ -11,7 +11,7 @@ export function NavBar() {
           Wyo Open Range
         </Link>
 
-        <div className="hidden items-center gap-6 md:flex">
+        <div className="hidden items-center gap-4 lg:flex">
           <Link href="/listings" className="text-sm font-bold text-[#1F2933] hover:text-[#2F5D50]">Browse</Link>
           <Link href="/regions" className="text-sm font-bold text-[#1F2933] hover:text-[#2F5D50]">Regions</Link>
           <Link href="/forums" className="text-sm font-bold text-[#1F2933] hover:text-[#2F5D50]">Forums</Link>
@@ -21,14 +21,14 @@ export function NavBar() {
           <AdminNavLink />
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
           <NotificationBell />
 
           <AuthStatus />
 
           <Link
             href="/post"
-            className="rounded-xl bg-[#2F5D50] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#24493f]"
+            className="rounded-xl bg-[#2F5D50] px-3 py-2 text-sm font-semibold text-white transition hover:bg-[#24493f] sm:px-4"
           >
             Post Listing
           </Link>

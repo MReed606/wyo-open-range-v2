@@ -24,7 +24,7 @@ export default async function ListingPage({ params }: PageProps) {
 
   return (
     <main className="min-h-screen bg-[#F7F5F2] px-6 py-10">
-      <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[2fr_1fr]">
+      <div className="mx-auto grid max-w-7xl gap-8 xl:grid-cols-[2fr_1fr]">
 
         {/* LEFT SIDE */}
         <div className="rounded-2xl bg-white p-6 shadow">
