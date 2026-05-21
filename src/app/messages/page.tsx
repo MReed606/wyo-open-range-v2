@@ -218,7 +218,7 @@ export default function MessagesPage() {
 
                       {conversation
                         ?.latest
-                        ?.content ??
+                        ?.message ??
 
                         "No messages yet."}
 

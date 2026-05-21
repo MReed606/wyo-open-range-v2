@@ -21,6 +21,7 @@ export default function NavBar() {
 
   useEffect(() => {
     checkUser();
+    loadMessageCount();
   }, []);
 
   async function checkUser() {
@@ -36,7 +37,30 @@ export default function NavBar() {
     );
   }
 
-  async function logout() {
+  
+
+  async function loadMessageCount() {
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) return;
+
+    const { data } =
+      await supabase
+        .from("messages")
+        .select("*")
+        .eq("read", false)
+        .neq("sender_id", user.id);
+
+    setMessageCount(
+      data?.length ?? 0
+    );
+  }
+
+
+async function logout() {
 
     await supabase.auth.signOut();
 
@@ -97,9 +121,18 @@ export default function NavBar() {
 
               <Link
                 href="/messages"
-                className="text-lg font-bold text-[#1F2933]"
+                className="relative text-lg font-bold text-[#1F2933]"
               >
                 Messages
+
+                {messageCount > 0 && (
+
+                  <span className="absolute -right-5 -top-2 rounded-full bg-red-600 px-2 py-1 text-xs font-black text-white">
+                    {messageCount}
+                  </span>
+
+                )}
+
               </Link>
 
 
