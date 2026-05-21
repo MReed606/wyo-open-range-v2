@@ -54,7 +54,7 @@ export default function NavBar() {
           </Link>
 
           <Link
-            href="/listings"
+            href="/dashboard/listings"
             className="text-lg font-bold text-[#1F2933]"
           >
             Browse
