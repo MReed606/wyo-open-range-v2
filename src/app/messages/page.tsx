@@ -28,6 +28,10 @@ export default function MessagesPage() {
       return;
     }
 
+    // =====================================
+    // LOAD CONVERSATIONS
+    // =====================================
+
     const { data } =
       await supabase
         .from("conversations")
@@ -35,9 +39,12 @@ export default function MessagesPage() {
         .or(
           `buyer_id.eq.${user.id},seller_id.eq.${user.id}`
         )
-        .order("created_at", {
-          ascending: false,
-        });
+        .order(
+          "created_at",
+          {
+            ascending: false,
+          }
+        );
 
     if (!data?.length) {
 
@@ -45,6 +52,10 @@ export default function MessagesPage() {
 
       return;
     }
+
+    // =====================================
+    // ENHANCE
+    // =====================================
 
     const enhanced =
       await Promise.all(
@@ -54,12 +65,28 @@ export default function MessagesPage() {
             conversation
           ) => {
 
-            // =====================================
-            // GET LATEST MESSAGE
-            // =====================================
+            const otherUserId =
+              conversation.buyer_id === user.id
+                ? conversation.seller_id
+                : conversation.buyer_id;
+
+            // PROFILE
 
             const {
-              data: latest
+              data: profile
+            } = await supabase
+              .from("profiles")
+              .select("*")
+              .eq(
+                "id",
+                otherUserId
+              )
+              .maybeSingle();
+
+            // LATEST MESSAGE
+
+            const {
+              data: latestMessages
             } = await supabase
               .from("messages")
               .select("*")
@@ -73,33 +100,15 @@ export default function MessagesPage() {
                   ascending: false,
                 }
               )
-              .limit(1)
-              .maybeSingle();
+              .limit(1);
 
-            // =====================================
-            // OTHER USER
-            // =====================================
-
-            const otherUserId =
-              conversation.buyer_id === user.id
-                ? conversation.seller_id
-                : conversation.buyer_id;
-
-            const {
-              data: profile
-            } = await supabase
-              .from("profiles")
-              .select("*")
-              .eq(
-                "id",
-                otherUserId
-              )
-              .maybeSingle();
+            const latest =
+              latestMessages?.[0];
 
             return {
               ...conversation,
-              latest,
               profile,
+              latest,
             };
           }
         )
@@ -123,6 +132,8 @@ export default function MessagesPage() {
       return;
     }
 
+    // DELETE MESSAGES FIRST
+
     await supabase
       .from("messages")
       .delete()
@@ -130,6 +141,8 @@ export default function MessagesPage() {
         "conversation_id",
         id
       );
+
+    // DELETE CONVERSATION
 
     await supabase
       .from("conversations")
@@ -157,7 +170,7 @@ export default function MessagesPage() {
           {!conversations.length && (
 
             <div className="rounded-3xl bg-white p-10 text-xl font-bold text-[#6B7280] shadow-sm">
-              No messages yet.
+              No conversations yet.
             </div>
 
           )}
@@ -180,10 +193,17 @@ export default function MessagesPage() {
                   >
 
                     <h2 className="text-2xl font-black text-[#111827]">
+
                       {conversation
                         ?.profile
                         ?.full_name ??
+
+                        conversation
+                          ?.profile
+                          ?.email ??
+
                         "User"}
+
                     </h2>
 
                     <div className="mt-2 text-sm text-gray-500">
@@ -199,6 +219,7 @@ export default function MessagesPage() {
                       {conversation
                         ?.latest
                         ?.content ??
+
                         "No messages yet."}
 
                     </p>

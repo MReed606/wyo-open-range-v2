@@ -12,6 +12,10 @@ export default function NavBar() {
   const [loggedIn, setLoggedIn] =
     useState(false);
 
+  const [messageCount,
+    setMessageCount] =
+    useState(0);
+
   const [isAdmin, setIsAdmin] =
     useState(false);
 
