@@ -81,12 +81,22 @@ export default function AdminUsersPage() {
       return;
     }
 
-    await supabase
-      .from("profiles")
-      .update({
-        [field]: value,
-      })
-      .eq("id", userId);
+    const { error } =
+      await supabase
+        .from("profiles")
+        .update({
+          [field]: value,
+        })
+        .eq("id", userId);
+
+    if (error) {
+
+      console.error(error);
+
+      alert(error.message);
+
+      return;
+    }
 
     loadUsers();
   }
