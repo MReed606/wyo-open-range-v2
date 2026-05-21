@@ -97,22 +97,22 @@ export default function NavBar() {
   return (
     <nav className="border-b border-black/5 bg-white">
 
-      <div className="mx-auto flex max-w-[1700px] items-center justify-between gap-6 px-4 py-3">
+      <div className="mx-auto flex w-full max-w-[1700px] items-center justify-between gap-4 overflow-hidden px-3 py-2">
 
         {/* LEFT */}
 
-        <div className="flex items-center gap-8">
+        <div className="flex min-w-0 flex-1 items-center gap-5 overflow-hidden">
 
           <Link
             href="/"
-            className="text-base font-bold text-[#1F2933]"
+            className="shrink-0 text-sm font-bold text-[#1F2933]"
           >
             Home
           </Link>
 
           <Link
             href="/listings"
-            className="text-base font-bold text-[#1F2933]"
+            className="shrink-0 text-sm font-bold text-[#1F2933]"
           >
             Browse
           </Link>
@@ -122,35 +122,35 @@ export default function NavBar() {
             <>
               <Link
                 href="/regions"
-                className="text-base font-bold text-[#1F2933]"
+                className="shrink-0 text-sm font-bold text-[#1F2933]"
               >
                 Regions
               </Link>
 
               <Link
                 href="/forums"
-                className="text-base font-bold text-[#1F2933]"
+                className="shrink-0 text-sm font-bold text-[#1F2933]"
               >
                 Forums
               </Link>
 
               <Link
                 href="/businesses"
-                className="text-base font-bold text-[#1F2933]"
+                className="shrink-0 text-sm font-bold text-[#1F2933]"
               >
                 Businesses
               </Link>
 
               <Link
                 href="/dashboard"
-                className="text-base font-bold text-[#1F2933]"
+                className="shrink-0 text-sm font-bold text-[#1F2933]"
               >
                 Dashboard
               </Link>
 
               <Link
                 href="/messages"
-                className="relative text-base font-bold text-[#1F2933]"
+                className="relative shrink-0 text-sm font-bold text-[#1F2933]"
               >
                 Messages
 
@@ -166,7 +166,7 @@ export default function NavBar() {
 
               <Link
                 href="/saved"
-                className="text-base font-bold text-[#1F2933]"
+                className="shrink-0 text-sm font-bold text-[#1F2933]"
               >
                 Saved
               </Link>
@@ -176,7 +176,7 @@ export default function NavBar() {
                 <>
                   <Link
                     href="/admin"
-                    className="text-base font-bold text-[#1F2933]"
+                    className="shrink-0 text-sm font-bold text-[#1F2933]"
                   >
                     Admin
                   </Link>
@@ -194,7 +194,7 @@ export default function NavBar() {
 
         {/* RIGHT */}
 
-        <div className="flex items-center gap-3">
+        <div className="flex shrink-0 items-center gap-2">
 
           {loggedIn && (
             <NotificationBell />
@@ -205,14 +205,14 @@ export default function NavBar() {
             <>
               <button
                 onClick={logout}
-                className="rounded-xl border border-[#2F5D50] px-5 py-2 text-base font-bold text-[#2F5D50]"
+                className="rounded-lg border border-[#2F5D50] px-4 py-2 text-sm font-bold text-[#2F5D50]"
               >
                 Log Out
               </button>
 
               <Link
                 href="/post"
-                className="flex items-center justify-center rounded-xl bg-[#2F5D50] px-5 py-2 text-base font-bold text-white"
+                className="flex items-center justify-center rounded-lg bg-[#2F5D50] px-4 py-2 text-sm font-bold text-white"
               >
                 Post Listing
               </Link>
@@ -223,14 +223,14 @@ export default function NavBar() {
             <>
               <Link
                 href="/login"
-                className="rounded-xl border border-[#2F5D50] px-5 py-2 text-base font-bold text-[#2F5D50]"
+                className="rounded-lg border border-[#2F5D50] px-4 py-2 text-sm font-bold text-[#2F5D50]"
               >
                 Login
               </Link>
 
               <Link
                 href="/signup"
-                className="rounded-xl bg-[#2F5D50] px-5 py-2 text-base font-bold text-white"
+                className="rounded-lg bg-[#2F5D50] px-4 py-2 text-sm font-bold text-white"
               >
                 Sign Up
               </Link>
