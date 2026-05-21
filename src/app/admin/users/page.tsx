@@ -51,6 +51,40 @@ export default function AdminUsersPage() {
     value: boolean
   ) {
 
+    const targetUser =
+      users.find(
+        (u) =>
+          u.id === userId
+      );
+
+    if (
+      targetUser?.protected_admin
+    ) {
+
+      alert(
+        "Protected owner account"
+      );
+
+      return;
+    }
+
+    const targetUser =
+      users.find(
+        (u) =>
+          u.id === userId
+      );
+
+    if (
+      targetUser?.protected_admin
+    ) {
+
+      alert(
+        "Protected owner account"
+      );
+
+      return;
+    }
+
     await supabase
       .from("profiles")
       .update({
@@ -68,6 +102,30 @@ export default function AdminUsersPage() {
   async function deleteUser(
     userId: string
   ) {
+
+    if (
+      userId ===
+      "SUPER_ADMIN_BLOCK"
+    ) {
+      return;
+    }
+
+    const targetUser =
+      users.find(
+        (u) =>
+          u.id === userId
+      );
+
+    if (
+      targetUser?.protected_admin
+    ) {
+
+      alert(
+        "Protected owner account"
+      );
+
+      return;
+    }
 
     const confirmed =
       confirm(
