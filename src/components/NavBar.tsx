@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { NotificationBell } from "@/components/NotificationBell";
 import { AdminVerificationLink } from "@/components/AdminVerificationLink";
-import { isAdmin } from "@/lib/admin";
+import { isAdmin as checkAdmin } from "@/lib/admin";
 
 export default function NavBar() {
 
@@ -28,9 +28,7 @@ export default function NavBar() {
     setLoggedIn(!!user);
 
     setIsAdmin(
-      isAdmin(
-        user?.email
-      )
+      await checkAdmin()
     );
   }
 
