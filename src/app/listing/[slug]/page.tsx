@@ -174,15 +174,6 @@ export default function ListingPage() {
 
               <div className="flex flex-wrap gap-4">
 
-                <button
-                  onClick={saveListing}
-                  className="rounded-2xl border border-[#2F5D50] px-6 py-4 text-lg font-bold text-[#2F5D50] transition hover:bg-[#F3F7F5]"
-                >
-                  {saved
-                    ? "Saved ✓"
-                    : "Save Listing"}
-                </button>
-
                 <FavoriteButton listingId={listing.id} />
 
                 <Link
