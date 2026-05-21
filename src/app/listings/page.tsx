@@ -82,7 +82,12 @@ export default function ListingsPage() {
 
             <ListingCard
               key={listing.id}
-              listing={listing}
+              title={listing.title}
+              price={listing.price}
+              location={listing.region}
+              seller={listing.seller ?? "Seller"}
+              slug={listing.slug}
+              image={listing.image_url}
             />
 
           ))}
