@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
 import Link from "next/link";
 
 import { supabase } from "@/lib/supabase";
@@ -42,10 +43,6 @@ export default function AdminUsersPage() {
     setUsers(data ?? []);
   }
 
-  // =====================================
-  // PROTECTED ACCOUNT CHECK
-  // =====================================
-
   function isProtected(
     userId: string
   ) {
@@ -60,10 +57,6 @@ export default function AdminUsersPage() {
       targetUser?.protected_admin
     );
   }
-
-  // =====================================
-  // BADGES
-  // =====================================
 
   async function toggleBadge(
     userId: string,
@@ -82,17 +75,11 @@ export default function AdminUsersPage() {
       return;
     }
 
-    // =====================================
-    // BUILD UPDATE PAYLOAD
-    // =====================================
-
     let payload: any = {
       [field]: value,
     };
 
-    // =====================================
-    // ADMIN ROLE LINK
-    // =====================================
+    // ADMIN LINK
 
     if (
       field ===
@@ -109,11 +96,6 @@ export default function AdminUsersPage() {
       };
     }
 
-    console.log(
-      "UPDATING:",
-      payload
-    );
-
     const { error } =
       await supabase
         .from("profiles")
@@ -129,16 +111,8 @@ export default function AdminUsersPage() {
       return;
     }
 
-    alert(
-      "User updated"
-    );
-
     loadUsers();
   }
-
-  // =====================================
-  // SUSPEND
-  // =====================================
 
   async function toggleSuspend(
     userId: string,
@@ -167,10 +141,6 @@ export default function AdminUsersPage() {
     loadUsers();
   }
 
-  // =====================================
-  // DELETE USER
-  // =====================================
-
   async function deleteUser(
     userId: string
   ) {
@@ -195,34 +165,21 @@ export default function AdminUsersPage() {
       return;
     }
 
-    // DELETE LISTINGS
-
     await supabase
       .from("listings")
       .delete()
       .eq("owner_id", userId);
 
-    // DELETE PROFILE
-
-    const { error } =
-      await supabase
-        .from("profiles")
-        .delete()
-        .eq("id", userId);
-
-    if (error) {
-
-      console.error(error);
-
-      alert(error.message);
-
-      return;
-    }
+    await supabase
+      .from("profiles")
+      .delete()
+      .eq("id", userId);
 
     loadUsers();
   }
 
   const badges = [
+
     [
       "verified_badge",
       "Verified",
@@ -252,6 +209,12 @@ export default function AdminUsersPage() {
       "admin_badge",
       "Admin",
     ],
+
+    [
+      "owner_badge",
+      "Site Owner / Programmer",
+    ],
+
   ];
 
   return (
@@ -277,8 +240,6 @@ export default function AdminUsersPage() {
 
                 <div className="flex flex-wrap items-start justify-between gap-8">
 
-                  {/* USER INFO */}
-
                   <div>
 
                     <h2 className="text-3xl font-black text-[#111827]">
@@ -290,10 +251,6 @@ export default function AdminUsersPage() {
 
                       <p>
                         {user.email}
-                      </p>
-
-                      <p>
-                        {user.phone}
                       </p>
 
                       <p>
