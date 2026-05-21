@@ -51,10 +51,25 @@ export default function DashboardListingsPage() {
       return;
     }
 
-    await supabase
-      .from("listings")
-      .delete()
-      .eq("id", listingId);
+    const { error } =
+      await supabase
+        .from("listings")
+        .delete()
+        .eq("id", listingId);
+
+    if (error) {
+
+      console.error(
+        "DELETE ERROR:",
+        error
+      );
+
+      alert(
+        error.message
+      );
+
+      return;
+    }
 
     loadListings();
   }

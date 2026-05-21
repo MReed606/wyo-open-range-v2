@@ -91,10 +91,25 @@ export default function AdminUsersPage() {
     // DELETE PROFILE
     // =====================================
 
-    await supabase
-      .from("profiles")
-      .delete()
-      .eq("id", userId);
+    const { error } =
+      await supabase
+        .from("profiles")
+        .delete()
+        .eq("id", userId);
+
+    if (error) {
+
+      console.error(
+        "USER DELETE ERROR:",
+        error
+      );
+
+      alert(
+        error.message
+      );
+
+      return;
+    }
 
     loadUsers();
   }
