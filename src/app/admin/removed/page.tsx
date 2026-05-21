@@ -35,9 +35,7 @@ export default function RemovedListingsPage() {
     }
 
     if (
-      !isAdmin(
-        user.email
-      )
+      !await isAdmin()
     ) {
 
       router.push("/");

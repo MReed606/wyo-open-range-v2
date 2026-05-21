@@ -35,9 +35,7 @@ export default function AdminReportsPage() {
     }
 
     if (
-      !isAdmin(
-        user.email
-      )
+      !await isAdmin()
     ) {
 
       router.push("/");
