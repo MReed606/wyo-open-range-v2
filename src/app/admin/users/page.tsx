@@ -41,6 +41,10 @@ export default function AdminUsersPage() {
     setUsers(data ?? []);
   }
 
+  // =====================================
+  // BADGES
+  // =====================================
+
   async function toggleBadge(
     userId: string,
     field: string,
@@ -57,7 +61,10 @@ export default function AdminUsersPage() {
     loadUsers();
   }
 
-  
+  // =====================================
+  // DELETE USER
+  // =====================================
+
   async function deleteUser(
     userId: string
   ) {
@@ -92,8 +99,39 @@ export default function AdminUsersPage() {
     loadUsers();
   }
 
+  const badges = [
+    [
+      "verified_badge",
+      "Verified",
+    ],
 
-return (
+    [
+      "trusted_seller_badge",
+      "Trusted Seller",
+    ],
+
+    [
+      "premium_seller_badge",
+      "Premium Seller",
+    ],
+
+    [
+      "moderator_badge",
+      "Moderator",
+    ],
+
+    [
+      "business_badge",
+      "Business",
+    ],
+
+    [
+      "admin_badge",
+      "Admin",
+    ],
+  ];
+
+  return (
     <>
       <AuthGuard />
 
@@ -116,72 +154,83 @@ return (
 
                 <div className="flex flex-wrap items-start justify-between gap-8">
 
+                  {/* USER INFO */}
+
                   <div>
 
                     <h2 className="text-3xl font-black text-[#111827]">
-                      {user.full_name ?? "Unnamed User"}
+                      {user.full_name ??
+                        "Unnamed User"}
                     </h2>
 
                     <div className="mt-4 space-y-2 text-[#374151]">
 
-                      <p>{user.email}</p>
+                      <p>
+                        {user.email}
+                      </p>
 
-                      <p>{user.phone}</p>
+                      <p>
+                        {user.phone}
+                      </p>
 
                       <p>
                         Role:
                         {" "}
-                        {user.role ?? "user"}
+                        {user.role ??
+                          "user"}
                       </p>
 
                     </div>
 
+                    {/* DELETE */}
+
+                    <button
+                      onClick={() =>
+                        deleteUser(
+                          user.id
+                        )
+                      }
+                      className="mt-6 rounded-2xl bg-red-600 px-5 py-3 font-black text-white transition hover:bg-red-700"
+                    >
+                      Delete User
+                    </button>
+
                   </div>
+
+                  {/* BADGES */}
 
                   <div className="grid gap-3 md:grid-cols-2">
 
-                    {[
-                      ["verified_badge", "Verified"],
-                      ["trusted_seller_badge", "Trusted Seller"],
-                      ["premium_seller_badge", "Premium Seller"],
-                      ["moderator_badge", "Moderator"],
-                      ["business_badge", "Business"],
-                      ["admin_badge", "Admin"],
-                    ].map(([field, label]) => (
+                    {badges.map(
+                      ([field, label]) => (
 
-                      <label
-                        key={field}
-                        className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-[#FAFAFA] px-4 py-3 font-bold text-[#111827]"
-                      >
+                        <label
+                          key={field}
+                          className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-[#FAFAFA] px-4 py-3 font-bold text-[#111827]"
+                        >
 
-                        <input
-                          type="checkbox"
-                          checked={user[field]}
-                          onChange={(e) =>
-                            toggleBadge(
-                              user.id,
-                              field,
-                              e.target.checked
-                            )
-                          }
-                        />
+                          <input
+                            type="checkbox"
+                            checked={
+                              user[field]
+                            }
+                            onChange={(e) =>
+                              toggleBadge(
+                                user.id,
+                                field,
+                                e.target.checked
+                              )
+                            }
+                          />
 
-                        {label}
+                          {label}
 
-                      </label>
+                        </label>
 
-                    ))}
+                      )
+                    )}
 
-                  
-
-                  <button
-                    onClick={() =>
-                      deleteUser(user.id)
-                    }
-                    className="mt-6 rounded-2xl bg-red-600 px-5 py-3 font-black text-white transition hover:bg-red-700"
-                  >
-                    Delete User
-                  </button>
+                  </div>
 
                 </div>
 
