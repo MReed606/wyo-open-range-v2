@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { AuthGuard } from "@/components/auth/AuthGuard";
-import { isAdminEmail } from "@/lib/admin";
+import { isAdmin } from "@/lib/admin";
 
 export default function VerificationPage() {
 
@@ -28,7 +28,7 @@ export default function VerificationPage() {
     } = await supabase.auth.getUser();
 
     if (
-      !isAdminEmail(
+      !isAdmin(
         user?.email
       )
     ) {
@@ -60,7 +60,7 @@ export default function VerificationPage() {
     const filtered =
       (data ?? []).filter(
         (profile) =>
-          !isAdminEmail(
+          !isAdmin(
             profile.email
           )
       );

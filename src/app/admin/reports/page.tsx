@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { AuthGuard } from "@/components/auth/AuthGuard";
-import { isAdminEmail } from "@/lib/admin";
+import { isAdmin } from "@/lib/admin";
 
 export default function AdminReportsPage() {
 
@@ -35,7 +35,7 @@ export default function AdminReportsPage() {
     }
 
     if (
-      !isAdminEmail(
+      !isAdmin(
         user.email
       )
     ) {

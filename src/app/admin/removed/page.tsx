@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { AuthGuard } from "@/components/auth/AuthGuard";
-import { isAdminEmail } from "@/lib/admin";
+import { isAdmin } from "@/lib/admin";
 
 export default function RemovedListingsPage() {
 
@@ -35,7 +35,7 @@ export default function RemovedListingsPage() {
     }
 
     if (
-      !isAdminEmail(
+      !isAdmin(
         user.email
       )
     ) {
