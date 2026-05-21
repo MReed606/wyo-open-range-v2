@@ -94,7 +94,7 @@ export default function DashboardListingsPage() {
                   </h2>
 
                   <p className="mt-3 text-2xl font-black text-[#2F5D50]">
-                    ${listing.price}
+                    $${listing.price}
                   </p>
 
                 </div>

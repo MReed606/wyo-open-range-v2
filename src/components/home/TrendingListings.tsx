@@ -84,7 +84,7 @@ export function TrendingListings() {
               <div className="mt-4 flex items-center justify-between">
 
                 <div className="text-2xl font-black text-[#2F5D50]">
-                  ${listing.price}
+                  $${listing.price}
                 </div>
 
                 <div className="text-sm font-bold text-gray-500">
