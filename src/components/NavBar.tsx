@@ -20,8 +20,38 @@ export default function NavBar() {
     useState(false);
 
   useEffect(() => {
+
     checkUser();
+
     loadMessageCount();
+
+    const refreshMessages =
+      () => loadMessageCount();
+
+    window.addEventListener(
+      "message-read",
+      refreshMessages
+    );
+
+    window.addEventListener(
+      "message-sent",
+      refreshMessages
+    );
+
+    return () => {
+
+      window.removeEventListener(
+        "message-read",
+        refreshMessages
+      );
+
+      window.removeEventListener(
+        "message-sent",
+        refreshMessages
+      );
+
+    };
+
   }, []);
 
   async function checkUser() {
@@ -36,8 +66,6 @@ export default function NavBar() {
       await checkAdmin()
     );
   }
-
-  
 
   async function loadMessageCount() {
 
@@ -59,8 +87,7 @@ export default function NavBar() {
     );
   }
 
-
-async function logout() {
+  async function logout() {
 
     await supabase.auth.signOut();
 
@@ -135,14 +162,12 @@ async function logout() {
 
               </Link>
 
-
               <Link
                 href="/saved"
                 className="text-lg font-bold text-[#1F2933]"
               >
                 Saved
               </Link>
-
 
               {isAdmin && (
 
@@ -158,6 +183,7 @@ async function logout() {
                 </>
 
               )}
+
             </>
 
           )}
@@ -182,7 +208,7 @@ async function logout() {
 
               <Link
                 href="/post"
-                className="rounded-2xl bg-[#2F5D50] px-6 py-3 text-lg font-bold text-white"
+                className="flex items-center justify-center rounded-2xl bg-[#2F5D50] px-6 py-3 text-lg font-bold text-white"
               >
                 Post Listing
               </Link>
