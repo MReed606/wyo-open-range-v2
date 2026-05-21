@@ -7,7 +7,7 @@ export function AdminVerificationLink() {
   return (
     <Link
       href="/admin/verification"
-      className="text-lg font-bold text-[#1F2933]"
+      className="shrink-0 text-sm font-bold text-[#1F2933]"
     >
       Verification
     </Link>
