@@ -42,6 +42,25 @@ export default function AdminUsersPage() {
   }
 
   // =====================================
+  // PROTECTED ACCOUNT CHECK
+  // =====================================
+
+  function isProtected(
+    userId: string
+  ) {
+
+    const targetUser =
+      users.find(
+        (u) =>
+          u.id === userId
+      );
+
+    return (
+      targetUser?.protected_admin
+    );
+  }
+
+  // =====================================
   // BADGES
   // =====================================
 
@@ -51,31 +70,8 @@ export default function AdminUsersPage() {
     value: boolean
   ) {
 
-    const targetUser =
-      users.find(
-        (u) =>
-          u.id === userId
-      );
-
     if (
-      targetUser?.protected_admin
-    ) {
-
-      alert(
-        "Protected owner account"
-      );
-
-      return;
-    }
-
-    const targetUser =
-      users.find(
-        (u) =>
-          u.id === userId
-      );
-
-    if (
-      targetUser?.protected_admin
+      isProtected(userId)
     ) {
 
       alert(
@@ -96,6 +92,37 @@ export default function AdminUsersPage() {
   }
 
   // =====================================
+  // SUSPEND
+  // =====================================
+
+  async function toggleSuspend(
+    userId: string,
+    suspended: boolean
+  ) {
+
+    if (
+      isProtected(userId)
+    ) {
+
+      alert(
+        "Protected owner account"
+      );
+
+      return;
+    }
+
+    await supabase
+      .from("profiles")
+      .update({
+        suspended:
+          !suspended,
+      })
+      .eq("id", userId);
+
+    loadUsers();
+  }
+
+  // =====================================
   // DELETE USER
   // =====================================
 
@@ -104,20 +131,7 @@ export default function AdminUsersPage() {
   ) {
 
     if (
-      userId ===
-      "SUPER_ADMIN_BLOCK"
-    ) {
-      return;
-    }
-
-    const targetUser =
-      users.find(
-        (u) =>
-          u.id === userId
-      );
-
-    if (
-      targetUser?.protected_admin
+      isProtected(userId)
     ) {
 
       alert(
@@ -136,18 +150,14 @@ export default function AdminUsersPage() {
       return;
     }
 
-    // =====================================
     // DELETE LISTINGS
-    // =====================================
 
     await supabase
       .from("listings")
       .delete()
       .eq("owner_id", userId);
 
-    // =====================================
     // DELETE PROFILE
-    // =====================================
 
     const { error } =
       await supabase
@@ -157,14 +167,9 @@ export default function AdminUsersPage() {
 
     if (error) {
 
-      console.error(
-        "USER DELETE ERROR:",
-        error
-      );
+      console.error(error);
 
-      alert(
-        error.message
-      );
+      alert(error.message);
 
       return;
     }
@@ -172,25 +177,7 @@ export default function AdminUsersPage() {
     loadUsers();
   }
 
-  
-  async function toggleSuspend(
-    userId: string,
-    suspended: boolean
-  ) {
-
-    await supabase
-      .from("profiles")
-      .update({
-        suspended:
-          !suspended,
-      })
-      .eq("id", userId);
-
-    loadUsers();
-  }
-
-
-const badges = [
+  const badges = [
     [
       "verified_badge",
       "Verified",
@@ -271,24 +258,19 @@ const badges = [
                           "user"}
                       </p>
 
+                      {user.protected_admin && (
+
+                        <div className="mt-4 rounded-2xl bg-red-100 px-4 py-2 font-black text-red-700">
+                          Protected Owner Account
+                        </div>
+
+                      )}
+
                     </div>
 
-                    {/* DELETE */}
+                    {/* ACTIONS */}
 
-                    <button
-                      onClick={() =>
-                        deleteUser(
-                          user.id
-                        )
-                      }
-                      className="mt-6 rounded-2xl bg-red-600 px-5 py-3 font-black text-white transition hover:bg-red-700"
-                    >
-                      Delete User
-                    </button>
-
-                  
-
-                    <div className="mt-6 flex gap-3">
+                    <div className="mt-6 flex flex-wrap gap-3">
 
                       <button
                         onClick={() =>
@@ -302,6 +284,17 @@ const badges = [
                         {user.suspended
                           ? "Unsuspend User"
                           : "Suspend User"}
+                      </button>
+
+                      <button
+                        onClick={() =>
+                          deleteUser(
+                            user.id
+                          )
+                        }
+                        className="rounded-2xl bg-red-600 px-5 py-3 font-black text-white"
+                      >
+                        Delete User
                       </button>
 
                     </div>
