@@ -73,7 +73,7 @@ export default function FavoriteButton({
   return (
     <button
       onClick={toggleSave}
-      className="rounded-2xl border border-[#2F5D50] px-4 py-2 font-black text-[#2F5D50]"
+      className="flex h-12 w-40 items-center justify-center rounded-2xl border border-[#2F5D50] px-4 py-2 font-black text-[#2F5D50] transition"
     >
       {saved
         ? "Saved"
