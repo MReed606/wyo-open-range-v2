@@ -346,6 +346,20 @@ export default function AdminUsersPage() {
                         }
                         className="rounded-2xl bg-red-600 px-5 py-3 font-black text-white"
                       >
+                        Message User
+                      </Link>
+
+                      <button
+                        onClick={() => {
+                          window.location.href =
+                            `/messages?user=${user.id}`;
+                        }}
+                        className="rounded-2xl bg-blue-600 px-5 py-3 font-black text-white"
+                      >
+                        Message User
+                      </button>
+
+                      <button>
                         Delete User
                       </button>
 
