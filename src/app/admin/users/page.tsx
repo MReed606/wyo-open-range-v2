@@ -81,12 +81,29 @@ export default function AdminUsersPage() {
       return;
     }
 
+    const payload: any = {
+      [field]: value,
+    };
+
+    // =====================================
+    // ADMIN ROLE LINK
+    // =====================================
+
+    if (
+      field ===
+      "admin_badge"
+    ) {
+
+      payload.role =
+        value
+          ? "admin"
+          : "user";
+    }
+
     const { error } =
       await supabase
         .from("profiles")
-        .update({
-          [field]: value,
-        })
+        .update(payload)
         .eq("id", userId);
 
     if (error) {
