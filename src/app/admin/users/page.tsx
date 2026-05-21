@@ -81,12 +81,16 @@ export default function AdminUsersPage() {
       return;
     }
 
-    const payload: any = {
+    // =====================================
+    // BUILD UPDATE PAYLOAD
+    // =====================================
+
+    let payload: any = {
       [field]: value,
     };
 
     // =====================================
-    // REAL ADMIN ROLE
+    // ADMIN ROLE LINK
     // =====================================
 
     if (
@@ -94,11 +98,20 @@ export default function AdminUsersPage() {
       "admin_badge"
     ) {
 
-      payload.role =
-        value
-          ? "admin"
-          : "user";
+      payload = {
+        admin_badge: value,
+
+        role:
+          value
+            ? "admin"
+            : "user",
+      };
     }
+
+    console.log(
+      "UPDATING:",
+      payload
+    );
 
     const { error } =
       await supabase
@@ -114,6 +127,10 @@ export default function AdminUsersPage() {
 
       return;
     }
+
+    alert(
+      "User updated"
+    );
 
     loadUsers();
   }
