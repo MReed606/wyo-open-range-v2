@@ -86,7 +86,7 @@ export default function AdminUsersPage() {
     };
 
     // =====================================
-    // ADMIN ROLE LINK
+    // REAL ADMIN ROLE
     // =====================================
 
     if (
