@@ -40,8 +40,7 @@ export default function MessagesPage() {
           `buyer_id.eq.${user.id},seller_id.eq.${user.id}`
         )
         
-        .neq("hidden_by_buyer", true)
-        .neq("hidden_by_seller", true)
+        
         .order(
           "created_at",
           {
@@ -57,13 +56,39 @@ export default function MessagesPage() {
     }
 
     // =====================================
+    // FILTER HIDDEN FOR CURRENT USER
+    // =====================================
+
+    const filtered =
+      data.filter(
+        (conversation) => {
+
+          if (
+            conversation.buyer_id === user.id &&
+            conversation.hidden_by_buyer
+          ) {
+            return false;
+          }
+
+          if (
+            conversation.seller_id === user.id &&
+            conversation.hidden_by_seller
+          ) {
+            return false;
+          }
+
+          return true;
+        }
+      );
+
+    // =====================================
     // ENHANCE
     // =====================================
 
     const enhanced =
       await Promise.all(
 
-        data.map(
+        filtered.map(
           async (
             conversation
           ) => {

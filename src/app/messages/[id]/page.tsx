@@ -117,11 +117,15 @@ async function loadMessages() {
 
     setMessage("");
 
-    loadMessages();
+    await loadMessages();
 
-    window.dispatchEvent(
-      new Event("message-read")
-    );
+    setTimeout(() => {
+
+      window.dispatchEvent(
+        new Event("message-read")
+      );
+
+    }, 300);
   }
 
   return (
