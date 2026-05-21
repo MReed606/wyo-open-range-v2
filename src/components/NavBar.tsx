@@ -97,9 +97,9 @@ export default function NavBar() {
   return (
     <nav className="border-b border-black/5 bg-white">
 
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-6 py-4">
 
-        <div className="flex items-center gap-8">
+        <div className="flex flex-wrap items-center gap-6">
 
           <Link
             href="/"
@@ -190,7 +190,7 @@ export default function NavBar() {
 
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-4">
 
           {loggedIn && (
             <NotificationBell />
