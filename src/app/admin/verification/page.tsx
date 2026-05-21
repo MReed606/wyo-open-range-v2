@@ -28,9 +28,7 @@ export default function VerificationPage() {
     } = await supabase.auth.getUser();
 
     if (
-      !isAdmin(
-        user?.email
-      )
+      !await isAdmin()
     ) {
 
       router.push("/");
