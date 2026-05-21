@@ -339,17 +339,6 @@ export default function AdminUsersPage() {
                       </Link>
 
                       <button
-                        onClick={() =>
-                          deleteUser(
-                            user.id
-                          )
-                        }
-                        className="rounded-2xl bg-red-600 px-5 py-3 font-black text-white"
-                      >
-                        Message User
-                      </Link>
-
-                      <button
                         onClick={() => {
                           window.location.href =
                             `/messages?user=${user.id}`;
@@ -359,7 +348,14 @@ export default function AdminUsersPage() {
                         Message User
                       </button>
 
-                      <button>
+                      <button
+                        onClick={() =>
+                          deleteUser(
+                            user.id
+                          )
+                        }
+                        className="rounded-2xl bg-red-600 px-5 py-3 font-black text-white"
+                      >
                         Delete User
                       </button>
 
@@ -367,7 +363,7 @@ export default function AdminUsersPage() {
 
                   </div>
 
-                  {/* BADGES */}
+                  {/* BADGES */}}}
 
                   <div className="grid gap-3 md:grid-cols-2">
 
