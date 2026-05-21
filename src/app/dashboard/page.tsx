@@ -99,6 +99,13 @@ export default function DashboardPage() {
                 </Link>
 
                 <Link
+                  href="/dashboard/listings"
+                  className="rounded-2xl border border-[#2F5D50] px-6 py-4 text-lg font-bold text-[#2F5D50]"
+                >
+                  Your Listings
+                </Link>
+
+                <Link
                   href="/saved"
                   className="rounded-2xl border border-[#2F5D50] px-6 py-4 text-lg font-bold text-[#2F5D50]"
                 >
