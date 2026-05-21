@@ -1,42 +1,33 @@
-import type { Metadata } from "next";
-
 import "./globals.css";
 
-import NavBar from "../components/NavBar";
+import type { Metadata } from "next";
 
-import { Footer } from "../components/Footer";
+import NavBar from "@/components/NavBar";
 
-import { ActivityTracker } from "@/components/activity/ActivityTracker";
-
-import { MobileBottomNav } from "@/components/mobile/MobileBottomNav";
+import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
   title: "Wyo Open Range",
-
   description:
-    "Wyoming's community marketplace",
+    "Wyoming's marketplace for listings, businesses, forums, and community.",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
 
   return (
     <html lang="en">
 
-      <body>
+      <body suppressHydrationWarning>
 
         <NavBar />
-
-        <ActivityTracker />
 
         {children}
 
         <Footer />
-
-        <MobileBottomNav />
 
       </body>
 

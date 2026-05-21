@@ -1,27 +1,20 @@
-import Link from "next/link";
+export default function Footer() {
 
-export function Footer() {
   return (
-    <footer className="mt-20 border-t border-black/10 bg-white">
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-6 px-6 py-8 text-sm text-[#374151]">
+    <footer className="border-t border-black/5 bg-white px-6 py-8">
 
-        <Link href="/terms" className="hover:text-[#2F5D50]">
-          Terms
-        </Link>
+      <div className="mx-auto flex max-w-7xl items-center justify-between">
 
-        <Link href="/privacy" className="hover:text-[#2F5D50]">
-          Privacy
-        </Link>
+        <p className="text-sm text-gray-500">
+          © 2026 Wyo Open Range
+        </p>
 
-        <Link href="/rules" className="hover:text-[#2F5D50]">
-          Rules
-        </Link>
-
-        <Link href="/prohibited" className="hover:text-[#2F5D50]">
-          Prohibited Items
-        </Link>
+        <p className="text-sm text-gray-500">
+          Built for Wyoming communities
+        </p>
 
       </div>
+
     </footer>
   );
 }
