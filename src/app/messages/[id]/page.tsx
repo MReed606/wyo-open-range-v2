@@ -20,6 +20,10 @@ export default function ConversationPage() {
 
   useEffect(() => {
     loadMessages();
+
+    window.dispatchEvent(
+      new Event("message-read")
+    );
   }, [id]);
 
   async function loadMessages() {
@@ -90,6 +94,10 @@ export default function ConversationPage() {
     setMessage("");
 
     loadMessages();
+
+    window.dispatchEvent(
+      new Event("message-read")
+    );
   }
 
   return (

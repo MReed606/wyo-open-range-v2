@@ -39,6 +39,9 @@ export default function MessagesPage() {
         .or(
           `buyer_id.eq.${user.id},seller_id.eq.${user.id}`
         )
+        
+        .neq("hidden_by_buyer", true)
+        .neq("hidden_by_seller", true)
         .order(
           "created_at",
           {
@@ -119,7 +122,8 @@ export default function MessagesPage() {
     );
   }
 
-  async function deleteConversation(
+  
+async function deleteConversation(
     id: string
   ) {
 
@@ -132,28 +136,52 @@ export default function MessagesPage() {
       return;
     }
 
-    // DELETE MESSAGES FIRST
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-    await supabase
-      .from("messages")
-      .delete()
-      .eq(
-        "conversation_id",
-        id
+    if (!user) {
+      return;
+    }
+
+    const conversation =
+      conversations.find(
+        (c) => c.id === id
       );
 
-    // DELETE CONVERSATION
+    if (!conversation) {
+      return;
+    }
 
-    await supabase
-      .from("conversations")
-      .delete()
-      .eq(
-        "id",
-        id
-      );
+    // =====================================
+    // HIDE FOR CURRENT USER ONLY
+    // =====================================
+
+    if (
+      conversation.buyer_id === user.id
+    ) {
+
+      await supabase
+        .from("conversations")
+        .update({
+          hidden_by_buyer: true
+        })
+        .eq("id", id);
+
+    } else {
+
+      await supabase
+        .from("conversations")
+        .update({
+          hidden_by_seller: true
+        })
+        .eq("id", id);
+
+    }
 
     loadConversations();
   }
+
 
   return (
     <>
