@@ -97,11 +97,11 @@ export default function NavBar() {
   return (
     <nav className="border-b border-black/5 bg-white">
 
-      <div className="mx-auto flex w-full max-w-[1700px] items-center justify-between gap-4 overflow-hidden px-3 py-2">
+      <div className="mx-auto flex w-full max-w-[1700px] items-center justify-between gap-4 overflow-hidden px-3 py-3">
 
         {/* LEFT */}
 
-        <div className="flex min-w-0 flex-1 items-center gap-5 overflow-hidden">
+        <div className="flex min-w-0 flex-1 items-center justify-center gap-5 overflow-hidden">
 
           <Link
             href="/"
