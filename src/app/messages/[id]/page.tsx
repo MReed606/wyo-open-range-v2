@@ -36,6 +36,35 @@ export default function ConversationPage() {
       });
 
     setMessages(data ?? []);
+
+
+
+    // MARK READ
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (user) {
+
+      await supabase
+        .from("messages")
+        .update({
+          read: true,
+          read_at:
+            new Date()
+        })
+        .eq(
+          "conversation_id",
+          id
+        )
+        .neq(
+          "sender_id",
+          user.id
+        );
+
+    }
+
   }
 
   async function sendMessage() {
