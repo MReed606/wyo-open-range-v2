@@ -85,7 +85,7 @@ export default function NavBar() {
               </Link>
 
               <Link
-                href="/dashboard"
+                href="/dashboard/listings"
                 className="text-lg font-bold text-[#1F2933]"
               >
                 Dashboard

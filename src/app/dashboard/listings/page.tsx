@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 
-import { supabase } from "@/lib/supabase";
+import Link from "next/link";
 
-import { AuthGuard } from "@/components/auth/AuthGuard";
+import { supabase } from "@/lib/supabase";
 
 export default function DashboardListingsPage() {
 
@@ -26,7 +26,7 @@ export default function DashboardListingsPage() {
       return;
     }
 
-    const { data, error } =
+    const { data } =
       await supabase
         .from("listings")
         .select("*")
@@ -35,120 +35,102 @@ export default function DashboardListingsPage() {
           ascending: false,
         });
 
-    if (error) {
-
-      console.error(error);
-
-      return;
-    }
-
     setListings(data ?? []);
   }
 
   async function deleteListing(
-    listingId: string
+    id: string
   ) {
 
     const confirmed =
       confirm(
-        "Delete this listing permanently?"
+        "Delete this listing?"
       );
 
     if (!confirmed) {
       return;
     }
 
-    const { error } =
-      await supabase
-        .from("listings")
-        .delete()
-        .eq("id", listingId);
-
-    if (error) {
-
-      console.error(error);
-
-      alert(error.message);
-
-      return;
-    }
-
-    alert(
-      "Listing deleted"
-    );
+    await supabase
+      .from("listings")
+      .delete()
+      .eq("id", id);
 
     loadListings();
   }
 
   return (
-    <>
-      <AuthGuard />
+    <main className="min-h-screen bg-[#F7F5F2] p-6 md:p-10">
 
-      <main className="min-h-screen bg-[#F7F5F2] p-6 md:p-10">
+      <div className="mx-auto max-w-6xl">
 
-        <div className="mx-auto max-w-6xl">
+        <h1 className="mb-10 text-5xl font-black text-[#111827]">
+          Your Listings
+        </h1>
 
-          <h1 className="mb-10 text-5xl font-black text-[#111827]">
-            Your Listings
-          </h1>
+        {!listings.length && (
 
-          {listings.length === 0 ? (
+          <div className="rounded-3xl bg-white p-10 text-xl font-bold text-[#6B7280] shadow-sm">
+            No listings yet.
+          </div>
 
-            <div className="rounded-3xl bg-white p-10 text-2xl font-black shadow-sm">
-              No listings found.
-            </div>
+        )}
 
-          ) : (
+        <div className="space-y-6">
 
-            <div className="space-y-6">
+          {listings.map((listing) => (
 
-              {listings.map((listing) => (
+            <div
+              key={listing.id}
+              className="rounded-3xl bg-white p-8 shadow-sm"
+            >
 
-                <div
-                  key={listing.id}
-                  className="rounded-3xl bg-white p-8 shadow-sm"
-                >
+              <div className="flex flex-wrap items-start justify-between gap-6">
 
-                  <div className="flex flex-wrap items-start justify-between gap-6">
+                <div>
 
-                    <div>
+                  <h2 className="text-3xl font-black text-[#111827]">
+                    {listing.title}
+                  </h2>
 
-                      <h2 className="text-3xl font-black text-[#111827]">
-                        {listing.title}
-                      </h2>
-
-                      <p className="mt-4 text-2xl font-black text-[#2F5D50]">
-                        ${listing.price}
-                      </p>
-
-                    </div>
-
-                    {/* HUGE DELETE BUTTON */}
-
-                    <button
-                      onClick={() =>
-                        deleteListing(
-                          listing.id
-                        )
-                      }
-                      className="rounded-2xl bg-red-600 px-8 py-5 text-xl font-black text-white transition hover:bg-red-700"
-                    >
-                      DELETE LISTING
-                    </button>
-
-                  </div>
+                  <p className="mt-3 text-2xl font-black text-[#2F5D50]">
+                    ${listing.price}
+                  </p>
 
                 </div>
 
-              ))}
+                <div className="flex flex-wrap gap-3">
+
+                  <Link
+                    href={`/edit-listing/${listing.id}`}
+                    className="rounded-2xl bg-blue-600 px-5 py-3 font-black text-white"
+                  >
+                    Edit
+                  </Link>
+
+                  <button
+                    onClick={() =>
+                      deleteListing(
+                        listing.id
+                      )
+                    }
+                    className="rounded-2xl bg-red-600 px-5 py-3 font-black text-white"
+                  >
+                    Delete
+                  </button>
+
+                </div>
+
+              </div>
 
             </div>
 
-          )}
+          ))}
 
         </div>
 
-      </main>
-    </>
+      </div>
+
+    </main>
   );
 }
