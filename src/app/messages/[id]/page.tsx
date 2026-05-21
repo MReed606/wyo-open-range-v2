@@ -15,6 +15,11 @@ export default function ConversationPage() {
   const [messages, setMessages] =
     useState<any[]>([]);
 
+  
+const [currentUserId,
+    setCurrentUserId] =
+    useState("");
+
   const [message, setMessage] =
     useState("");
 
@@ -22,11 +27,30 @@ export default function ConversationPage() {
     loadMessages();
 
     window.dispatchEvent(
+      new Event("message-sent")
+    );
+    loadUser();
+
+    window.dispatchEvent(
       new Event("message-read")
     );
   }, [id]);
 
-  async function loadMessages() {
+  
+
+  async function loadUser() {
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    setCurrentUserId(
+      user?.id ?? ""
+    );
+  }
+
+
+async function loadMessages() {
 
     const { data } = await supabase
       .from("messages")
@@ -123,7 +147,15 @@ export default function ConversationPage() {
                 className="rounded-2xl bg-[#F7F5F2] p-5"
               >
 
-                <div className="text-sm text-gray-500">
+                <div className="text-sm font-bold text-[#2F5D50]">
+
+                  {msg.sender_id === currentUserId
+                    ? "You"
+                    : "Other User"}
+
+                </div>
+
+                <div className="mt-1 text-sm text-gray-500">
                   {new Date(
                     msg.created_at
                   ).toLocaleString()}
