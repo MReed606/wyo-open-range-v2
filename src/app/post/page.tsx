@@ -1,17 +1,51 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { AuthGuard } from "@/components/auth/AuthGuard";
-import { containsProfanity } from "@/lib/safety";
+
+const categories = [
+  "Livestock",
+  "Vehicles",
+  "Equipment",
+  "Ranching",
+  "Land",
+  "Services",
+  "Firearms",
+  "Farm & Ranch",
+  "Heavy Equipment",
+  "Trailers",
+  "ATV/UTV",
+  "Horses",
+  "Hay & Feed",
+  "Pets",
+  "Tools",
+  "Other",
+];
+
+const regions = [
+  "Cheyenne",
+  "Casper",
+  "Laramie",
+  "Gillette",
+  "Rock Springs",
+  "Sheridan",
+  "Cody",
+  "Jackson",
+  "Evanston",
+  "Rawlins",
+  "Riverton",
+  "Worland",
+  "Torrington",
+  "Green River",
+  "Buffalo",
+  "Douglas",
+  "Thermopolis",
+  "Newcastle",
+  "Wheatland",
+  "Other",
+];
 
 export default function PostPage() {
-
-  const router = useRouter();
-
-  const [loading, setLoading] =
-    useState(false);
 
   const [title, setTitle] =
     useState("");
@@ -27,61 +61,15 @@ export default function PostPage() {
     setCategory] =
     useState("");
 
-  const [region, setRegion] =
+  const [region,
+    setRegion] =
     useState("");
 
-  const [images, setImages] =
-    useState<string[]>([]);
+  const [loading,
+    setLoading] =
+    useState(false);
 
-  async function uploadImages(
-    files: FileList | null
-  ) {
-
-    if (!files) return;
-
-    const uploaded: string[] = [];
-
-    for (const file of Array.from(files)) {
-
-      const filename =
-        `${Date.now()}-${file.name}`;
-
-      const { error } =
-        await supabase.storage
-          .from("listing-images")
-          .upload(
-            filename,
-            file
-          );
-
-      if (error) {
-
-        console.log(error);
-
-        continue;
-      }
-
-      const {
-        data: publicUrl
-      } = supabase.storage
-        .from("listing-images")
-        .getPublicUrl(
-          filename
-        );
-
-      uploaded.push(
-        publicUrl.publicUrl
-      );
-    }
-
-    setImages(uploaded);
-  }
-
-  async function createListing(
-    e: React.FormEvent
-  ) {
-
-    e.preventDefault();
+  async function createListing() {
 
     setLoading(true);
 
@@ -89,19 +77,9 @@ export default function PostPage() {
       data: { user },
     } = await supabase.auth.getUser();
 
-    if (!user) return;
+    if (!user) {
 
-    // =====================================
-    // PROFANITY FILTER
-    // =====================================
-    if (
-      containsProfanity(title) ||
-      containsProfanity(description)
-    ) {
-
-      alert(
-        "Listing contains blocked words."
-      );
+      alert("Login required.");
 
       setLoading(false);
 
@@ -112,171 +90,152 @@ export default function PostPage() {
       title
         .toLowerCase()
         .replaceAll(" ", "-")
-        + "-"
-        + Date.now();
+        .replace(/[^a-z0-9-]/g, "") +
+      "-" +
+      Date.now();
 
-    await supabase
-      .from("listings")
-      .insert({
-        owner_id: user.id,
+    const { error } =
+      await supabase
+        .from("listings")
+        .insert({
+          title,
+          description,
+          price,
+          category,
+          region,
+          slug,
+          owner_id: user.id,
+        });
 
-        title,
-        description,
+    setLoading(false);
 
-        price:
-          Number(price),
+    if (error) {
 
-        category,
-        region,
+      alert(
+        "Failed to create listing."
+      );
 
-        status: "active",
+      console.log(error);
 
-        image_url:
-          images?.[0] ?? null,
+      return;
+    }
 
-        images,
-
-        slug,
-      });
-
-    router.push(
-      "/dashboard"
-    );
+    window.location.href =
+      "/dashboard/listings";
   }
 
   return (
-    <>
-      <AuthGuard />
+    <main className="min-h-screen bg-[#F7F5F2] px-6 py-12">
 
-      <main className="min-h-screen bg-[#F7F5F2] p-6 md:p-10">
+      <div className="mx-auto max-w-3xl rounded-3xl bg-white p-8 shadow-sm">
 
-        <div className="mx-auto max-w-3xl rounded-3xl bg-white p-8 shadow-sm">
+        <h1 className="mb-8 text-4xl font-black text-[#111827]">
+          Create Listing
+        </h1>
 
-          <h1 className="text-5xl font-black text-[#111827]">
-            Create Listing
-          </h1>
+        <div className="space-y-6">
 
-          <form
-            onSubmit={createListing}
-            className="mt-8 space-y-5"
+          <input
+            value={title}
+            onChange={(e) =>
+              setTitle(e.target.value)
+            }
+            placeholder="Listing Title"
+            className="w-full rounded-2xl border border-gray-300 px-5 py-4 text-lg"
+          />
+
+          <textarea
+            value={description}
+            onChange={(e) =>
+              setDescription(
+                e.target.value
+              )
+            }
+            placeholder="Description"
+            className="min-h-40 w-full rounded-2xl border border-gray-300 px-5 py-4 text-lg"
+          />
+
+          <input
+            value={price}
+            onChange={(e) =>
+              setPrice(e.target.value)
+            }
+            placeholder="Price"
+            className="w-full rounded-2xl border border-gray-300 px-5 py-4 text-lg"
+          />
+
+          {/* CATEGORY */}
+
+          <select
+            value={category}
+            onChange={(e) =>
+              setCategory(
+                e.target.value
+              )
+            }
+            className="w-full rounded-2xl border border-gray-300 px-5 py-4 text-lg"
           >
 
-            <input
-              value={title}
-              onChange={(e) =>
-                setTitle(
-                  e.target.value
-                )
-              }
-              placeholder="Listing Title"
-              required
-              className="w-full rounded-2xl border border-gray-300 px-5 py-4 text-lg text-[#111827]"
-            />
+            <option value="">
+              Select Category
+            </option>
 
-            <textarea
-              value={description}
-              onChange={(e) =>
-                setDescription(
-                  e.target.value
-                )
-              }
-              placeholder="Description"
-              required
-              className="min-h-40 w-full rounded-2xl border border-gray-300 px-5 py-4 text-lg text-[#111827]"
-            />
+            {categories.map((cat) => (
 
-            <input
-              type="number"
-              value={price}
-              onChange={(e) =>
-                setPrice(
-                  e.target.value
-                )
-              }
-              placeholder="Price"
-              required
-              className="w-full rounded-2xl border border-gray-300 px-5 py-4 text-lg text-[#111827]"
-            />
+              <option
+                key={cat}
+                value={cat}
+              >
+                {cat}
+              </option>
 
-            <input
-              value={category}
-              onChange={(e) =>
-                setCategory(
-                  e.target.value
-                )
-              }
-              placeholder="Category"
-              required
-              className="w-full rounded-2xl border border-gray-300 px-5 py-4 text-lg text-[#111827]"
-            />
+            ))}
 
-            <input
-              value={region}
-              onChange={(e) =>
-                setRegion(
-                  e.target.value
-                )
-              }
-              placeholder="Region"
-              required
-              className="w-full rounded-2xl border border-gray-300 px-5 py-4 text-lg text-[#111827]"
-            />
+          </select>
 
-            {/* IMAGE UPLOAD */}
+          {/* REGION */}
 
-            <div className="rounded-3xl border border-dashed border-gray-300 p-6">
+          <select
+            value={region}
+            onChange={(e) =>
+              setRegion(
+                e.target.value
+              )
+            }
+            className="w-full rounded-2xl border border-gray-300 px-5 py-4 text-lg"
+          >
 
-              <h2 className="mb-4 text-2xl font-black text-[#111827]">
-                Listing Images
-              </h2>
+            <option value="">
+              Select Region
+            </option>
 
-              <input
-                type="file"
-                multiple
-                accept="image/*"
-                onChange={(e) =>
-                  uploadImages(
-                    e.target.files
-                  )
-                }
-              />
+            {regions.map((reg) => (
 
-              {!!images.length && (
+              <option
+                key={reg}
+                value={reg}
+              >
+                {reg}
+              </option>
 
-                <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
+            ))}
 
-                  {images.map((img) => (
+          </select>
 
-                    <img
-                      key={img}
-                      src={img}
-                      alt=""
-                      className="h-32 w-full rounded-2xl object-cover"
-                    />
-
-                  ))}
-
-                </div>
-
-              )}
-
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full rounded-2xl bg-[#2F5D50] px-6 py-4 text-xl font-black text-white"
-            >
-              {loading
-                ? "Creating..."
-                : "Create Listing"}
-            </button>
-
-          </form>
+          <button
+            onClick={createListing}
+            disabled={loading}
+            className="w-full rounded-2xl bg-[#2F5D50] px-6 py-4 text-lg font-black text-white transition hover:bg-[#24473d]"
+          >
+            {loading
+              ? "Creating..."
+              : "Create Listing"}
+          </button>
 
         </div>
 
-      </main>
-    </>
+      </div>
+
+    </main>
   );
 }
