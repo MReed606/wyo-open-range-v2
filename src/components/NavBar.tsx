@@ -49,6 +49,13 @@ export default function NavBar() {
         <div className="flex items-center gap-8">
 
           <Link
+            href="/"
+            className="text-lg font-bold text-[#1F2933]"
+          >
+            Home
+          </Link>
+
+          <Link
             href="/listings"
             className="text-lg font-bold text-[#1F2933]"
           >
