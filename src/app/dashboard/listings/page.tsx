@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from "react";
 
-import Link from "next/link";
-
 import { supabase } from "@/lib/supabase";
 
 import { AuthGuard } from "@/components/auth/AuthGuard";
@@ -13,10 +11,6 @@ export default function DashboardListingsPage() {
   const [listings,
     setListings] =
     useState<any[]>([]);
-
-  const [loading,
-    setLoading] =
-    useState(true);
 
   useEffect(() => {
     loadListings();
@@ -43,17 +37,12 @@ export default function DashboardListingsPage() {
 
     if (error) {
 
-      console.error(
-        "LOAD ERROR:",
-        error
-      );
+      console.error(error);
 
       return;
     }
 
     setListings(data ?? []);
-
-    setLoading(false);
   }
 
   async function deleteListing(
@@ -77,14 +66,9 @@ export default function DashboardListingsPage() {
 
     if (error) {
 
-      console.error(
-        "DELETE ERROR:",
-        error
-      );
+      console.error(error);
 
-      alert(
-        error.message
-      );
+      alert(error.message);
 
       return;
     }
@@ -104,30 +88,13 @@ export default function DashboardListingsPage() {
 
         <div className="mx-auto max-w-6xl">
 
-          <div className="mb-10 flex flex-wrap items-center justify-between gap-4">
+          <h1 className="mb-10 text-5xl font-black text-[#111827]">
+            Your Listings
+          </h1>
 
-            <h1 className="text-5xl font-black text-[#111827]">
-              Your Listings
-            </h1>
+          {listings.length === 0 ? (
 
-            <Link
-              href="/sell"
-              className="rounded-2xl bg-[#2F5D50] px-6 py-4 text-lg font-black text-white"
-            >
-              Create Listing
-            </Link>
-
-          </div>
-
-          {loading ? (
-
-            <div className="rounded-3xl bg-white p-10 text-2xl font-black text-[#111827] shadow-sm">
-              Loading listings...
-            </div>
-
-          ) : listings.length === 0 ? (
-
-            <div className="rounded-3xl bg-white p-10 text-2xl font-black text-[#111827] shadow-sm">
+            <div className="rounded-3xl bg-white p-10 text-2xl font-black shadow-sm">
               No listings found.
             </div>
 
@@ -150,39 +117,24 @@ export default function DashboardListingsPage() {
                         {listing.title}
                       </h2>
 
-                      <p className="mt-4 text-xl font-bold text-[#2F5D50]">
+                      <p className="mt-4 text-2xl font-black text-[#2F5D50]">
                         ${listing.price}
                       </p>
 
-                      <p className="mt-3 text-[#6B7280]">
-                        Views:
-                        {" "}
-                        {listing.views ?? 0}
-                      </p>
-
                     </div>
 
-                    <div className="flex gap-3">
+                    {/* HUGE DELETE BUTTON */}
 
-                      <Link
-                        href={`/listing/${listing.id}`}
-                        className="rounded-2xl bg-[#111827] px-5 py-3 font-black text-white"
-                      >
-                        View
-                      </Link>
-
-                      <button
-                        onClick={() =>
-                          deleteListing(
-                            listing.id
-                          )
-                        }
-                        className="rounded-2xl bg-red-600 px-5 py-3 font-black text-white transition hover:bg-red-700"
-                      >
-                        Delete
-                      </button>
-
-                    </div>
+                    <button
+                      onClick={() =>
+                        deleteListing(
+                          listing.id
+                        )
+                      }
+                      className="rounded-2xl bg-red-600 px-8 py-5 text-xl font-black text-white transition hover:bg-red-700"
+                    >
+                      DELETE LISTING
+                    </button>
 
                   </div>
 
