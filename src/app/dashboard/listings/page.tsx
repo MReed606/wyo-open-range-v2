@@ -14,6 +14,10 @@ export default function DashboardListingsPage() {
     setListings] =
     useState<any[]>([]);
 
+  const [loading,
+    setLoading] =
+    useState(true);
+
   useEffect(() => {
     loadListings();
   }, []);
@@ -24,9 +28,11 @@ export default function DashboardListingsPage() {
       data: { user },
     } = await supabase.auth.getUser();
 
-    if (!user) return;
+    if (!user) {
+      return;
+    }
 
-    const { data } =
+    const { data, error } =
       await supabase
         .from("listings")
         .select("*")
@@ -35,7 +41,19 @@ export default function DashboardListingsPage() {
           ascending: false,
         });
 
+    if (error) {
+
+      console.error(
+        "LOAD ERROR:",
+        error
+      );
+
+      return;
+    }
+
     setListings(data ?? []);
+
+    setLoading(false);
   }
 
   async function deleteListing(
@@ -71,6 +89,10 @@ export default function DashboardListingsPage() {
       return;
     }
 
+    alert(
+      "Listing deleted"
+    );
+
     loadListings();
   }
 
@@ -82,7 +104,7 @@ export default function DashboardListingsPage() {
 
         <div className="mx-auto max-w-6xl">
 
-          <div className="mb-10 flex items-center justify-between">
+          <div className="mb-10 flex flex-wrap items-center justify-between gap-4">
 
             <h1 className="text-5xl font-black text-[#111827]">
               Your Listings
@@ -97,47 +119,80 @@ export default function DashboardListingsPage() {
 
           </div>
 
-          <div className="space-y-6">
+          {loading ? (
 
-            {listings.map((listing) => (
+            <div className="rounded-3xl bg-white p-10 text-2xl font-black text-[#111827] shadow-sm">
+              Loading listings...
+            </div>
 
-              <div
-                key={listing.id}
-                className="rounded-3xl bg-white p-8 shadow-sm"
-              >
+          ) : listings.length === 0 ? (
 
-                <div className="flex flex-wrap items-start justify-between gap-6">
+            <div className="rounded-3xl bg-white p-10 text-2xl font-black text-[#111827] shadow-sm">
+              No listings found.
+            </div>
 
-                  <div>
+          ) : (
 
-                    <h2 className="text-3xl font-black text-[#111827]">
-                      {listing.title}
-                    </h2>
+            <div className="space-y-6">
 
-                    <p className="mt-4 text-xl font-bold text-[#2F5D50]">
-                      ${listing.price}
-                    </p>
+              {listings.map((listing) => (
+
+                <div
+                  key={listing.id}
+                  className="rounded-3xl bg-white p-8 shadow-sm"
+                >
+
+                  <div className="flex flex-wrap items-start justify-between gap-6">
+
+                    <div>
+
+                      <h2 className="text-3xl font-black text-[#111827]">
+                        {listing.title}
+                      </h2>
+
+                      <p className="mt-4 text-xl font-bold text-[#2F5D50]">
+                        ${listing.price}
+                      </p>
+
+                      <p className="mt-3 text-[#6B7280]">
+                        Views:
+                        {" "}
+                        {listing.views ?? 0}
+                      </p>
+
+                    </div>
+
+                    <div className="flex gap-3">
+
+                      <Link
+                        href={`/listing/${listing.id}`}
+                        className="rounded-2xl bg-[#111827] px-5 py-3 font-black text-white"
+                      >
+                        View
+                      </Link>
+
+                      <button
+                        onClick={() =>
+                          deleteListing(
+                            listing.id
+                          )
+                        }
+                        className="rounded-2xl bg-red-600 px-5 py-3 font-black text-white transition hover:bg-red-700"
+                      >
+                        Delete
+                      </button>
+
+                    </div>
 
                   </div>
 
-                  <button
-                    onClick={() =>
-                      deleteListing(
-                        listing.id
-                      )
-                    }
-                    className="rounded-2xl bg-red-600 px-5 py-3 font-black text-white"
-                  >
-                    Delete Listing
-                  </button>
-
                 </div>
 
-              </div>
+              ))}
 
-            ))}
+            </div>
 
-          </div>
+          )}
 
         </div>
 
