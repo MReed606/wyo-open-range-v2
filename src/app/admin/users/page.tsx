@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 import { supabase } from "@/lib/supabase";
 
@@ -329,6 +330,13 @@ export default function AdminUsersPage() {
                           ? "Unsuspend User"
                           : "Suspend User"}
                       </button>
+
+                      <Link
+                        href={`/seller/profile/${user.id}`}
+                        className="rounded-2xl bg-[#111827] px-5 py-3 font-black text-white"
+                      >
+                        View Profile
+                      </Link>
 
                       <button
                         onClick={() =>
