@@ -1,22 +1,24 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
 import { supabase } from "@/lib/supabase";
 
-export function FavoriteButton({
+export default function FavoriteButton({
   listingId,
 }: {
   listingId: string;
 }) {
 
-  const [saved, setSaved] =
+  const [saved,
+    setSaved] =
     useState(false);
 
   useEffect(() => {
-    checkSaved();
+    loadSaved();
   }, []);
 
-  async function checkSaved() {
+  async function loadSaved() {
 
     const {
       data: { user },
@@ -42,11 +44,6 @@ export function FavoriteButton({
     } = await supabase.auth.getUser();
 
     if (!user) {
-
-      alert(
-        "Login required."
-      );
-
       return;
     }
 
@@ -60,30 +57,26 @@ export function FavoriteButton({
 
       setSaved(false);
 
-    } else {
-
-      await supabase
-        .from("favorites")
-        .insert({
-          user_id: user.id,
-          listing_id: listingId,
-        });
-
-      setSaved(true);
+      return;
     }
+
+    await supabase
+      .from("favorites")
+      .insert({
+        user_id: user.id,
+        listing_id: listingId,
+      });
+
+    setSaved(true);
   }
 
   return (
     <button
       onClick={toggleSave}
-      className={`rounded-2xl px-6 py-4 text-lg font-black transition ${
-        saved
-          ? "bg-red-600 text-white"
-          : "border border-gray-300 bg-white text-[#111827]"
-      }`}
+      className="rounded-2xl border border-[#2F5D50] px-4 py-2 font-black text-[#2F5D50]"
     >
       {saved
-        ? "Saved ♥"
+        ? "Saved"
         : "Save Listing"}
     </button>
   );

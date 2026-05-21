@@ -110,3 +110,25 @@ export default function MessagesPage() {
     </>
   );
 }
+
+
+async function deleteMessage(
+  id: string
+) {
+
+  const confirmed =
+    confirm(
+      "Delete message?"
+    );
+
+  if (!confirmed) {
+    return;
+  }
+
+  await supabase
+    .from("messages")
+    .delete()
+    .eq("id", id);
+
+  window.location.reload();
+}

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { FavoriteButton } from "@/components/listings/FavoriteButton";
+import FavoriteButton from "@/components/listings/FavoriteButton";
 import { ImageGallery } from "@/components/listings/ImageGallery";
 import { supabase } from "@/lib/supabase";
 
