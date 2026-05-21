@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { notifyUser } from "@/lib/notify";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 
 export default function MessagesPage() {
