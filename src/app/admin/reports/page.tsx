@@ -135,7 +135,7 @@ async function loadReports() {
 
 
         <Link
-          href="/admin/removed"
+          href="/admin"
           className="rounded-xl border border-red-600 px-5 py-3 font-bold text-red-700"
         >
           Removed Listings

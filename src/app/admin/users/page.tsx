@@ -99,7 +99,25 @@ export default function AdminUsersPage() {
     loadUsers();
   }
 
-  const badges = [
+  
+  async function toggleSuspend(
+    userId: string,
+    suspended: boolean
+  ) {
+
+    await supabase
+      .from("profiles")
+      .update({
+        suspended:
+          !suspended,
+      })
+      .eq("id", userId);
+
+    loadUsers();
+  }
+
+
+const badges = [
     [
       "verified_badge",
       "Verified",
@@ -194,6 +212,26 @@ export default function AdminUsersPage() {
                     >
                       Delete User
                     </button>
+
+                  
+
+                    <div className="mt-6 flex gap-3">
+
+                      <button
+                        onClick={() =>
+                          toggleSuspend(
+                            user.id,
+                            user.suspended
+                          )
+                        }
+                        className="rounded-2xl bg-yellow-500 px-5 py-3 font-black text-white"
+                      >
+                        {user.suspended
+                          ? "Unsuspend User"
+                          : "Suspend User"}
+                      </button>
+
+                    </div>
 
                   </div>
 
