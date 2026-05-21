@@ -4,12 +4,31 @@ import { useEffect, useState } from "react";
 
 import { supabase } from "@/lib/supabase";
 
+import { isAdmin } from "@/lib/admin";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 
 export default function AdminUsersPage() {
 
   const [users, setUsers] =
     useState<any[]>([]);
+
+  
+  useEffect(() => {
+    checkAdmin();
+  }, []);
+
+  async function checkAdmin() {
+
+    const admin =
+      await isAdmin();
+
+    if (!admin) {
+
+      window.location.href =
+        "/";
+    }
+  }
+
 
   useEffect(() => {
     loadUsers();

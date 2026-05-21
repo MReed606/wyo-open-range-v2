@@ -1,15 +1,23 @@
-export const ADMIN_EMAILS = [
-  "mathewrreed88@gmail.com",
-  "vince.green.4@outlook.com",
-];
+import { supabase } from "@/lib/supabase";
 
-export function isAdminEmail(
-  email?: string | null
-) {
+export async function isAdmin() {
 
-  if (!email) return false;
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  return ADMIN_EMAILS.includes(
-    email.toLowerCase()
+  if (!user) {
+    return false;
+  }
+
+  const { data } =
+    await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .maybeSingle();
+
+  return (
+    data?.role === "admin"
   );
 }
