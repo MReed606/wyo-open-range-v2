@@ -4,17 +4,18 @@ import { useEffect, useState } from "react";
 
 import { supabase } from "@/lib/supabase";
 
-import { isAdmin } from "@/lib/admin";
 import { AuthGuard } from "@/components/auth/AuthGuard";
+
+import { isAdmin } from "@/lib/admin";
 
 export default function AdminUsersPage() {
 
   const [users, setUsers] =
     useState<any[]>([]);
 
-  
   useEffect(() => {
     checkAdmin();
+    loadUsers();
   }, []);
 
   async function checkAdmin() {
@@ -23,16 +24,9 @@ export default function AdminUsersPage() {
       await isAdmin();
 
     if (!admin) {
-
-      window.location.href =
-        "/";
+      window.location.href = "/";
     }
   }
-
-
-  useEffect(() => {
-    loadUsers();
-  }, []);
 
   async function loadUsers() {
 
@@ -47,29 +41,16 @@ export default function AdminUsersPage() {
     setUsers(data ?? []);
   }
 
-  async function setBadge(
+  async function toggleBadge(
     userId: string,
-    badge: string
+    field: string,
+    value: boolean
   ) {
 
     await supabase
       .from("profiles")
       .update({
-        badge
-      })
-      .eq("id", userId);
-
-    loadUsers();
-  }
-
-  async function suspendUser(
-    userId: string
-  ) {
-
-    await supabase
-      .from("profiles")
-      .update({
-        suspended: true
+        [field]: value,
       })
       .eq("id", userId);
 
@@ -84,7 +65,7 @@ export default function AdminUsersPage() {
 
         <div className="mx-auto max-w-7xl">
 
-          <h1 className="mb-8 text-5xl font-black text-[#111827]">
+          <h1 className="mb-10 text-5xl font-black text-[#111827]">
             User Management
           </h1>
 
@@ -94,10 +75,10 @@ export default function AdminUsersPage() {
 
               <div
                 key={user.id}
-                className="rounded-3xl bg-white p-6 shadow-sm"
+                className="rounded-3xl bg-white p-8 shadow-sm"
               >
 
-                <div className="flex flex-wrap items-start justify-between gap-6">
+                <div className="flex flex-wrap items-start justify-between gap-8">
 
                   <div>
 
@@ -112,57 +93,48 @@ export default function AdminUsersPage() {
                       <p>{user.phone}</p>
 
                       <p>
-                        Badge:
+                        Role:
                         {" "}
-                        {user.badge ?? "None"}
-                      </p>
-
-                      <p>
-                        Trust Score:
-                        {" "}
-                        {user.trust_score ?? 100}
+                        {user.role ?? "user"}
                       </p>
 
                     </div>
 
                   </div>
 
-                  <div className="flex flex-wrap gap-3">
+                  <div className="grid gap-3 md:grid-cols-2">
 
-                    <button
-                      onClick={() =>
-                        setBadge(
-                          user.id,
-                          "Trusted Seller"
-                        )
-                      }
-                      className="rounded-2xl bg-blue-600 px-4 py-3 font-bold text-white"
-                    >
-                      Trusted
-                    </button>
+                    {[
+                      ["verified_badge", "Verified"],
+                      ["trusted_seller_badge", "Trusted Seller"],
+                      ["premium_seller_badge", "Premium Seller"],
+                      ["moderator_badge", "Moderator"],
+                      ["business_badge", "Business"],
+                      ["admin_badge", "Admin"],
+                    ].map(([field, label]) => (
 
-                    <button
-                      onClick={() =>
-                        setBadge(
-                          user.id,
-                          "Business"
-                        )
-                      }
-                      className="rounded-2xl bg-purple-600 px-4 py-3 font-bold text-white"
-                    >
-                      Business
-                    </button>
+                      <label
+                        key={field}
+                        className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-[#FAFAFA] px-4 py-3 font-bold text-[#111827]"
+                      >
 
-                    <button
-                      onClick={() =>
-                        suspendUser(
-                          user.id
-                        )
-                      }
-                      className="rounded-2xl bg-red-600 px-4 py-3 font-bold text-white"
-                    >
-                      Suspend
-                    </button>
+                        <input
+                          type="checkbox"
+                          checked={user[field]}
+                          onChange={(e) =>
+                            toggleBadge(
+                              user.id,
+                              field,
+                              e.target.checked
+                            )
+                          }
+                        />
+
+                        {label}
+
+                      </label>
+
+                    ))}
 
                   </div>
 
