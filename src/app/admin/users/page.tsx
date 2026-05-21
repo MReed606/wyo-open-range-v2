@@ -363,7 +363,7 @@ export default function AdminUsersPage() {
 
                   </div>
 
-                  {/* BADGES */}}}
+                  {/* BADGES */}
 
                   <div className="grid gap-3 md:grid-cols-2">
 
