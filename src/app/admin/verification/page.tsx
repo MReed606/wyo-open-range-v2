@@ -58,9 +58,7 @@ export default function VerificationPage() {
     const filtered =
       (data ?? []).filter(
         (profile) =>
-          !isAdmin(
-            profile.email
-          )
+          profile.role !== "admin"
       );
 
     setProfiles(filtered);
