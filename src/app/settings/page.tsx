@@ -195,7 +195,53 @@ export default function SettingsPage() {
     );
   }
 
-  if (loading) {
+  
+  async function deleteAccount() {
+
+    const confirmed =
+      confirm(
+        "Are you sure you want to permanently delete your account?"
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) return;
+
+    // =====================================
+    // DELETE LISTINGS
+    // =====================================
+
+    await supabase
+      .from("listings")
+      .delete()
+      .eq("owner_id", user.id);
+
+    // =====================================
+    // DELETE PROFILE
+    // =====================================
+
+    await supabase
+      .from("profiles")
+      .delete()
+      .eq("id", user.id);
+
+    // =====================================
+    // SIGN OUT
+    // =====================================
+
+    await supabase.auth.signOut();
+
+    window.location.href = "/";
+  }
+
+
+if (loading) {
 
     return (
       <>
@@ -432,6 +478,15 @@ export default function SettingsPage() {
               className="w-full rounded-2xl bg-[#2F5D50] px-8 py-5 text-xl font-black text-white"
             >
               Save Settings
+            </button>
+
+          
+
+            <button
+              onClick={deleteAccount}
+              className="w-full rounded-2xl bg-red-600 px-8 py-5 text-xl font-black text-white transition hover:bg-red-700"
+            >
+              Delete Account
             </button>
 
           </div>

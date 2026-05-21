@@ -57,7 +57,43 @@ export default function AdminUsersPage() {
     loadUsers();
   }
 
-  return (
+  
+  async function deleteUser(
+    userId: string
+  ) {
+
+    const confirmed =
+      confirm(
+        "Delete this user permanently?"
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    // =====================================
+    // DELETE LISTINGS
+    // =====================================
+
+    await supabase
+      .from("listings")
+      .delete()
+      .eq("owner_id", userId);
+
+    // =====================================
+    // DELETE PROFILE
+    // =====================================
+
+    await supabase
+      .from("profiles")
+      .delete()
+      .eq("id", userId);
+
+    loadUsers();
+  }
+
+
+return (
     <>
       <AuthGuard />
 
@@ -136,7 +172,16 @@ export default function AdminUsersPage() {
 
                     ))}
 
-                  </div>
+                  
+
+                  <button
+                    onClick={() =>
+                      deleteUser(user.id)
+                    }
+                    className="mt-6 rounded-2xl bg-red-600 px-5 py-3 font-black text-white transition hover:bg-red-700"
+                  >
+                    Delete User
+                  </button>
 
                 </div>
 
