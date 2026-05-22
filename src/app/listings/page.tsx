@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { ListingCard } from "@/components/ListingCard";
 
-export default function ListingsPage() {
+function ListingsContent() {
 
   const searchParams =
     useSearchParams();
@@ -97,5 +97,34 @@ export default function ListingsPage() {
       </div>
 
     </main>
+  );
+}
+
+export default function ListingsPage() {
+
+  return (
+    <Suspense
+      fallback={
+        <main className="min-h-screen bg-[#F7F5F2] px-6 py-12">
+
+          <div className="mx-auto max-w-7xl">
+
+            <div className="rounded-3xl bg-white p-10 shadow-sm">
+
+              <h2 className="text-2xl font-black text-[#111827]">
+                Loading listings...
+              </h2>
+
+            </div>
+
+          </div>
+
+        </main>
+      }
+    >
+
+      <ListingsContent />
+
+    </Suspense>
   );
 }
