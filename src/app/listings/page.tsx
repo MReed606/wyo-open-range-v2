@@ -87,6 +87,7 @@ export default function ListingsPage() {
               location={listing.region}
               seller={listing.seller ?? "Seller"}
               slug={listing.slug}
+              condition={listing.condition ?? "Used"}
             />
 
           ))}
