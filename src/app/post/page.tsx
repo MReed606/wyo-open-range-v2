@@ -1,49 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-
-const categories = [
-  "Livestock",
-  "Vehicles",
-  "Equipment",
-  "Ranching",
-  "Land",
-  "Services",
-  "Firearms",
-  "Farm & Ranch",
-  "Heavy Equipment",
-  "Trailers",
-  "ATV/UTV",
-  "Horses",
-  "Hay & Feed",
-  "Pets",
-  "Tools",
-  "Other",
-];
-
-const regions = [
-  "Cheyenne",
-  "Casper",
-  "Laramie",
-  "Gillette",
-  "Rock Springs",
-  "Sheridan",
-  "Cody",
-  "Jackson",
-  "Evanston",
-  "Rawlins",
-  "Riverton",
-  "Worland",
-  "Torrington",
-  "Green River",
-  "Buffalo",
-  "Douglas",
-  "Thermopolis",
-  "Newcastle",
-  "Wheatland",
-  "Other",
-];
 
 export default function PostPage() {
 
@@ -54,7 +12,8 @@ export default function PostPage() {
     setDescription] =
     useState("");
 
-  const [price, setPrice] =
+  const [price,
+    setPrice] =
     useState("");
 
   const [category,
@@ -65,9 +24,62 @@ export default function PostPage() {
     setRegion] =
     useState("");
 
+  const [categories,
+    setCategories] =
+    useState<string[]>([]);
+
+  const [regions,
+    setRegions] =
+    useState<string[]>([]);
+
   const [loading,
     setLoading] =
     useState(false);
+
+  useEffect(() => {
+    loadFilters();
+  }, []);
+
+  async function loadFilters() {
+
+    const {
+      data: listings
+    } = await supabase
+      .from("listings")
+      .select("category, region");
+
+    if (!listings) return;
+
+    const uniqueCategories =
+      Array.from(
+        new Set(
+          listings
+            .map(
+              (x) => x.category
+            )
+            .filter(Boolean)
+        )
+      );
+
+    const uniqueRegions =
+      Array.from(
+        new Set(
+          listings
+            .map(
+              (x) => x.region
+            )
+            .filter(Boolean)
+        )
+      );
+
+    setCategories(
+      uniqueCategories as string[]
+    );
+
+    setRegions(
+      uniqueRegions as string[]
+    );
+  }
 
   async function createListing() {
 
@@ -79,7 +91,9 @@ export default function PostPage() {
 
     if (!user) {
 
-      alert("Login required.");
+      alert(
+        "Login required."
+      );
 
       setLoading(false);
 
@@ -90,7 +104,10 @@ export default function PostPage() {
       title
         .toLowerCase()
         .replaceAll(" ", "-")
-        .replace(/[^a-z0-9-]/g, "") +
+        .replace(
+          /[^a-z0-9-]/g,
+          ""
+        ) +
       "-" +
       Date.now();
 
@@ -111,11 +128,11 @@ export default function PostPage() {
 
     if (error) {
 
+      console.log(error);
+
       alert(
         "Failed to create listing."
       );
-
-      console.log(error);
 
       return;
     }
@@ -164,8 +181,6 @@ export default function PostPage() {
             className="w-full rounded-2xl border border-gray-300 px-5 py-4 text-lg"
           />
 
-          {/* CATEGORY */}
-
           <select
             value={category}
             onChange={(e) =>
@@ -192,8 +207,6 @@ export default function PostPage() {
             ))}
 
           </select>
-
-          {/* REGION */}
 
           <select
             value={region}
