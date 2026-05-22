@@ -87,7 +87,6 @@ export default function ListingsPage() {
               location={listing.region}
               seller={listing.seller ?? "Seller"}
               slug={listing.slug}
-              image={listing.image_url}
             />
 
           ))}
