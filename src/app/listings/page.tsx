@@ -1,9 +1,11 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { ListingCard } from "@/components/ListingCard";
+
+const PAGE_SIZE = 12;
 
 function ListingsContent() {
 
@@ -20,6 +22,23 @@ function ListingsContent() {
   const [loading,
     setLoading] =
     useState(true);
+
+  const [loadingMore,
+    setLoadingMore] =
+    useState(false);
+
+  const [hasMore,
+    setHasMore] =
+    useState(true);
+
+  const [page,
+    setPage] =
+    useState(0);
+
+  const observerRef =
+    useRef<HTMLDivElement | null>(
+      null
+    );
 
   // =====================================
   // FILTER STATES
@@ -45,8 +64,14 @@ function ListingsContent() {
     setSortBy] =
     useState("newest");
 
+  // =====================================
+  // RESET WHEN FILTERS CHANGE
+  // =====================================
+
   useEffect(() => {
-    loadListings();
+
+    resetAndReload();
+
   }, [
     category,
     search,
@@ -56,15 +81,101 @@ function ListingsContent() {
     sortBy,
   ]);
 
-  async function loadListings() {
+  async function resetAndReload() {
 
-    setLoading(true);
+    setListings([]);
+    setPage(0);
+    setHasMore(true);
+
+    await loadListings(
+      0,
+      true
+    );
+  }
+
+  // =====================================
+  // INFINITE SCROLL OBSERVER
+  // =====================================
+
+  useEffect(() => {
+
+    if (!observerRef.current) {
+      return;
+    }
+
+    const observer =
+      new IntersectionObserver(
+        async (entries) => {
+
+          const first =
+            entries[0];
+
+          if (
+            first.isIntersecting &&
+            hasMore &&
+            !loadingMore &&
+            !loading
+          ) {
+
+            const nextPage =
+              page + 1;
+
+            setPage(nextPage);
+
+            await loadListings(
+              nextPage,
+              false
+            );
+          }
+
+        },
+        {
+          threshold: 0.25,
+        }
+      );
+
+    observer.observe(
+      observerRef.current
+    );
+
+    return () => {
+      observer.disconnect();
+    };
+
+  }, [
+    page,
+    hasMore,
+    loadingMore,
+    loading,
+  ]);
+
+  // =====================================
+  // LOAD LISTINGS
+  // =====================================
+
+  async function loadListings(
+    currentPage: number,
+    replace: boolean
+  ) {
+
+    if (replace) {
+      setLoading(true);
+    } else {
+      setLoadingMore(true);
+    }
+
+    const from =
+      currentPage * PAGE_SIZE;
+
+    const to =
+      from + PAGE_SIZE - 1;
 
     let query =
       supabase
         .from("listings")
         .select("*")
-        .neq("status", "removed");
+        .neq("status", "removed")
+        .range(from, to);
 
     // =====================================
     // CATEGORY
@@ -106,7 +217,7 @@ function ListingsContent() {
     }
 
     // =====================================
-    // PRICE RANGE
+    // PRICE FILTERS
     // =====================================
 
     if (minPrice) {
@@ -203,12 +314,38 @@ function ListingsContent() {
       );
 
       setLoading(false);
+      setLoadingMore(false);
+
       return;
     }
 
-    setListings(data ?? []);
+    const newListings =
+      data ?? [];
+
+    if (
+      newListings.length <
+      PAGE_SIZE
+    ) {
+
+      setHasMore(false);
+    }
+
+    if (replace) {
+
+      setListings(
+        newListings
+      );
+
+    } else {
+
+      setListings((prev) => [
+        ...prev,
+        ...newListings,
+      ]);
+    }
 
     setLoading(false);
+    setLoadingMore(false);
   }
 
   return (
@@ -339,7 +476,7 @@ function ListingsContent() {
 
         </div>
 
-        {/* LOADING */}
+        {/* INITIAL LOADING */}
 
         {loading && (
 
@@ -412,6 +549,40 @@ function ListingsContent() {
               />
 
             ))}
+
+          </div>
+
+        )}
+
+        {/* LOAD MORE */}
+
+        {loadingMore && (
+
+          <div className="mt-10 text-center">
+
+            <p className="text-lg font-bold text-[#6B7280]">
+              Loading more listings...
+            </p>
+
+          </div>
+
+        )}
+
+        {/* END MARKER */}
+
+        <div
+          ref={observerRef}
+          className="h-20"
+        />
+
+        {!hasMore &&
+          listings.length > 0 && (
+
+          <div className="mt-10 text-center">
+
+            <p className="text-lg font-bold text-[#6B7280]">
+              You've reached the end.
+            </p>
 
           </div>
 
