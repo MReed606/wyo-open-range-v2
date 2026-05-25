@@ -64,6 +64,10 @@ function ListingsContent() {
     setSortBy] =
     useState("newest");
 
+  const [savingSearch,
+    setSavingSearch] =
+    useState(false);
+
   // =====================================
   // RESET WHEN FILTERS CHANGE
   // =====================================
@@ -94,7 +98,77 @@ function ListingsContent() {
   }
 
   // =====================================
-  // INFINITE SCROLL OBSERVER
+  // SAVE SEARCH
+  // =====================================
+
+  async function saveSearch() {
+
+    setSavingSearch(true);
+
+    const {
+      data: { user }
+    } =
+      await supabase.auth.getUser();
+
+    if (!user) {
+
+      alert(
+        "Please login first."
+      );
+
+      setSavingSearch(false);
+
+      return;
+    }
+
+    const { error } =
+      await supabase
+        .from("saved_searches")
+        .insert({
+
+          user_id:
+            user.id,
+
+          search:
+            search || null,
+
+          category:
+            category || null,
+
+          region:
+            region || null,
+
+          min_price:
+            minPrice || null,
+
+          max_price:
+            maxPrice || null,
+
+        });
+
+    setSavingSearch(false);
+
+    if (error) {
+
+      console.error(
+        "SAVE SEARCH ERROR:",
+        error
+      );
+
+      alert(
+        "Unable to save search."
+      );
+
+      return;
+    }
+
+    alert(
+      "Search saved successfully."
+    );
+  }
+
+  // =====================================
+  // INFINITE SCROLL
   // =====================================
 
   useEffect(() => {
@@ -177,9 +251,7 @@ function ListingsContent() {
         .neq("status", "removed")
         .range(from, to);
 
-    // =====================================
     // CATEGORY
-    // =====================================
 
     if (category) {
 
@@ -190,9 +262,7 @@ function ListingsContent() {
         );
     }
 
-    // =====================================
     // SEARCH
-    // =====================================
 
     if (search.trim()) {
 
@@ -203,9 +273,7 @@ function ListingsContent() {
         );
     }
 
-    // =====================================
     // REGION
-    // =====================================
 
     if (region.trim()) {
 
@@ -216,9 +284,7 @@ function ListingsContent() {
         );
     }
 
-    // =====================================
     // PRICE FILTERS
-    // =====================================
 
     if (minPrice) {
 
@@ -238,9 +304,7 @@ function ListingsContent() {
         );
     }
 
-    // =====================================
     // SORTING
-    // =====================================
 
     switch (sortBy) {
 
@@ -355,19 +419,35 @@ function ListingsContent() {
 
         {/* HEADER */}
 
-        <div className="mb-10">
+        <div className="mb-10 flex flex-wrap items-start justify-between gap-6">
 
-          <h1 className="text-5xl font-black text-[#111827]">
+          <div>
 
-            {category
-              ? `${category} Listings`
-              : "Marketplace Listings"}
+            <h1 className="text-5xl font-black text-[#111827]">
 
-          </h1>
+              {category
+                ? `${category} Listings`
+                : "Marketplace Listings"}
 
-          <p className="mt-4 text-lg text-[#6B7280]">
-            Discover listings across Wyoming.
-          </p>
+            </h1>
+
+            <p className="mt-4 text-lg text-[#6B7280]">
+              Discover listings across Wyoming.
+            </p>
+
+          </div>
+
+          <button
+            onClick={saveSearch}
+            disabled={savingSearch}
+            className="rounded-2xl bg-[#2F5D50] px-6 py-4 text-sm font-black text-white transition hover:bg-[#24473d] disabled:opacity-50"
+          >
+
+            {savingSearch
+              ? "Saving..."
+              : "Save Search"}
+
+          </button>
 
         </div>
 
@@ -476,85 +556,28 @@ function ListingsContent() {
 
         </div>
 
-        {/* INITIAL LOADING */}
-
-        {loading && (
-
-          <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
-
-            {Array.from({
-              length: 6,
-            }).map((_, i) => (
-
-              <div
-                key={i}
-                className="overflow-hidden rounded-3xl bg-white shadow-sm"
-              >
-
-                <div className="h-[240px] animate-pulse bg-gray-200" />
-
-                <div className="p-6">
-
-                  <div className="h-8 animate-pulse rounded bg-gray-200" />
-
-                  <div className="mt-4 h-6 w-1/2 animate-pulse rounded bg-gray-200" />
-
-                </div>
-
-              </div>
-
-            ))}
-
-          </div>
-
-        )}
-
-        {/* EMPTY */}
-
-        {!loading &&
-          !listings.length && (
-
-          <div className="rounded-3xl bg-white p-10 shadow-sm">
-
-            <h2 className="text-2xl font-black text-[#111827]">
-              No listings found
-            </h2>
-
-            <p className="mt-3 text-[#6B7280]">
-              Try adjusting your filters.
-            </p>
-
-          </div>
-
-        )}
-
         {/* GRID */}
 
-        {!loading &&
-          listings.length > 0 && (
+        <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
 
-          <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
+          {listings.map((listing) => (
 
-            {listings.map((listing) => (
+            <ListingCard
+              key={listing.id}
+              title={listing.title}
+              price={listing.price}
+              location={listing.region}
+              seller={listing.seller ?? "Seller"}
+              slug={listing.slug}
+              condition={listing.condition ?? "Used"}
+              imageUrl={listing.image_url}
+            />
 
-              <ListingCard
-                key={listing.id}
-                title={listing.title}
-                price={listing.price}
-                location={listing.region}
-                seller={listing.seller ?? "Seller"}
-                slug={listing.slug}
-                condition={listing.condition ?? "Used"}
-                imageUrl={listing.image_url}
-              />
+          ))}
 
-            ))}
+        </div>
 
-          </div>
-
-        )}
-
-        {/* LOAD MORE */}
+        {/* LOADING */}
 
         {loadingMore && (
 
@@ -568,25 +591,12 @@ function ListingsContent() {
 
         )}
 
-        {/* END MARKER */}
+        {/* OBSERVER */}
 
         <div
           ref={observerRef}
           className="h-20"
         />
-
-        {!hasMore &&
-          listings.length > 0 && (
-
-          <div className="mt-10 text-center">
-
-            <p className="text-lg font-bold text-[#6B7280]">
-              You've reached the end.
-            </p>
-
-          </div>
-
-        )}
 
       </div>
 
