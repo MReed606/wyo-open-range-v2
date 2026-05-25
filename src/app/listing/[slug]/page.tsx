@@ -7,8 +7,20 @@ import { useParams } from "next/navigation";
 
 import FavoriteButton from "@/components/listings/FavoriteButton";
 import { SellerRating } from "@/components/reviews/SellerRating";
+import { LeaveReviewForm } from "@/components/reviews/LeaveReviewForm";
 
 import { supabase } from "@/lib/supabase";
+
+type RelatedListing = {
+  id: string;
+  title: string;
+  slug: string;
+  image_url: string | null;
+  price: string;
+  region: string;
+  category: string | null;
+  trending_score: number;
+};
 
 export default function ListingPage() {
 
@@ -20,6 +32,10 @@ export default function ListingPage() {
   const [listing,
     setListing] =
     useState<any>(null);
+
+  const [relatedListings,
+    setRelatedListings] =
+    useState<RelatedListing[]>([]);
 
   const [loading,
     setLoading] =
@@ -36,10 +52,48 @@ export default function ListingPage() {
   useEffect(() => {
 
     if (slug) {
+
       loadListing();
+
     }
 
   }, [slug]);
+
+  // =====================================
+  // TRACK USER ACTIVITY
+  // =====================================
+
+  async function trackActivity(
+    listingId: string,
+    activityType: string
+  ) {
+
+    const {
+      data: { user }
+    } =
+      await supabase.auth.getUser();
+
+    if (!user) {
+      return;
+    }
+
+    await supabase
+      .from(
+        "user_listing_activity"
+      )
+      .insert({
+
+        user_id:
+          user.id,
+
+        listing_id:
+          listingId,
+
+        activity_type:
+          activityType,
+
+      });
+  }
 
   // =====================================
   // VIEW COUNTER
@@ -70,7 +124,8 @@ export default function ListingPage() {
       await supabase.rpc(
         "increment_listing_views",
         {
-          listing_id: listingId,
+          listing_id:
+            listingId,
         }
       );
 
@@ -82,6 +137,60 @@ export default function ListingPage() {
       );
 
     }
+  }
+
+  // =====================================
+  // LOAD RELATED
+  // =====================================
+
+  async function loadRelatedListings(
+    currentListing: any
+  ) {
+
+    const { data, error } =
+      await supabase
+        .from("listings")
+        .select(`
+          id,
+          title,
+          slug,
+          image_url,
+          price,
+          region,
+          category,
+          trending_score
+        `)
+        .neq(
+          "id",
+          currentListing.id
+        )
+        .eq(
+          "category",
+          currentListing.category
+        )
+        .or("status.is.null,status.neq.removed")
+        .or("hidden_by_system.is.null,hidden_by_system.neq.true")
+        .order(
+          "trending_score",
+          {
+            ascending: false,
+          }
+        )
+        .limit(6);
+
+    if (error) {
+
+      console.error(
+        "RELATED LISTINGS ERROR:",
+        error
+      );
+
+      return;
+    }
+
+    setRelatedListings(
+      data ?? []
+    );
   }
 
   // =====================================
@@ -128,6 +237,15 @@ export default function ListingPage() {
       data.id
     );
 
+    await trackActivity(
+      data.id,
+      "view"
+    );
+
+    await loadRelatedListings(
+      data
+    );
+
     setLoading(false);
   }
 
@@ -148,22 +266,24 @@ export default function ListingPage() {
 
     const {
       data: { user },
-    } = await supabase.auth.getUser();
+    } =
+      await supabase.auth.getUser();
 
     const {
       data: existingReport
-    } = await supabase
-      .from("reports")
-      .select("id")
-      .eq(
-        "listing_id",
-        listing.id
-      )
-      .eq(
-        "reporter_id",
-        user?.id
-      )
-      .single();
+    } =
+      await supabase
+        .from("reports")
+        .select("id")
+        .eq(
+          "listing_id",
+          listing.id
+        )
+        .eq(
+          "reporter_id",
+          user?.id
+        )
+        .single();
 
     if (existingReport) {
 
@@ -214,20 +334,26 @@ export default function ListingPage() {
       return;
     }
 
+    await trackActivity(
+      listing.id,
+      "contact_seller"
+    );
+
     const {
       data: existing
-    } = await supabase
-      .from("conversations")
-      .select("*")
-      .eq(
-        "listing_id",
-        listing.id
-      )
-      .eq(
-        "buyer_id",
-        user.id
-      )
-      .single();
+    } =
+      await supabase
+        .from("conversations")
+        .select("*")
+        .eq(
+          "listing_id",
+          listing.id
+        )
+        .eq(
+          "buyer_id",
+          user.id
+        )
+        .single();
 
     if (existing) {
 
@@ -254,10 +380,6 @@ export default function ListingPage() {
         })
         .select()
         .single();
-
-    // =====================================
-    // NOTIFICATION
-    // =====================================
 
     await supabase
       .from(
@@ -364,8 +486,6 @@ export default function ListingPage() {
 
                 </h1>
 
-                {/* CATEGORY */}
-
                 {listing.category && (
 
                   <div className="mt-4 inline-flex rounded-full bg-[#2F5D50]/10 px-4 py-2 text-sm font-bold text-[#2F5D50]">
@@ -376,7 +496,7 @@ export default function ListingPage() {
 
                 )}
 
-                {/* SELLER RATING */}
+                {/* SELLER */}
 
                 <div className="mt-6">
 
@@ -429,7 +549,9 @@ export default function ListingPage() {
               <div className="flex flex-wrap gap-4">
 
                 <FavoriteButton
-                  listingId={listing.id}
+                  listingId={
+                    listing.id
+                  }
                 />
 
                 <Link
@@ -477,6 +599,124 @@ export default function ListingPage() {
           </div>
 
         </div>
+
+        {/* REVIEW FORM */}
+
+        <LeaveReviewForm
+          sellerId={listing.owner_id}
+          listingId={listing.id}
+        />
+
+        {/* RELATED */}
+
+        {relatedListings.length > 0 && (
+
+          <section className="mt-16">
+
+            <div className="mb-8">
+
+              <h2 className="text-4xl font-black text-[#111827]">
+
+                Similar Listings
+
+              </h2>
+
+              <p className="mt-3 text-lg text-[#6B7280]">
+
+                Related listings you may also like.
+
+              </p>
+
+            </div>
+
+            <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
+
+              {relatedListings.map((item) => (
+
+                <Link
+                  key={item.id}
+                  href={`/listing/${item.slug}`}
+                  className="group overflow-hidden rounded-3xl bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
+                >
+
+                  <div className="relative h-[240px] overflow-hidden">
+
+                    {item.image_url ? (
+
+                      <Image
+                        src={item.image_url}
+                        alt={item.title}
+                        fill
+                        className="object-cover transition duration-500 group-hover:scale-105"
+                      />
+
+                    ) : (
+
+                      <div className="flex h-full items-center justify-center bg-[#E5E7EB]">
+
+                        <span className="font-bold text-[#6B7280]">
+
+                          No Image
+
+                        </span>
+
+                      </div>
+
+                    )}
+
+                    <div className="absolute left-4 top-4 rounded-full bg-[#2F5D50] px-4 py-2 text-sm font-black text-white">
+
+                      Similar
+
+                    </div>
+
+                  </div>
+
+                  <div className="p-6">
+
+                    <h3 className="line-clamp-2 text-2xl font-black text-[#111827]">
+
+                      {item.title}
+
+                    </h3>
+
+                    <p className="mt-4 text-3xl font-black text-[#2F5D50]">
+
+                      {item.price}
+
+                    </p>
+
+                    <div className="mt-6 flex items-center justify-between">
+
+                      <p className="text-sm font-bold text-[#6B7280]">
+
+                        {item.region}
+
+                      </p>
+
+                      <div className="rounded-full bg-[#F3F4F6] px-4 py-2 text-sm font-black text-[#111827]">
+
+                        🔥
+                        {" "}
+                        {Math.round(
+                          item.trending_score ?? 0
+                        )}
+
+                      </div>
+
+                    </div>
+
+                  </div>
+
+                </Link>
+
+              ))}
+
+            </div>
+
+          </section>
+
+        )}
 
         {/* REPORT */}
 
