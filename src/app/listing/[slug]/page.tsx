@@ -60,7 +60,7 @@ export default function ListingPage() {
   }, [slug]);
 
   // =====================================
-  // TRACK USER ACTIVITY
+  // TRACK USER ACTIVITY + LEARN PREFERENCES
   // =====================================
 
   async function trackActivity(
@@ -76,6 +76,10 @@ export default function ListingPage() {
     if (!user) {
       return;
     }
+
+    // =====================================
+    // TRACK RAW ACTIVITY
+    // =====================================
 
     await supabase
       .from(
@@ -93,6 +97,106 @@ export default function ListingPage() {
           activityType,
 
       });
+
+    // =====================================
+    // LOAD LISTING DETAILS
+    // =====================================
+
+    const { data: listingData } =
+      await supabase
+        .from("listings")
+        .select(`
+          category,
+          region
+        `)
+        .eq("id", listingId)
+        .single();
+
+    if (!listingData) {
+      return;
+    }
+
+    // =====================================
+    // LOAD EXISTING PROFILE
+    // =====================================
+
+    const {
+      data: existingProfile
+    } =
+      await supabase
+        .from(
+          "user_preference_profiles"
+        )
+        .select("*")
+        .eq(
+          "user_id",
+          user.id
+        )
+        .maybeSingle();
+
+    const currentCategories =
+      existingProfile
+        ?.favorite_categories ?? [];
+
+    const currentRegions =
+      existingProfile
+        ?.favorite_regions ?? [];
+
+    // =====================================
+    // MERGE CATEGORY SIGNALS
+    // =====================================
+
+    const updatedCategories =
+      Array.from(
+        new Set([
+
+          ...currentCategories,
+
+          listingData.category,
+
+        ].filter(Boolean))
+      );
+
+    // =====================================
+    // MERGE REGION SIGNALS
+    // =====================================
+
+    const updatedRegions =
+      Array.from(
+        new Set([
+
+          ...currentRegions,
+
+          listingData.region,
+
+        ].filter(Boolean))
+      );
+
+    // =====================================
+    // UPSERT PROFILE
+    // =====================================
+
+    await supabase
+      .from(
+        "user_preference_profiles"
+      )
+      .upsert({
+
+        user_id:
+          user.id,
+
+        favorite_categories:
+          updatedCategories,
+
+        favorite_regions:
+          updatedRegions,
+
+        updated_at:
+          new Date()
+            .toISOString(),
+
+      });
+
   }
 
   // =====================================

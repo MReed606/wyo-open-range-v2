@@ -2,6 +2,9 @@
 
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
+
+import { Search, Sparkles } from "lucide-react";
+
 import { supabase } from "@/lib/supabase";
 import { ListingCard } from "@/components/ListingCard";
 
@@ -62,7 +65,7 @@ function ListingsContent() {
 
   const [sortBy,
     setSortBy] =
-    useState("newest");
+    useState("recommended");
 
   const [savingSearch,
     setSavingSearch] =
@@ -88,7 +91,9 @@ function ListingsContent() {
   async function resetAndReload() {
 
     setListings([]);
+
     setPage(0);
+
     setHasMore(true);
 
     await loadListings(
@@ -233,9 +238,13 @@ function ListingsContent() {
   ) {
 
     if (replace) {
+
       setLoading(true);
+
     } else {
+
       setLoadingMore(true);
+
     }
 
     const from =
@@ -251,7 +260,9 @@ function ListingsContent() {
         .neq("status", "removed")
         .range(from, to);
 
+    // =====================================
     // CATEGORY
+    // =====================================
 
     if (category) {
 
@@ -262,18 +273,24 @@ function ListingsContent() {
         );
     }
 
-    // SEARCH
+    // =====================================
+    // SMART SEARCH
+    // =====================================
 
     if (search.trim()) {
 
       query =
-        query.ilike(
-          "title",
-          `%${search}%`
-        );
+        query.or(`
+          title.ilike.%${search}%,
+          description.ilike.%${search}%,
+          category.ilike.%${search}%,
+          region.ilike.%${search}%
+        `);
     }
 
+    // =====================================
     // REGION
+    // =====================================
 
     if (region.trim()) {
 
@@ -284,7 +301,9 @@ function ListingsContent() {
         );
     }
 
+    // =====================================
     // PRICE FILTERS
+    // =====================================
 
     if (minPrice) {
 
@@ -304,9 +323,23 @@ function ListingsContent() {
         );
     }
 
+    // =====================================
     // SORTING
+    // =====================================
 
     switch (sortBy) {
+
+      case "recommended":
+
+        query =
+          query.order(
+            "trending_score",
+            {
+              ascending: false,
+            }
+          );
+
+        break;
 
       case "popular":
 
@@ -378,6 +411,7 @@ function ListingsContent() {
       );
 
       setLoading(false);
+
       setLoadingMore(false);
 
       return;
@@ -403,16 +437,21 @@ function ListingsContent() {
     } else {
 
       setListings((prev) => [
+
         ...prev,
+
         ...newListings,
+
       ]);
     }
 
     setLoading(false);
+
     setLoadingMore(false);
   }
 
   return (
+
     <main className="min-h-screen bg-[#F7F5F2] px-6 py-12">
 
       <div className="mx-auto max-w-7xl">
@@ -423,6 +462,14 @@ function ListingsContent() {
 
           <div>
 
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-[#2F5D50]/10 px-4 py-2 text-sm font-black text-[#2F5D50]">
+
+              <Sparkles className="h-4 w-4" />
+
+              Smart Marketplace Search
+
+            </div>
+
             <h1 className="text-5xl font-black text-[#111827]">
 
               {category
@@ -432,7 +479,9 @@ function ListingsContent() {
             </h1>
 
             <p className="mt-4 text-lg text-[#6B7280]">
-              Discover listings across Wyoming.
+
+              Intelligent discovery across Wyoming.
+
             </p>
 
           </div>
@@ -457,17 +506,27 @@ function ListingsContent() {
 
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
 
-            <input
-              type="text"
-              placeholder="Search listings..."
-              value={search}
-              onChange={(e) =>
-                setSearch(
-                  e.target.value
-                )
-              }
-              className="rounded-2xl border border-gray-200 bg-white px-5 py-4 text-sm font-semibold text-[#111827] outline-none transition focus:border-[#2F5D50]"
-            />
+            {/* SEARCH */}
+
+            <div className="relative xl:col-span-2">
+
+              <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+
+              <input
+                type="text"
+                placeholder="Search listings, regions, categories..."
+                value={search}
+                onChange={(e) =>
+                  setSearch(
+                    e.target.value
+                  )
+                }
+                className="w-full rounded-2xl border border-gray-200 bg-white py-4 pl-12 pr-5 text-sm font-semibold text-[#111827] outline-none transition focus:border-[#2F5D50]"
+              />
+
+            </div>
+
+            {/* REGION */}
 
             <input
               type="text"
@@ -481,6 +540,8 @@ function ListingsContent() {
               className="rounded-2xl border border-gray-200 bg-white px-5 py-4 text-sm font-semibold text-[#111827] outline-none transition focus:border-[#2F5D50]"
             />
 
+            {/* MIN */}
+
             <input
               type="number"
               placeholder="Min Price"
@@ -492,6 +553,8 @@ function ListingsContent() {
               }
               className="rounded-2xl border border-gray-200 bg-white px-5 py-4 text-sm font-semibold text-[#111827] outline-none transition focus:border-[#2F5D50]"
             />
+
+            {/* MAX */}
 
             <input
               type="number"
@@ -505,6 +568,8 @@ function ListingsContent() {
               className="rounded-2xl border border-gray-200 bg-white px-5 py-4 text-sm font-semibold text-[#111827] outline-none transition focus:border-[#2F5D50]"
             />
 
+            {/* SORT */}
+
             <select
               value={sortBy}
               onChange={(e) =>
@@ -514,6 +579,10 @@ function ListingsContent() {
               }
               className="rounded-2xl border border-gray-200 bg-white px-5 py-4 text-sm font-semibold text-[#111827] outline-none transition focus:border-[#2F5D50]"
             >
+
+              <option value="recommended">
+                Recommended
+              </option>
 
               <option value="newest">
                 Newest
@@ -537,6 +606,12 @@ function ListingsContent() {
 
             </select>
 
+          </div>
+
+          {/* RESET */}
+
+          <div className="mt-5 flex justify-end">
+
             <button
               onClick={() => {
 
@@ -544,12 +619,16 @@ function ListingsContent() {
                 setRegion("");
                 setMinPrice("");
                 setMaxPrice("");
-                setSortBy("newest");
+                setSortBy(
+                  "recommended"
+                );
 
               }}
-              className="rounded-2xl bg-[#2F5D50] px-5 py-4 text-sm font-black text-white transition hover:bg-[#24473d]"
+              className="rounded-2xl bg-[#111827] px-5 py-3 text-sm font-black text-white transition hover:bg-[#1F2937]"
             >
+
               Reset Filters
+
             </button>
 
           </div>
@@ -577,6 +656,29 @@ function ListingsContent() {
 
         </div>
 
+        {/* EMPTY */}
+
+        {!loading &&
+          !listings.length && (
+
+          <div className="mt-12 rounded-3xl bg-white p-12 text-center shadow-sm">
+
+            <h2 className="text-3xl font-black text-[#111827]">
+
+              No listings found
+
+            </h2>
+
+            <p className="mt-4 text-lg text-[#6B7280]">
+
+              Try adjusting your filters or search terms.
+
+            </p>
+
+          </div>
+
+        )}
+
         {/* LOADING */}
 
         {loadingMore && (
@@ -584,7 +686,9 @@ function ListingsContent() {
           <div className="mt-10 text-center">
 
             <p className="text-lg font-bold text-[#6B7280]">
+
               Loading more listings...
+
             </p>
 
           </div>
@@ -601,14 +705,17 @@ function ListingsContent() {
       </div>
 
     </main>
+
   );
 }
 
 export default function ListingsPage() {
 
   return (
+
     <Suspense
       fallback={
+
         <main className="min-h-screen bg-[#F7F5F2] px-6 py-12">
 
           <div className="mx-auto max-w-7xl">
@@ -616,7 +723,9 @@ export default function ListingsPage() {
             <div className="rounded-3xl bg-white p-10 shadow-sm">
 
               <h2 className="text-2xl font-black text-[#111827]">
+
                 Loading listings...
+
               </h2>
 
             </div>
@@ -624,11 +733,13 @@ export default function ListingsPage() {
           </div>
 
         </main>
+
       }
     >
 
       <ListingsContent />
 
     </Suspense>
+
   );
 }
