@@ -38,56 +38,98 @@ export default function ListingPage() {
 
   }, [slug]);
 
+  async function incrementViewCount(
+    listingId: string
+  ) {
+
+    const storageKey =
+      `viewed_listing_${listingId}`;
+
+    // =====================================
+    // PREVENT SPAM REFRESH COUNTING
+    // =====================================
+
+    const alreadyViewed =
+      sessionStorage.getItem(
+        storageKey
+      );
+
+    if (alreadyViewed) {
+      return;
+    }
+
+    sessionStorage.setItem(
+      storageKey,
+      "true"
+    );
+
+    // =====================================
+    // ATOMIC SQL FUNCTION
+    // =====================================
+
+    const { error } =
+      await supabase.rpc(
+        "increment_listing_views",
+        {
+          listing_id: listingId,
+        }
+      );
+
+    if (error) {
+
+      console.error(
+        "VIEW COUNT ERROR:",
+        error
+      );
+
+    }
+  }
+
   async function loadListing() {
 
-    const { data, error } = await supabase
-      .from("listings")
-      .select("*")
-      .or("status.is.null,status.neq.removed")
-      .or("hidden_by_system.is.null,hidden_by_system.neq.true")
-      .eq("slug", slug)
-      .single();
+    const { data, error } =
+      await supabase
+        .from("listings")
+        .select("*")
+        .or("status.is.null,status.neq.removed")
+        .or("hidden_by_system.is.null,hidden_by_system.neq.true")
+        .eq("slug", slug)
+        .single();
 
-    console.log("LISTING LOAD:", data);
-    console.log("LISTING ERROR:", error);
+    if (error) {
+
+      console.error(
+        "LISTING LOAD ERROR:",
+        error
+      );
+
+      setLoading(false);
+      return;
+    }
 
     if (!data) {
 
       setLoading(false);
       return;
-
     }
 
     // =====================================
-    // VIEW COUNT DEBUG
-    // =====================================
-
-    const currentViews =
-      data.views ?? 0;
-
-    const newViews =
-      currentViews + 1;
-
-    console.log("CURRENT VIEWS:", currentViews);
-    console.log("NEW VIEWS:", newViews);
-
-    const updateResult = await supabase
-      .from("listings")
-      .update({
-        views: newViews,
-      })
-      .eq("id", data.id);
-
-    console.log("UPDATE RESULT:", updateResult);
-
-    // =====================================
-    // UPDATE LOCAL STATE
+    // UPDATE LOCAL UI IMMEDIATELY
     // =====================================
 
     setListing({
       ...data,
-      views: newViews,
+      views:
+        (data.views ?? 0) + 1,
     });
+
+    // =====================================
+    // SAFE BACKEND INCREMENT
+    // =====================================
+
+    await incrementViewCount(
+      data.id
+    );
 
     setLoading(false);
   }
@@ -243,10 +285,6 @@ export default function ListingPage() {
                       return;
                     }
 
-                    // =========================
-                    // FIND EXISTING
-                    // =========================
-
                     const {
                       data: existing
                     } = await supabase
@@ -272,10 +310,6 @@ export default function ListingPage() {
                       return;
                     }
 
-                    // =========================
-                    // CREATE
-                    // =========================
-
                     const { data } =
                       await supabase
                         .from(
@@ -293,10 +327,6 @@ export default function ListingPage() {
                         })
                         .select()
                         .single();
-
-                    // =========================
-                    // NOTIFY SELLER
-                    // =========================
 
                     await supabase
                       .from(
