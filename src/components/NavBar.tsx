@@ -229,7 +229,7 @@ export default function NavBar() {
               </Link>
 
               <Link
-                href="/signup"
+                href="/login"
                 className="rounded-lg bg-[#2F5D50] px-4 py-2 text-sm font-bold text-white"
               >
                 Sign Up
