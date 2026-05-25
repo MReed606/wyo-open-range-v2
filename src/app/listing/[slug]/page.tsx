@@ -2,14 +2,43 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
 
-import FavoriteButton from "@/components/listings/FavoriteButton";
-import { SellerRating } from "@/components/reviews/SellerRating";
-import { LeaveReviewForm } from "@/components/reviews/LeaveReviewForm";
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
-import { supabase } from "@/lib/supabase";
+import {
+  useParams,
+} from "next/navigation";
+
+import {
+  ChevronLeft,
+  ChevronRight,
+  Expand,
+  X,
+  Images,
+} from "lucide-react";
+
+import FavoriteButton
+from "@/components/listings/FavoriteButton";
+
+import {
+  SellerRating
+} from "@/components/reviews/SellerRating";
+
+import {
+  LeaveReviewForm
+} from "@/components/reviews/LeaveReviewForm";
+
+import {
+  supabase
+} from "@/lib/supabase";
+
+import {
+  getRelatedListings
+} from "@/lib/recommendations";
 
 type RelatedListing = {
   id: string;
@@ -24,7 +53,8 @@ type RelatedListing = {
 
 export default function ListingPage() {
 
-  const params = useParams();
+  const params =
+    useParams();
 
   const slug =
     params?.slug as string;
@@ -49,6 +79,18 @@ export default function ListingPage() {
     setReportSubmitted] =
     useState(false);
 
+  const [activeImage,
+    setActiveImage] =
+    useState(0);
+
+  const [fullscreen,
+    setFullscreen] =
+    useState(false);
+
+  // =====================================
+  // LOAD
+  // =====================================
+
   useEffect(() => {
 
     if (slug) {
@@ -60,147 +102,64 @@ export default function ListingPage() {
   }, [slug]);
 
   // =====================================
-  // TRACK USER ACTIVITY + LEARN PREFERENCES
+  // GALLERY
   // =====================================
 
-  async function trackActivity(
-    listingId: string,
-    activityType: string
-  ) {
+  const galleryImages =
+    useMemo(() => {
 
-    const {
-      data: { user }
-    } =
-      await supabase.auth.getUser();
+      if (!listing) {
+        return [];
+      }
 
-    if (!user) {
-      return;
-    }
+      const images:
+        string[] = [];
 
-    // =====================================
-    // TRACK RAW ACTIVITY
-    // =====================================
+      // LEGACY IMAGE
 
-    await supabase
-      .from(
-        "user_listing_activity"
-      )
-      .insert({
+      if (
+        listing.image_url
+      ) {
 
-        user_id:
-          user.id,
+        images.push(
+          listing.image_url
+        );
+      }
 
-        listing_id:
-          listingId,
+      // MULTI IMAGE SUPPORT
 
-        activity_type:
-          activityType,
-
-      });
-
-    // =====================================
-    // LOAD LISTING DETAILS
-    // =====================================
-
-    const { data: listingData } =
-      await supabase
-        .from("listings")
-        .select(`
-          category,
-          region
-        `)
-        .eq("id", listingId)
-        .single();
-
-    if (!listingData) {
-      return;
-    }
-
-    // =====================================
-    // LOAD EXISTING PROFILE
-    // =====================================
-
-    const {
-      data: existingProfile
-    } =
-      await supabase
-        .from(
-          "user_preference_profiles"
+      if (
+        Array.isArray(
+          listing.images
         )
-        .select("*")
-        .eq(
-          "user_id",
-          user.id
-        )
-        .maybeSingle();
+      ) {
 
-    const currentCategories =
-      existingProfile
-        ?.favorite_categories ?? [];
+        listing.images.forEach(
+          (
+            image: string
+          ) => {
 
-    const currentRegions =
-      existingProfile
-        ?.favorite_regions ?? [];
+            if (
+              image &&
+              !images.includes(
+                image
+              )
+            ) {
 
-    // =====================================
-    // MERGE CATEGORY SIGNALS
-    // =====================================
+              images.push(
+                image
+              );
+            }
+          }
+        );
+      }
 
-    const updatedCategories =
-      Array.from(
-        new Set([
+      return images;
 
-          ...currentCategories,
-
-          listingData.category,
-
-        ].filter(Boolean))
-      );
-
-    // =====================================
-    // MERGE REGION SIGNALS
-    // =====================================
-
-    const updatedRegions =
-      Array.from(
-        new Set([
-
-          ...currentRegions,
-
-          listingData.region,
-
-        ].filter(Boolean))
-      );
-
-    // =====================================
-    // UPSERT PROFILE
-    // =====================================
-
-    await supabase
-      .from(
-        "user_preference_profiles"
-      )
-      .upsert({
-
-        user_id:
-          user.id,
-
-        favorite_categories:
-          updatedCategories,
-
-        favorite_regions:
-          updatedRegions,
-
-        updated_at:
-          new Date()
-            .toISOString(),
-
-      });
-
-  }
+    }, [listing]);
 
   // =====================================
-  // VIEW COUNTER
+  // VIEW TRACKING
   // =====================================
 
   async function incrementViewCount(
@@ -210,12 +169,12 @@ export default function ListingPage() {
     const storageKey =
       `viewed_listing_${listingId}`;
 
-    const alreadyViewed =
+    if (
       sessionStorage.getItem(
         storageKey
-      );
+      )
+    ) {
 
-    if (alreadyViewed) {
       return;
     }
 
@@ -224,76 +183,41 @@ export default function ListingPage() {
       "true"
     );
 
-    const { error } =
-      await supabase.rpc(
-        "increment_listing_views",
-        {
-          listing_id:
-            listingId,
-        }
-      );
-
-    if (error) {
-
-      console.error(
-        "VIEW COUNT ERROR:",
-        error
-      );
-
-    }
+    await supabase.rpc(
+      "increment_listing_views",
+      {
+        listing_id:
+          listingId,
+      }
+    );
   }
 
   // =====================================
   // LOAD RELATED
   // =====================================
 
-  async function loadRelatedListings(
+  async function loadRelated(
     currentListing: any
   ) {
 
-    const { data, error } =
-      await supabase
-        .from("listings")
-        .select(`
-          id,
-          title,
-          slug,
-          image_url,
-          price,
-          region,
-          category,
-          trending_score
-        `)
-        .neq(
-          "id",
-          currentListing.id
-        )
-        .eq(
-          "category",
-          currentListing.category
-        )
-        .or("status.is.null,status.neq.removed")
-        .or("hidden_by_system.is.null,hidden_by_system.neq.true")
-        .order(
-          "trending_score",
-          {
-            ascending: false,
-          }
-        )
-        .limit(6);
+    const related =
+      await getRelatedListings({
 
-    if (error) {
+        listingId:
+          currentListing.id,
 
-      console.error(
-        "RELATED LISTINGS ERROR:",
-        error
-      );
+        category:
+          currentListing.category,
 
-      return;
-    }
+        region:
+          currentListing.region,
+
+        limit: 6,
+
+      });
 
     setRelatedListings(
-      data ?? []
+      related as RelatedListing[]
     );
   }
 
@@ -303,119 +227,39 @@ export default function ListingPage() {
 
   async function loadListing() {
 
-    const { data, error } =
+    const {
+      data,
+      error
+    } =
       await supabase
         .from("listings")
         .select("*")
-        .or("status.is.null,status.neq.removed")
-        .or("hidden_by_system.is.null,hidden_by_system.neq.true")
-        .eq("slug", slug)
+        .eq(
+          "slug",
+          slug
+        )
         .single();
 
-    if (error) {
+    if (error || !data) {
 
-      console.error(
-        "LISTING LOAD ERROR:",
-        error
-      );
+      console.error(error);
 
       setLoading(false);
 
       return;
     }
 
-    if (!data) {
-
-      setLoading(false);
-
-      return;
-    }
-
-    setListing({
-      ...data,
-      views:
-        (data.views ?? 0) + 1,
-    });
+    setListing(data);
 
     await incrementViewCount(
       data.id
     );
 
-    await trackActivity(
-      data.id,
-      "view"
-    );
-
-    await loadRelatedListings(
+    await loadRelated(
       data
     );
 
     setLoading(false);
-  }
-
-  // =====================================
-  // REPORT LISTING
-  // =====================================
-
-  async function submitReport() {
-
-    if (!reportReason.trim()) {
-
-      alert(
-        "Please enter a reason."
-      );
-
-      return;
-    }
-
-    const {
-      data: { user },
-    } =
-      await supabase.auth.getUser();
-
-    const {
-      data: existingReport
-    } =
-      await supabase
-        .from("reports")
-        .select("id")
-        .eq(
-          "listing_id",
-          listing.id
-        )
-        .eq(
-          "reporter_id",
-          user?.id
-        )
-        .single();
-
-    if (existingReport) {
-
-      alert(
-        "You already reported this listing."
-      );
-
-      return;
-    }
-
-    await supabase
-      .from("reports")
-      .insert({
-
-        listing_id:
-          listing.id,
-
-        reporter_id:
-          user?.id ?? null,
-
-        reason:
-          reportReason,
-
-      });
-
-    setReportSubmitted(true);
-
-    setReportReason("");
   }
 
   // =====================================
@@ -437,11 +281,6 @@ export default function ListingPage() {
 
       return;
     }
-
-    await trackActivity(
-      listing.id,
-      "contact_seller"
-    );
 
     const {
       data: existing
@@ -467,7 +306,9 @@ export default function ListingPage() {
       return;
     }
 
-    const { data } =
+    const {
+      data
+    } =
       await supabase
         .from("conversations")
         .insert({
@@ -485,31 +326,95 @@ export default function ListingPage() {
         .select()
         .single();
 
+    if (data) {
+
+      await supabase
+        .from(
+          "user_notifications"
+        )
+        .insert({
+
+          user_id:
+            listing.owner_id,
+
+          type:
+            "message",
+
+          title:
+            "New Buyer Message",
+
+          message:
+            `"${listing.title}" received a new buyer message.`,
+
+          link:
+            `/messages/${data.id}`,
+
+        });
+
+      window.location.href =
+        `/messages/${data.id}`;
+    }
+  }
+
+  // =====================================
+  // REPORT
+  // =====================================
+
+  async function submitReport() {
+
+    if (
+      !reportReason.trim()
+    ) {
+
+      return;
+    }
+
     await supabase
-      .from(
-        "user_notifications"
-      )
+      .from("reports")
       .insert({
 
-        user_id:
-          listing.owner_id,
+        listing_id:
+          listing.id,
 
-        type:
-          "message",
-
-        title:
-          "New Buyer Message",
-
-        message:
-          `"${listing.title}" received a new buyer message.`,
-
-        link:
-          `/messages/${data.id}`,
+        reason:
+          reportReason,
 
       });
 
-    window.location.href =
-      `/messages/${data.id}`;
+    setReportSubmitted(
+      true
+    );
+
+    setReportReason("");
+  }
+
+  // =====================================
+  // GALLERY NAV
+  // =====================================
+
+  function nextImage() {
+
+    setActiveImage((prev) =>
+
+      prev ===
+      galleryImages.length - 1
+
+        ? 0
+
+        : prev + 1
+    );
+  }
+
+  function previousImage() {
+
+    setActiveImage((prev) =>
+
+      prev === 0
+
+        ? galleryImages.length - 1
+
+        : prev - 1
+    );
   }
 
   // =====================================
@@ -522,7 +427,7 @@ export default function ListingPage() {
 
       <main className="min-h-screen bg-[#F7F5F2] p-10">
 
-        Loading...
+        Loading listing...
 
       </main>
 
@@ -552,95 +457,85 @@ export default function ListingPage() {
 
     <main className="min-h-screen bg-[#F7F5F2] p-6 md:p-10">
 
-      <div className="mx-auto max-w-6xl">
+      {/* FULLSCREEN */}
 
-        {/* LISTING */}
+      {fullscreen && (
 
-        <div className="overflow-hidden rounded-3xl bg-white shadow-sm">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black">
 
-          {/* IMAGE */}
+          <button
+            onClick={() =>
+              setFullscreen(false)
+            }
+            className="absolute right-5 top-5 z-50 rounded-full bg-white/10 p-3 text-white backdrop-blur"
+          >
 
-          {listing.image_url && (
+            <X className="h-6 w-6" />
 
-            <div className="relative h-[450px] w-full">
+          </button>
+
+          {!!galleryImages.length && (
+
+            <div className="relative h-full w-full">
 
               <Image
-                src={listing.image_url}
-                alt={listing.title}
+                src={
+                  galleryImages[
+                    activeImage
+                  ]
+                }
+                alt={
+                  listing.title
+                }
                 fill
-                className="object-cover"
-                priority
+                className="object-contain"
               />
 
             </div>
 
           )}
 
-          <div className="p-8">
+        </div>
 
-            <div className="flex flex-wrap items-start justify-between gap-6">
+      )}
 
-              {/* LEFT */}
+      <div className="mx-auto max-w-7xl">
 
-              <div className="max-w-3xl">
+        {/* GALLERY */}
 
-                <h1 className="text-5xl font-black text-[#111827]">
+        <div className="overflow-hidden rounded-[32px] bg-white shadow-xl">
 
-                  {listing.title}
+          {/* HERO */}
 
-                </h1>
+          <div className="relative aspect-[16/8] overflow-hidden bg-[#E5E7EB]">
 
-                {listing.category && (
+            {!!galleryImages.length ? (
 
-                  <div className="mt-4 inline-flex rounded-full bg-[#2F5D50]/10 px-4 py-2 text-sm font-bold text-[#2F5D50]">
+              <Image
+                src={
+                  galleryImages[
+                    activeImage
+                  ]
+                }
+                alt={
+                  listing.title
+                }
+                fill
+                priority
+                className="object-cover"
+              />
 
-                    {listing.category}
+            ) : (
 
-                  </div>
+              <div className="flex h-full items-center justify-center">
 
-                )}
+                <div className="text-center">
 
-                {/* SELLER */}
+                  <Images className="mx-auto h-20 w-20 text-gray-400" />
 
-                <div className="mt-6">
+                  <div className="mt-5 text-xl font-black text-[#6B7280]">
 
-                  <SellerRating
-                    sellerId={
-                      listing.owner_id
-                    }
-                  />
-
-                </div>
-
-                {/* PRICE */}
-
-                <p className="mt-8 text-4xl font-black text-[#2F5D50]">
-
-                  {listing.price ??
-                    "Contact"}
-
-                </p>
-
-                {/* META */}
-
-                <div className="mt-6 flex flex-wrap gap-3">
-
-                  <div className="rounded-full bg-[#F3F4F6] px-4 py-2 text-sm font-black text-[#111827]">
-
-                    👁
-                    {" "}
-                    {listing.views ?? 0}
-                    {" "}
-                    views
-
-                  </div>
-
-                  <div className="rounded-full bg-[#F3F4F6] px-4 py-2 text-sm font-black text-[#111827]">
-
-                    📍
-                    {" "}
-                    {listing.region ??
-                      "Wyoming"}
+                    No Images
 
                   </div>
 
@@ -648,9 +543,306 @@ export default function ListingPage() {
 
               </div>
 
-              {/* ACTIONS */}
+            )}
 
-              <div className="flex flex-wrap gap-4">
+            {/* CONTROLS */}
+
+            {galleryImages.length > 1 && (
+
+              <>
+
+                <button
+                  onClick={
+                    previousImage
+                  }
+                  className="absolute left-5 top-1/2 z-20 flex h-14 w-14 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur"
+                >
+
+                  <ChevronLeft className="h-6 w-6" />
+
+                </button>
+
+                <button
+                  onClick={
+                    nextImage
+                  }
+                  className="absolute right-5 top-1/2 z-20 flex h-14 w-14 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur"
+                >
+
+                  <ChevronRight className="h-6 w-6" />
+
+                </button>
+
+              </>
+
+            )}
+
+            {/* FULLSCREEN */}
+
+            {!!galleryImages.length && (
+
+              <button
+                onClick={() =>
+                  setFullscreen(true)
+                }
+                className="absolute right-5 top-5 z-20 flex items-center gap-2 rounded-full bg-black/40 px-5 py-3 text-sm font-black text-white backdrop-blur"
+              >
+
+                <Expand className="h-4 w-4" />
+
+                Fullscreen
+
+              </button>
+
+            )}
+
+            {/* COUNT */}
+
+            {!!galleryImages.length && (
+
+              <div className="absolute bottom-5 right-5 rounded-full bg-black/50 px-5 py-3 text-sm font-black text-white backdrop-blur">
+
+                {activeImage + 1}
+                {" / "}
+                {galleryImages.length}
+
+              </div>
+
+            )}
+
+          </div>
+
+          {/* THUMBNAILS */}
+
+          {galleryImages.length > 1 && (
+
+            <div className="flex gap-4 overflow-x-auto p-5">
+
+              {galleryImages.map(
+                (image, index) => (
+
+                <button
+                  key={image}
+                  onClick={() =>
+                    setActiveImage(
+                      index
+                    )
+                  }
+                  className={`relative h-28 w-40 shrink-0 overflow-hidden rounded-2xl border-4 transition ${
+                    activeImage === index
+                      ? "border-[#2F5D50]"
+                      : "border-transparent"
+                  }`}
+                >
+
+                  <Image
+                    src={image}
+                    alt={`Gallery ${index}`}
+                    fill
+                    className="object-cover"
+                  />
+
+                </button>
+
+              ))}
+
+            </div>
+
+          )}
+
+        </div>
+
+        {/* CONTENT */}
+
+        <div className="mt-10 grid gap-10 xl:grid-cols-[1fr_380px]">
+
+          {/* LEFT */}
+
+          <div className="space-y-10">
+
+            <div className="rounded-3xl bg-white p-8 shadow-sm">
+
+              <div className="flex flex-wrap items-start justify-between gap-6">
+
+                <div>
+
+                  <h1 className="text-5xl font-black text-[#111827]">
+
+                    {listing.title}
+
+                  </h1>
+
+                  {listing.category && (
+
+                    <div className="mt-5 inline-flex rounded-full bg-[#2F5D50]/10 px-5 py-3 text-sm font-black text-[#2F5D50]">
+
+                      {listing.category}
+
+                    </div>
+
+                  )}
+
+                  <div className="mt-6">
+
+                    <SellerRating
+                      sellerId={
+                        listing.owner_id
+                      }
+                    />
+
+                  </div>
+
+                </div>
+
+                <div className="text-right">
+
+                  <div className="text-5xl font-black text-[#2F5D50]">
+
+                    {listing.price ??
+                      "Contact"}
+
+                  </div>
+
+                  <div className="mt-5 flex flex-wrap justify-end gap-3">
+
+                    <div className="rounded-full bg-[#F3F4F6] px-4 py-2 text-sm font-black text-[#111827]">
+
+                      👁
+                      {" "}
+                      {listing.views ?? 0}
+                      {" "}
+                      views
+
+                    </div>
+
+                    <div className="rounded-full bg-[#F3F4F6] px-4 py-2 text-sm font-black text-[#111827]">
+
+                      📍
+                      {" "}
+                      {listing.region ??
+                        "Wyoming"}
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+              {/* DESCRIPTION */}
+
+              <div className="mt-12">
+
+                <h2 className="text-3xl font-black text-[#111827]">
+
+                  Description
+
+                </h2>
+
+                <p className="mt-6 whitespace-pre-wrap text-lg leading-8 text-[#374151]">
+
+                  {listing.description}
+
+                </p>
+
+              </div>
+
+            </div>
+
+            {/* RELATED */}
+
+            {!!relatedListings.length && (
+
+              <section>
+
+                <div className="mb-8">
+
+                  <h2 className="text-4xl font-black text-[#111827]">
+
+                    Similar Listings
+
+                  </h2>
+
+                  <p className="mt-3 text-lg text-[#6B7280]">
+
+                    AI-powered related marketplace discovery.
+
+                  </p>
+
+                </div>
+
+                <div className="grid gap-8 md:grid-cols-2">
+
+                  {relatedListings.map(
+                    (item) => (
+
+                    <Link
+                      key={item.id}
+                      href={`/listing/${item.slug}`}
+                      className="group overflow-hidden rounded-3xl bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
+                    >
+
+                      <div className="relative h-[240px] overflow-hidden">
+
+                        {item.image_url ? (
+
+                          <Image
+                            src={item.image_url}
+                            alt={item.title}
+                            fill
+                            className="object-cover transition duration-500 group-hover:scale-105"
+                          />
+
+                        ) : (
+
+                          <div className="flex h-full items-center justify-center bg-[#E5E7EB]">
+
+                            No Image
+
+                          </div>
+
+                        )}
+
+                      </div>
+
+                      <div className="p-6">
+
+                        <h3 className="line-clamp-2 text-2xl font-black text-[#111827]">
+
+                          {item.title}
+
+                        </h3>
+
+                        <div className="mt-4 text-3xl font-black text-[#2F5D50]">
+
+                          {item.price}
+
+                        </div>
+
+                      </div>
+
+                    </Link>
+
+                  ))}
+
+                </div>
+
+              </section>
+
+            )}
+
+          </div>
+
+          {/* SIDEBAR */}
+
+          <div className="space-y-8">
+
+            {/* ACTIONS */}
+
+            <div className="rounded-3xl bg-white p-8 shadow-sm">
+
+              <div className="space-y-4">
 
                 <FavoriteButton
                   listingId={
@@ -658,213 +850,83 @@ export default function ListingPage() {
                   }
                 />
 
-                <Link
-                  href={`/seller/profile/${listing.owner_id}`}
-                  className="rounded-2xl bg-[#2F5D50] px-6 py-4 text-lg font-bold text-white transition hover:bg-[#24493f]"
-                >
-
-                  Seller Profile
-
-                </Link>
-
                 <button
                   onClick={
                     contactSeller
                   }
-                  className="rounded-2xl bg-blue-600 px-6 py-4 text-lg font-bold text-white transition hover:bg-blue-700"
+                  className="w-full rounded-2xl bg-blue-600 px-6 py-5 text-lg font-black text-white transition hover:bg-blue-700"
                 >
 
                   Contact Seller
 
                 </button>
 
+                <Link
+                  href={`/seller/profile/${listing.owner_id}`}
+                  className="block w-full rounded-2xl bg-[#2F5D50] px-6 py-5 text-center text-lg font-black text-white transition hover:bg-[#24473d]"
+                >
+
+                  Seller Profile
+
+                </Link>
+
               </div>
 
             </div>
 
-            {/* DESCRIPTION */}
+            {/* REVIEW */}
 
-            <div className="mt-12">
+            <LeaveReviewForm
+              sellerId={
+                listing.owner_id
+              }
+            />
 
-              <h2 className="text-3xl font-black text-[#111827]">
+            {/* REPORT */}
 
-                Description
+            <div className="rounded-3xl bg-white p-8 shadow-sm">
+
+              <h2 className="text-2xl font-black text-[#111827]">
+
+                Report Listing
 
               </h2>
 
-              <p className="mt-5 whitespace-pre-wrap text-lg leading-8 text-[#374151]">
+              <textarea
+                value={reportReason}
+                onChange={(e) =>
+                  setReportReason(
+                    e.target.value
+                  )
+                }
+                placeholder="Describe the issue..."
+                className="mt-5 min-h-40 w-full rounded-2xl border border-gray-300 px-5 py-4"
+              />
 
-                {listing.description}
+              <button
+                onClick={
+                  submitReport
+                }
+                className="mt-5 w-full rounded-2xl bg-red-600 px-6 py-4 text-lg font-black text-white transition hover:bg-red-700"
+              >
 
-              </p>
+                Submit Report
+
+              </button>
+
+              {reportSubmitted && (
+
+                <div className="mt-5 rounded-2xl bg-red-50 p-4 text-sm font-bold text-red-700">
+
+                  Report submitted successfully.
+
+                </div>
+
+              )}
 
             </div>
 
           </div>
-
-        </div>
-
-        {/* REVIEW FORM */}
-
-        <LeaveReviewForm
-          sellerId={listing.owner_id}
-          listingId={listing.id}
-        />
-
-        {/* RELATED */}
-
-        {relatedListings.length > 0 && (
-
-          <section className="mt-16">
-
-            <div className="mb-8">
-
-              <h2 className="text-4xl font-black text-[#111827]">
-
-                Similar Listings
-
-              </h2>
-
-              <p className="mt-3 text-lg text-[#6B7280]">
-
-                Related listings you may also like.
-
-              </p>
-
-            </div>
-
-            <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
-
-              {relatedListings.map((item) => (
-
-                <Link
-                  key={item.id}
-                  href={`/listing/${item.slug}`}
-                  className="group overflow-hidden rounded-3xl bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
-                >
-
-                  <div className="relative h-[240px] overflow-hidden">
-
-                    {item.image_url ? (
-
-                      <Image
-                        src={item.image_url}
-                        alt={item.title}
-                        fill
-                        className="object-cover transition duration-500 group-hover:scale-105"
-                      />
-
-                    ) : (
-
-                      <div className="flex h-full items-center justify-center bg-[#E5E7EB]">
-
-                        <span className="font-bold text-[#6B7280]">
-
-                          No Image
-
-                        </span>
-
-                      </div>
-
-                    )}
-
-                    <div className="absolute left-4 top-4 rounded-full bg-[#2F5D50] px-4 py-2 text-sm font-black text-white">
-
-                      Similar
-
-                    </div>
-
-                  </div>
-
-                  <div className="p-6">
-
-                    <h3 className="line-clamp-2 text-2xl font-black text-[#111827]">
-
-                      {item.title}
-
-                    </h3>
-
-                    <p className="mt-4 text-3xl font-black text-[#2F5D50]">
-
-                      {item.price}
-
-                    </p>
-
-                    <div className="mt-6 flex items-center justify-between">
-
-                      <p className="text-sm font-bold text-[#6B7280]">
-
-                        {item.region}
-
-                      </p>
-
-                      <div className="rounded-full bg-[#F3F4F6] px-4 py-2 text-sm font-black text-[#111827]">
-
-                        🔥
-                        {" "}
-                        {Math.round(
-                          item.trending_score ?? 0
-                        )}
-
-                      </div>
-
-                    </div>
-
-                  </div>
-
-                </Link>
-
-              ))}
-
-            </div>
-
-          </section>
-
-        )}
-
-        {/* REPORT */}
-
-        <div className="mt-8 rounded-3xl bg-white p-6 shadow-sm">
-
-          <h2 className="mb-5 text-2xl font-black text-[#111827]">
-
-            Report Listing
-
-          </h2>
-
-          <textarea
-            value={reportReason}
-            onChange={(e) =>
-              setReportReason(
-                e.target.value
-              )
-            }
-            placeholder="Why are you reporting this?"
-            className="w-full rounded-2xl border border-gray-300 bg-white px-5 py-4 text-lg font-medium text-[#111827] placeholder:text-gray-500 focus:border-red-500 focus:outline-none"
-          />
-
-          <button
-            onClick={submitReport}
-            className="mt-5 w-full rounded-2xl bg-red-600 px-6 py-4 text-xl font-black text-white transition hover:bg-red-700"
-          >
-
-            Submit Report
-
-          </button>
-
-          {reportSubmitted && (
-
-            <div className="mt-4 rounded-2xl bg-red-50 px-5 py-4">
-
-              <p className="text-sm font-semibold text-[#374151]">
-
-                Report submitted successfully.
-
-              </p>
-
-            </div>
-
-          )}
 
         </div>
 

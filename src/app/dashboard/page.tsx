@@ -1,60 +1,435 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
-import { SellerAnalytics } from "@/components/dashboard/SellerAnalytics";
-import { AuthGuard } from "@/components/auth/AuthGuard";
+
+import {
+  useEffect,
+  useState,
+} from "react";
+
+import {
+  Sparkles,
+  Eye,
+  MessageCircle,
+  Heart,
+  TrendingUp,
+  Brain,
+  Star,
+  Activity,
+} from "lucide-react";
+
+import {
+  supabase
+} from "@/lib/supabase";
+
+import {
+  SellerAnalytics
+} from "@/components/dashboard/SellerAnalytics";
+
+import {
+  AuthGuard
+} from "@/components/auth/AuthGuard";
 
 export default function DashboardPage() {
 
-  const [profile, setProfile] =
+  const [profile,
+    setProfile] =
     useState<any>(null);
 
+  const [stats,
+    setStats] =
+    useState({
+
+      listings: 0,
+
+      totalViews: 0,
+
+      totalFavorites: 0,
+
+      totalMessages: 0,
+
+      recommendationScore: 0,
+
+      averageTrending: 0,
+
+    });
+
+  const [topListings,
+    setTopListings] =
+    useState<any[]>([]);
+
+  const [loading,
+    setLoading] =
+    useState(true);
+
+  // =====================================
+  // INITIALIZE
+  // =====================================
+
   useEffect(() => {
-    loadProfile();
+
+    initialize();
+
   }, []);
+
+  async function initialize() {
+
+    setLoading(true);
+
+    await Promise.all([
+
+      loadProfile(),
+
+      loadAnalytics(),
+
+    ]);
+
+    setLoading(false);
+  }
+
+  // =====================================
+  // PROFILE
+  // =====================================
 
   async function loadProfile() {
 
     const {
       data: { user },
-    } = await supabase.auth.getUser();
+    } =
+      await supabase.auth.getUser();
 
-    if (!user) return;
+    if (!user) {
+      return;
+    }
 
     const { data } =
       await supabase
         .from("profiles")
         .select("*")
-        .eq("id", user.id)
+        .eq(
+          "id",
+          user.id
+        )
         .maybeSingle();
 
     setProfile(data);
   }
 
+  // =====================================
+  // ANALYTICS
+  // =====================================
+
+  async function loadAnalytics() {
+
+    const {
+      data: { user },
+    } =
+      await supabase.auth.getUser();
+
+    if (!user) {
+      return;
+    }
+
+    // =====================================
+    // LISTINGS
+    // =====================================
+
+    const {
+      data: listings
+    } =
+      await supabase
+        .from("listings")
+        .select("*")
+        .eq(
+          "user_id",
+          user.id
+        );
+
+    const userListings =
+      listings ?? [];
+
+    // =====================================
+    // TOTAL VIEWS
+    // =====================================
+
+    const totalViews =
+      userListings.reduce(
+        (sum, listing) =>
+          sum +
+          (
+            listing.views || 0
+          ),
+        0
+      );
+
+    // =====================================
+    // TRENDING
+    // =====================================
+
+    const averageTrending =
+      userListings.length
+
+        ? (
+            userListings.reduce(
+              (sum, listing) =>
+                sum +
+                (
+                  listing.trending_score || 0
+                ),
+              0
+            )
+            /
+            userListings.length
+          )
+
+        : 0;
+
+    // =====================================
+    // FAVORITES
+    // =====================================
+
+    const listingIds =
+      userListings.map(
+        (l) => l.id
+      );
+
+    let totalFavorites = 0;
+
+    if (listingIds.length) {
+
+      const {
+        data: favorites
+      } =
+        await supabase
+          .from("favorites")
+          .select("id, listing_id")
+          .in(
+            "listing_id",
+            listingIds
+          );
+
+      totalFavorites =
+        favorites?.length ?? 0;
+    }
+
+    // =====================================
+    // MESSAGES
+    // =====================================
+
+    const {
+      data: conversations
+    } =
+      await supabase
+        .from("conversations")
+        .select("*")
+        .or(`
+          buyer_id.eq.${user.id},
+          seller_id.eq.${user.id}
+        `);
+
+    const totalMessages =
+      conversations?.length ?? 0;
+
+    // =====================================
+    // RECOMMENDATION SCORE
+    // =====================================
+
+    const recommendationScore =
+      Math.min(
+        100,
+        Math.round(
+          (
+            totalViews * 0.02
+          ) +
+          (
+            totalFavorites * 2
+          ) +
+          (
+            averageTrending * 5
+          )
+        )
+      );
+
+    // =====================================
+    // TOP LISTINGS
+    // =====================================
+
+    const ranked =
+      [...userListings]
+        .sort(
+          (a, b) =>
+
+            (
+              b.trending_score || 0
+            )
+            -
+            (
+              a.trending_score || 0
+            )
+        )
+        .slice(0, 5);
+
+    setTopListings(
+      ranked
+    );
+
+    setStats({
+
+      listings:
+        userListings.length,
+
+      totalViews,
+
+      totalFavorites,
+
+      totalMessages,
+
+      recommendationScore,
+
+      averageTrending:
+        Number(
+          averageTrending.toFixed(1)
+        ),
+
+    });
+  }
+
+  // =====================================
+  // METRIC CARD
+  // =====================================
+
+  function MetricCard({
+    title,
+    value,
+    icon,
+    color,
+  }: {
+    title: string;
+    value: string | number;
+    icon: React.ReactNode;
+    color: string;
+  }) {
+
+    return (
+
+      <div className="rounded-3xl bg-white p-6 shadow-sm">
+
+        <div className="flex items-center justify-between">
+
+          <div>
+
+            <div className="text-sm font-bold text-[#6B7280]">
+
+              {title}
+
+            </div>
+
+            <div className="mt-3 text-4xl font-black text-[#111827]">
+
+              {value}
+
+            </div>
+
+          </div>
+
+          <div className={`flex h-16 w-16 items-center justify-center rounded-2xl ${color}`}>
+
+            {icon}
+
+          </div>
+
+        </div>
+
+      </div>
+
+    );
+
+  }
+
   return (
+
     <>
       <AuthGuard />
 
       <main className="min-h-screen bg-[#F7F5F2] p-6 md:p-10">
 
-        <div className="mx-auto max-w-5xl">
+        <div className="mx-auto max-w-7xl">
 
-          <div className="rounded-3xl bg-white p-8 shadow-sm">
+          {/* HERO */}
+
+          <div className="mb-10 overflow-hidden rounded-[32px] bg-gradient-to-r from-[#2F5D50] to-[#1F2933] p-10 text-white shadow-xl">
+
+            <div className="flex flex-wrap items-center justify-between gap-8">
+
+              <div>
+
+                <div className="mb-5 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-black backdrop-blur">
+
+                  <Brain className="h-4 w-4" />
+
+                  AI Marketplace Intelligence
+
+                </div>
+
+                <h1 className="text-5xl font-black">
+
+                  Welcome back,
+                  {" "}
+                  {profile?.full_name ??
+                    "Seller"}
+
+                </h1>
+
+                <p className="mt-5 max-w-2xl text-lg leading-8 text-white/80">
+
+                  Track marketplace performance, seller growth,
+                  engagement metrics, and AI recommendation visibility.
+
+                </p>
+
+              </div>
+
+              <div className="flex flex-wrap gap-4">
+
+                <Link
+                  href="/post"
+                  className="rounded-2xl bg-white px-6 py-4 text-lg font-black text-[#111827]"
+                >
+
+                  Create Listing
+
+                </Link>
+
+                <Link
+                  href="/dashboard/listings"
+                  className="rounded-2xl border border-white/20 bg-white/10 px-6 py-4 text-lg font-black text-white backdrop-blur"
+                >
+
+                  Manage Listings
+
+                </Link>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          {/* PROFILE */}
+
+          <div className="mb-10 rounded-3xl bg-white p-8 shadow-sm">
 
             <div className="flex flex-wrap items-center justify-between gap-6">
 
               <div>
 
-                <h1 className="text-5xl font-black text-[#111827]">
+                <h2 className="text-4xl font-black text-[#111827]">
 
-                  {profile?.full_name ??
-                    "User"}
+                  Account Overview
 
-                </h1>
+                </h2>
 
-                <div className="mt-4 space-y-2 text-[#374151]">
+                <div className="mt-5 space-y-2 text-[#374151]">
 
                   <p>
                     {profile?.email}
@@ -70,8 +445,10 @@ export default function DashboardPage() {
 
                   {profile?.verified && (
 
-                    <div className="rounded-full bg-blue-100 px-4 py-2 text-sm font-bold text-blue-700">
-                      Verified
+                    <div className="rounded-full bg-blue-100 px-4 py-2 text-sm font-black text-blue-700">
+
+                      Verified Seller
+
                     </div>
 
                   )}
@@ -79,8 +456,10 @@ export default function DashboardPage() {
                   {profile
                     ?.verification_submitted && (
 
-                    <div className="rounded-full bg-yellow-100 px-4 py-2 text-sm font-bold text-yellow-700">
-                      Verification Submitted
+                    <div className="rounded-full bg-yellow-100 px-4 py-2 text-sm font-black text-yellow-700">
+
+                      Verification Pending
+
                     </div>
 
                   )}
@@ -95,28 +474,18 @@ export default function DashboardPage() {
                   href="/settings"
                   className="rounded-2xl border border-[#2F5D50] px-6 py-4 text-lg font-bold text-[#2F5D50]"
                 >
-                  Account Settings
-                </Link>
 
-                <Link
-                  href="/dashboard/listings"
-                  className="rounded-2xl border border-[#2F5D50] px-6 py-4 text-lg font-bold text-[#2F5D50]"
-                >
-                  Your Listings
+                  Account Settings
+
                 </Link>
 
                 <Link
                   href="/saved"
                   className="rounded-2xl border border-[#2F5D50] px-6 py-4 text-lg font-bold text-[#2F5D50]"
                 >
-                  Saved Listings
-                </Link>
 
-                <Link
-                  href="/post"
-                  className="rounded-2xl bg-[#2F5D50] px-6 py-4 text-lg font-bold text-white"
-                >
-                  Create Listing
+                  Saved Listings
+
                 </Link>
 
               </div>
@@ -125,11 +494,164 @@ export default function DashboardPage() {
 
           </div>
 
+          {/* METRICS */}
+
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+
+            <MetricCard
+              title="Total Listings"
+              value={stats.listings}
+              icon={
+                <Sparkles className="h-8 w-8 text-white" />
+              }
+              color="bg-[#2F5D50]"
+            />
+
+            <MetricCard
+              title="Marketplace Views"
+              value={stats.totalViews}
+              icon={
+                <Eye className="h-8 w-8 text-white" />
+              }
+              color="bg-blue-600"
+            />
+
+            <MetricCard
+              title="Saved By Buyers"
+              value={stats.totalFavorites}
+              icon={
+                <Heart className="h-8 w-8 text-white" />
+              }
+              color="bg-red-500"
+            />
+
+            <MetricCard
+              title="Conversation Activity"
+              value={stats.totalMessages}
+              icon={
+                <MessageCircle className="h-8 w-8 text-white" />
+              }
+              color="bg-yellow-500"
+            />
+
+            <MetricCard
+              title="AI Recommendation Score"
+              value={`${stats.recommendationScore}%`}
+              icon={
+                <Brain className="h-8 w-8 text-white" />
+              }
+              color="bg-purple-600"
+            />
+
+            <MetricCard
+              title="Average Trending Score"
+              value={stats.averageTrending}
+              icon={
+                <TrendingUp className="h-8 w-8 text-white" />
+              }
+              color="bg-green-600"
+            />
+
+          </div>
+
+          {/* TOP LISTINGS */}
+
+          <div className="mt-10 rounded-3xl bg-white p-8 shadow-sm">
+
+            <div className="mb-8 flex items-center gap-3">
+
+              <Activity className="h-7 w-7 text-[#2F5D50]" />
+
+              <h2 className="text-3xl font-black text-[#111827]">
+
+                Top Performing Listings
+
+              </h2>
+
+            </div>
+
+            {!topListings.length && (
+
+              <div className="rounded-2xl bg-[#F7F5F2] p-8 text-center text-[#6B7280]">
+
+                No listing analytics available yet.
+
+              </div>
+
+            )}
+
+            <div className="space-y-5">
+
+              {topListings.map((listing) => (
+
+                <div
+                  key={listing.id}
+                  className="flex flex-wrap items-center justify-between gap-6 rounded-2xl bg-[#F7F5F2] p-6"
+                >
+
+                  <div>
+
+                    <h3 className="text-2xl font-black text-[#111827]">
+
+                      {listing.title}
+
+                    </h3>
+
+                    <div className="mt-3 flex flex-wrap gap-3">
+
+                      <div className="rounded-full bg-blue-100 px-4 py-2 text-sm font-black text-blue-700">
+
+                        👁
+                        {" "}
+                        {listing.views ?? 0}
+                        {" "}
+                        views
+
+                      </div>
+
+                      <div className="rounded-full bg-green-100 px-4 py-2 text-sm font-black text-green-700">
+
+                        🔥
+                        {" "}
+                        {listing.trending_score ?? 0}
+                        {" "}
+                        trending
+
+                      </div>
+
+                    </div>
+
+                  </div>
+
+                  <Link
+                    href={`/listing/${listing.slug}`}
+                    className="rounded-2xl bg-[#2F5D50] px-5 py-3 font-black text-white"
+                  >
+
+                    View Listing
+
+                  </Link>
+
+                </div>
+
+              ))}
+
+            </div>
+
+          </div>
+
+          {/* ANALYTICS */}
+
+          <div className="mt-10">
+
+            <SellerAnalytics />
+
+          </div>
+
         </div>
 
-                <SellerAnalytics />
-
       </main>
+
     </>
   );
 }
