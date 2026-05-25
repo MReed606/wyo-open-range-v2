@@ -1,22 +1,32 @@
 "use client";
 
 import { useState } from "react";
+import { Star } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
 export function LeaveReviewForm({
   sellerId,
+  listingId,
 }: {
   sellerId: string;
+  listingId: string;
 }) {
 
-  const [rating, setRating] =
+  const [rating,
+    setRating] =
     useState(5);
 
-  const [review, setReview] =
+  const [review,
+    setReview] =
     useState("");
 
-  const [loading, setLoading] =
+  const [loading,
+    setLoading] =
     useState(false);
+
+  const [hovered,
+    setHovered] =
+    useState(0);
 
   async function handleSubmit(
     e: React.FormEvent
@@ -28,180 +38,234 @@ export function LeaveReviewForm({
 
     const {
       data: { user },
-    } = await supabase.auth.getUser();
+    } =
+      await supabase.auth.getUser();
 
     if (!user) {
-      alert("Login required.");
+
+      alert(
+        "Login required."
+      );
+
+      setLoading(false);
+
       return;
     }
 
-    
     // =====================================
-    // CHECK EXISTING REVIEW
+    // PREVENT DUPLICATE REVIEWS
     // =====================================
-    const { data: existingReview } =
+
+    const {
+      data: existingReview
+    } =
       await supabase
-        .from("user_reviews")
+        .from("seller_reviews")
         .select("id")
-        .eq("reviewer_id", user.id)
         .eq(
-          "reviewed_user_id",
+          "reviewer_id",
+          user.id
+        )
+        .eq(
+          "seller_id",
           sellerId
+        )
+        .eq(
+          "listing_id",
+          listingId
         )
         .single();
 
     if (existingReview) {
+
       alert(
-        "You already reviewed this seller."
+        "You already reviewed this seller for this listing."
       );
+
+      setLoading(false);
+
       return;
     }
-
 
     // =====================================
     // CREATE REVIEW
     // =====================================
-    const { error } = await supabase
-      .from("user_reviews")
-      .insert({
-        reviewer_id: user.id,
-        reviewed_user_id: sellerId,
-        rating,
-        review,
-      });
+
+    const { error } =
+      await supabase
+        .from("seller_reviews")
+        .insert({
+
+          seller_id:
+            sellerId,
+
+          reviewer_id:
+            user.id,
+
+          listing_id:
+            listingId,
+
+          rating,
+
+          review,
+
+        });
 
     if (error) {
+
       console.error(error);
-      alert("Failed to submit review.");
+
+      alert(
+        "Failed to submit review."
+      );
+
+      setLoading(false);
+
       return;
     }
 
     // =====================================
-    // RECALCULATE SCORE
-    // =====================================
-    const { data: reviews } =
-      await supabase
-        .from("user_reviews")
-        .select("rating")
-        .eq(
-          "reviewed_user_id",
-          sellerId
-        );
-
-    const total =
-      reviews?.reduce(
-        (sum, r) =>
-          sum + r.rating,
-        0
-      ) ?? 0;
-
-    const count =
-      reviews?.length ?? 0;
-
-    const average =
-      count > 0
-        ? (
-            total / count
-          ).toFixed(1)
-        : 0;
-
-    await supabase
-      .from("profiles")
-      .update({
-        review_score: average,
-        review_count: count,
-      })
-      .eq("id", sellerId);
-
-    
-    // =====================================
     // CREATE NOTIFICATION
     // =====================================
+
     await supabase
-      .from("notifications")
+      .from(
+        "user_notifications"
+      )
       .insert({
-        user_id: sellerId,
-        type: "review",
-        title: "New Seller Review",
+
+        user_id:
+          sellerId,
+
+        type:
+          "seller_review",
+
+        title:
+          "New Seller Review",
+
         message:
           "You received a new seller review.",
+
+        link:
+          `/seller/profile/${sellerId}`,
+
       });
 
-
-    alert("Review submitted.");
+    alert(
+      "Review submitted successfully."
+    );
 
     location.reload();
   }
 
   return (
+
     <form
       onSubmit={handleSubmit}
       className="mt-8 rounded-3xl bg-white p-8 shadow-sm"
     >
 
       <h2 className="text-3xl font-black text-[#111827]">
-        Leave Review
+
+        Leave Seller Review
+
       </h2>
 
-      <div className="mt-6">
+      {/* STARS */}
 
-        <label className="mb-2 block font-bold text-[#111827]">
+      <div className="mt-8">
+
+        <label className="mb-4 block font-bold text-[#111827]">
+
           Rating
+
         </label>
 
-        <select
-          value={rating}
-          onChange={(e) =>
-            setRating(
-              Number(e.target.value)
-            )
-          }
-          className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-[#111827]"
-        >
-          <option value={5}>
-            ⭐⭐⭐⭐⭐ (5)
-          </option>
+        <div className="flex items-center gap-2">
 
-          <option value={4}>
-            ⭐⭐⭐⭐ (4)
-          </option>
+          {Array.from({
+            length: 5,
+          }).map((_, i) => {
 
-          <option value={3}>
-            ⭐⭐⭐ (3)
-          </option>
+            const value =
+              i + 1;
 
-          <option value={2}>
-            ⭐⭐ (2)
-          </option>
+            return (
 
-          <option value={1}>
-            ⭐ (1)
-          </option>
+              <button
+                key={value}
+                type="button"
+                onClick={() =>
+                  setRating(value)
+                }
+                onMouseEnter={() =>
+                  setHovered(value)
+                }
+                onMouseLeave={() =>
+                  setHovered(0)
+                }
+                className="transition hover:scale-110"
+              >
 
-        </select>
+                <Star
+                  className={`h-9 w-9 ${
+                    value <= (
+                      hovered || rating
+                    )
+                      ? "fill-yellow-400 text-yellow-400"
+                      : "text-gray-300"
+                  }`}
+                />
+
+              </button>
+
+            );
+
+          })}
+
+        </div>
 
       </div>
 
-      <textarea
-        value={review}
-        onChange={(e) =>
-          setReview(e.target.value)
-        }
-        placeholder="Write your review..."
-        required
-        className="mt-5 min-h-40 w-full rounded-xl border border-gray-300 px-4 py-3 text-[#111827]"
-      />
+      {/* REVIEW */}
+
+      <div className="mt-8">
+
+        <label className="mb-4 block font-bold text-[#111827]">
+
+          Review
+
+        </label>
+
+        <textarea
+          value={review}
+          onChange={(e) =>
+            setReview(
+              e.target.value
+            )
+          }
+          placeholder="Share your experience with this seller..."
+          required
+          className="min-h-40 w-full rounded-2xl border border-gray-300 px-5 py-4 text-[#111827] focus:border-[#2F5D50] focus:outline-none"
+        />
+
+      </div>
+
+      {/* SUBMIT */}
 
       <button
         type="submit"
         disabled={loading}
-        className="mt-5 rounded-2xl bg-[#2F5D50] px-6 py-4 font-bold text-white"
+        className="mt-8 rounded-2xl bg-[#2F5D50] px-8 py-4 font-black text-white transition hover:bg-[#24473d] disabled:opacity-50"
       >
+
         {loading
           ? "Submitting..."
           : "Submit Review"}
+
       </button>
 
     </form>
+
   );
 }
