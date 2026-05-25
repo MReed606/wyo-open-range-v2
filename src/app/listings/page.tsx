@@ -1,12 +1,34 @@
 "use client";
 
-import { Suspense, useEffect, useRef, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import {
+  Suspense,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
-import { Search, Sparkles } from "lucide-react";
+import {
+  useSearchParams,
+} from "next/navigation";
 
-import { supabase } from "@/lib/supabase";
-import { ListingCard } from "@/components/ListingCard";
+import {
+  Search,
+  Sparkles,
+  Brain,
+} from "lucide-react";
+
+import {
+  supabase
+} from "@/lib/supabase";
+
+import {
+  ListingCard
+} from "@/components/ListingCard";
+
+import {
+  getRecommendedListings,
+} from "@/lib/recommendations";
 
 const PAGE_SIZE = 12;
 
@@ -16,7 +38,14 @@ function ListingsContent() {
     useSearchParams();
 
   const category =
-    searchParams.get("category");
+    searchParams.get(
+      "category"
+    );
+
+  const observerRef =
+    useRef<HTMLDivElement | null>(
+      null
+    );
 
   const [listings,
     setListings] =
@@ -37,15 +66,6 @@ function ListingsContent() {
   const [page,
     setPage] =
     useState(0);
-
-  const observerRef =
-    useRef<HTMLDivElement | null>(
-      null
-    );
-
-  // =====================================
-  // FILTER STATES
-  // =====================================
 
   const [search,
     setSearch] =
@@ -72,21 +92,43 @@ function ListingsContent() {
     useState(false);
 
   // =====================================
-  // RESET WHEN FILTERS CHANGE
+  // FILTER KEY
+  // =====================================
+
+  const filterKey =
+    useMemo(() => {
+
+      return JSON.stringify({
+
+        category,
+        search,
+        region,
+        minPrice,
+        maxPrice,
+        sortBy,
+
+      });
+
+    }, [
+
+      category,
+      search,
+      region,
+      minPrice,
+      maxPrice,
+      sortBy,
+
+    ]);
+
+  // =====================================
+  // RESET
   // =====================================
 
   useEffect(() => {
 
     resetAndReload();
 
-  }, [
-    category,
-    search,
-    region,
-    minPrice,
-    maxPrice,
-    sortBy,
-  ]);
+  }, [filterKey]);
 
   async function resetAndReload() {
 
@@ -218,14 +260,18 @@ function ListingsContent() {
     );
 
     return () => {
+
       observer.disconnect();
+
     };
 
   }, [
+
     page,
     hasMore,
     loadingMore,
     loading,
+
   ]);
 
   // =====================================
@@ -247,18 +293,77 @@ function ListingsContent() {
 
     }
 
-    const from =
-      currentPage * PAGE_SIZE;
+    const {
+      data: { user }
+    } =
+      await supabase.auth.getUser();
 
-    const to =
-      from + PAGE_SIZE - 1;
+    // =====================================
+    // AI ENGINE
+    // =====================================
 
-    let query =
-      supabase
-        .from("listings")
-        .select("*")
-        .neq("status", "removed")
-        .range(from, to);
+    let results =
+      await getRecommendedListings({
+
+        userId:
+          user?.id,
+
+        limit: 100,
+
+        categoryBoost:
+          category
+            ? [category]
+            : [],
+
+        regionBoost:
+          region
+            ? [region]
+            : [],
+
+      });
+
+    // =====================================
+    // SEARCH FILTER
+    // =====================================
+
+    if (search.trim()) {
+
+      const searchLower =
+        search.toLowerCase();
+
+      results =
+        results.filter(
+          (listing: any) => {
+
+            return (
+
+              listing.title
+                ?.toLowerCase()
+                .includes(
+                  searchLower
+                )
+
+              ||
+
+              listing.category
+                ?.toLowerCase()
+                .includes(
+                  searchLower
+                )
+
+              ||
+
+              listing.region
+                ?.toLowerCase()
+                .includes(
+                  searchLower
+                )
+
+            );
+
+          }
+        );
+    }
 
     // =====================================
     // CATEGORY
@@ -266,26 +371,12 @@ function ListingsContent() {
 
     if (category) {
 
-      query =
-        query.eq(
-          "category",
-          category
+      results =
+        results.filter(
+          (listing: any) =>
+            listing.category ===
+            category
         );
-    }
-
-    // =====================================
-    // SMART SEARCH
-    // =====================================
-
-    if (search.trim()) {
-
-      query =
-        query.or(`
-          title.ilike.%${search}%,
-          description.ilike.%${search}%,
-          category.ilike.%${search}%,
-          region.ilike.%${search}%
-        `);
     }
 
     // =====================================
@@ -294,10 +385,15 @@ function ListingsContent() {
 
     if (region.trim()) {
 
-      query =
-        query.ilike(
-          "region",
-          `%${region}%`
+      results =
+        results.filter(
+          (listing: any) =>
+
+            listing.region
+              ?.toLowerCase()
+              .includes(
+                region.toLowerCase()
+              )
         );
     }
 
@@ -307,19 +403,37 @@ function ListingsContent() {
 
     if (minPrice) {
 
-      query =
-        query.gte(
-          "price",
-          minPrice
+      results =
+        results.filter(
+          (listing: any) =>
+
+            Number(
+              listing.price
+                ?.replace(
+                  /[^0-9.]/g,
+                  ""
+                )
+            )
+            >=
+            Number(minPrice)
         );
     }
 
     if (maxPrice) {
 
-      query =
-        query.lte(
-          "price",
-          maxPrice
+      results =
+        results.filter(
+          (listing: any) =>
+
+            Number(
+              listing.price
+                ?.replace(
+                  /[^0-9.]/g,
+                  ""
+                )
+            )
+            <=
+            Number(maxPrice)
         );
     }
 
@@ -329,99 +443,91 @@ function ListingsContent() {
 
     switch (sortBy) {
 
-      case "recommended":
-
-        query =
-          query.order(
-            "trending_score",
-            {
-              ascending: false,
-            }
-          );
-
-        break;
-
       case "popular":
 
-        query =
-          query.order(
-            "views",
-            {
-              ascending: false,
-            }
-          );
+        results.sort(
+          (a: any, b: any) =>
+            (b.views || 0)
+            -
+            (a.views || 0)
+        );
 
         break;
 
       case "trending":
 
-        query =
-          query.order(
-            "trending_score",
-            {
-              ascending: false,
-            }
-          );
+        results.sort(
+          (a: any, b: any) =>
+            (b.trending_score || 0)
+            -
+            (a.trending_score || 0)
+        );
 
         break;
 
       case "price_low":
 
-        query =
-          query.order(
-            "price",
-            {
-              ascending: true,
-            }
-          );
+        results.sort(
+          (a: any, b: any) =>
+
+            Number(
+              a.price?.replace(
+                /[^0-9.]/g,
+                ""
+              ) || 0
+            )
+            -
+            Number(
+              b.price?.replace(
+                /[^0-9.]/g,
+                ""
+              ) || 0
+            )
+        );
 
         break;
 
       case "price_high":
 
-        query =
-          query.order(
-            "price",
-            {
-              ascending: false,
-            }
-          );
+        results.sort(
+          (a: any, b: any) =>
+
+            Number(
+              b.price?.replace(
+                /[^0-9.]/g,
+                ""
+              ) || 0
+            )
+            -
+            Number(
+              a.price?.replace(
+                /[^0-9.]/g,
+                ""
+              ) || 0
+            )
+        );
 
         break;
-
-      default:
-
-        query =
-          query.order(
-            "created_at",
-            {
-              ascending: false,
-            }
-          );
     }
 
-    const { data, error } =
-      await query;
+    // =====================================
+    // PAGINATION
+    // =====================================
 
-    if (error) {
+    const from =
+      currentPage * PAGE_SIZE;
 
-      console.error(
-        "LISTINGS ERROR:",
-        error
+    const to =
+      from + PAGE_SIZE;
+
+    const paginated =
+      results.slice(
+        from,
+        to
       );
 
-      setLoading(false);
-
-      setLoadingMore(false);
-
-      return;
-    }
-
-    const newListings =
-      data ?? [];
-
     if (
-      newListings.length <
+      paginated.length <
       PAGE_SIZE
     ) {
 
@@ -431,7 +537,7 @@ function ListingsContent() {
     if (replace) {
 
       setListings(
-        newListings
+        paginated
       );
 
     } else {
@@ -440,7 +546,7 @@ function ListingsContent() {
 
         ...prev,
 
-        ...newListings,
+        ...paginated,
 
       ]);
     }
@@ -464,9 +570,9 @@ function ListingsContent() {
 
             <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-[#2F5D50]/10 px-4 py-2 text-sm font-black text-[#2F5D50]">
 
-              <Sparkles className="h-4 w-4" />
+              <Brain className="h-4 w-4" />
 
-              Smart Marketplace Search
+              AI Marketplace Search
 
             </div>
 
@@ -480,7 +586,7 @@ function ListingsContent() {
 
             <p className="mt-4 text-lg text-[#6B7280]">
 
-              Intelligent discovery across Wyoming.
+              Adaptive AI-powered discovery across Wyoming.
 
             </p>
 
@@ -506,15 +612,13 @@ function ListingsContent() {
 
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
 
-            {/* SEARCH */}
-
             <div className="relative xl:col-span-2">
 
               <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
 
               <input
                 type="text"
-                placeholder="Search listings, regions, categories..."
+                placeholder="Search marketplace..."
                 value={search}
                 onChange={(e) =>
                   setSearch(
@@ -525,8 +629,6 @@ function ListingsContent() {
               />
 
             </div>
-
-            {/* REGION */}
 
             <input
               type="text"
@@ -540,8 +642,6 @@ function ListingsContent() {
               className="rounded-2xl border border-gray-200 bg-white px-5 py-4 text-sm font-semibold text-[#111827] outline-none transition focus:border-[#2F5D50]"
             />
 
-            {/* MIN */}
-
             <input
               type="number"
               placeholder="Min Price"
@@ -553,8 +653,6 @@ function ListingsContent() {
               }
               className="rounded-2xl border border-gray-200 bg-white px-5 py-4 text-sm font-semibold text-[#111827] outline-none transition focus:border-[#2F5D50]"
             />
-
-            {/* MAX */}
 
             <input
               type="number"
@@ -568,8 +666,6 @@ function ListingsContent() {
               className="rounded-2xl border border-gray-200 bg-white px-5 py-4 text-sm font-semibold text-[#111827] outline-none transition focus:border-[#2F5D50]"
             />
 
-            {/* SORT */}
-
             <select
               value={sortBy}
               onChange={(e) =>
@@ -582,10 +678,6 @@ function ListingsContent() {
 
               <option value="recommended">
                 Recommended
-              </option>
-
-              <option value="newest">
-                Newest
               </option>
 
               <option value="popular">
@@ -646,10 +738,18 @@ function ListingsContent() {
               title={listing.title}
               price={listing.price}
               location={listing.region}
-              seller={listing.seller ?? "Seller"}
+              seller={
+                listing.seller ??
+                "Seller"
+              }
               slug={listing.slug}
-              condition={listing.condition ?? "Used"}
-              imageUrl={listing.image_url}
+              condition={
+                listing.condition ??
+                "Used"
+              }
+              imageUrl={
+                listing.image_url
+              }
             />
 
           ))}

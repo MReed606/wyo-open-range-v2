@@ -2,9 +2,26 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useState } from "react";
 
-import { supabase } from "@/lib/supabase";
+import {
+  useEffect,
+  useState,
+} from "react";
+
+import {
+  Sparkles,
+  Flame,
+  Brain,
+} from "lucide-react";
+
+import {
+  supabase
+} from "@/lib/supabase";
+
+import {
+  getRecommendedListings,
+  getTrendingListings,
+} from "@/lib/recommendations";
 
 type Listing = {
   id: string;
@@ -28,72 +45,64 @@ export function TrendingListings() {
     setRecommended] =
     useState<Listing[]>([]);
 
+  const [regional,
+    setRegional] =
+    useState<Listing[]>([]);
+
   const [loading,
     setLoading] =
     useState(true);
 
+  // =====================================
+  // INITIALIZE
+  // =====================================
+
   useEffect(() => {
 
-    loadTrendingListings();
-
-    loadRecommendedListings();
+    initialize();
 
   }, []);
 
-  // =====================================
-  // TRENDING
-  // =====================================
+  async function initialize() {
 
-  async function loadTrendingListings() {
+    setLoading(true);
 
-    await supabase.rpc(
-      "update_listing_trending_scores"
-    );
+    await Promise.all([
 
-    const { data, error } =
-      await supabase
-        .from("listings")
-        .select(`
-          id,
-          title,
-          slug,
-          price,
-          region,
-          image_url,
-          views,
-          trending_score,
-          category
-        `)
-        .or("status.is.null,status.neq.removed")
-        .or("hidden_by_system.is.null,hidden_by_system.neq.true")
-        .order(
-          "trending_score",
-          {
-            ascending: false,
-          }
-        )
-        .limit(6);
+      loadTrending(),
 
-    if (error) {
+      loadRecommended(),
 
-      console.error(
-        "TRENDING ERROR:",
-        error
-      );
+      loadRegional(),
 
-      return;
-    }
-
-    setTrending(data ?? []);
+    ]);
 
     setLoading(false);
   }
 
   // =====================================
-  // RECOMMENDATIONS
+  // TRENDING
   // =====================================
 
-  async function loadRecommendedListings() {
+  async function loadTrending() {
+
+    await supabase.rpc(
+      "update_listing_trending_scores"
+    );
+
+    const data =
+      await getTrendingListings(6);
+
+    setTrending(
+      data as Listing[]
+    );
+  }
+
+  // =====================================
+  // RECOMMENDED
+  // =====================================
+
+  async function loadRecommended() {
 
     const {
       data: { user }
@@ -104,124 +113,74 @@ export function TrendingListings() {
       return;
     }
 
-    // =====================================
-    // USER ACTIVITY
-    // =====================================
+    const data =
+      await getRecommendedListings({
+
+        userId:
+          user.id,
+
+        limit: 6,
+
+      });
+
+    setRecommended(
+      data as Listing[]
+    );
+  }
+
+  // =====================================
+  // REGIONAL
+  // =====================================
+
+  async function loadRegional() {
 
     const {
-      data: activity
+      data: { user }
+    } =
+      await supabase.auth.getUser();
+
+    if (!user) {
+      return;
+    }
+
+    const {
+      data: profile
     } =
       await supabase
         .from(
-          "user_listing_activity"
+          "user_preference_profiles"
         )
-        .select(`
-          listing_id,
-          activity_type,
-          listings (
-            category
-          )
-        `)
+        .select("*")
         .eq(
           "user_id",
           user.id
         )
-        .limit(25);
+        .maybeSingle();
 
-    if (!activity?.length) {
+    const regions =
+      profile
+        ?.favorite_regions ?? [];
+
+    if (!regions.length) {
       return;
     }
 
-    // =====================================
-    // TOP CATEGORY SIGNALS
-    // =====================================
+    const data =
+      await getRecommendedListings({
 
-    const categoryCounts:
-      Record<string, number> = {};
+        userId:
+          user.id,
 
-    activity.forEach(
-      (item: any) => {
+        limit: 6,
 
-        const category =
-          item.listings?.category;
+        regionBoost:
+          regions,
 
-        if (!category) {
-          return;
-        }
+      });
 
-        categoryCounts[
-          category
-        ] =
-          (
-            categoryCounts[
-              category
-            ] || 0
-          ) + 1;
-
-      }
+    setRegional(
+      data as Listing[]
     );
-
-    const topCategories =
-      Object.entries(
-        categoryCounts
-      )
-        .sort(
-          (a, b) =>
-            b[1] - a[1]
-        )
-        .slice(0, 3)
-        .map(
-          ([category]) =>
-            category
-        );
-
-    if (!topCategories.length) {
-      return;
-    }
-
-    // =====================================
-    // LOAD RECOMMENDATIONS
-    // =====================================
-
-    const { data, error } =
-      await supabase
-        .from("listings")
-        .select(`
-          id,
-          title,
-          slug,
-          price,
-          region,
-          image_url,
-          views,
-          trending_score,
-          category
-        `)
-        .in(
-          "category",
-          topCategories
-        )
-        .or("status.is.null,status.neq.removed")
-        .or("hidden_by_system.is.null,hidden_by_system.neq.true")
-        .order(
-          "trending_score",
-          {
-            ascending: false,
-          }
-        )
-        .limit(6);
-
-    if (error) {
-
-      console.error(
-        "RECOMMENDATION ERROR:",
-        error
-      );
-
-      return;
-    }
-
-    setRecommended(data ?? []);
   }
 
   // =====================================
@@ -314,7 +273,9 @@ export function TrendingListings() {
 
             <div className="rounded-full bg-[#F3F4F6] px-4 py-2 text-sm font-black text-[#111827]">
 
-              👁 {listing.views ?? 0}
+              👁
+              {" "}
+              {listing.views ?? 0}
 
             </div>
 
@@ -323,6 +284,89 @@ export function TrendingListings() {
         </div>
 
       </Link>
+
+    );
+
+  }
+
+  // =====================================
+  // SECTION
+  // =====================================
+
+  function ListingSection({
+    title,
+    description,
+    icon,
+    listings,
+    badge,
+  }: {
+    title: string;
+    description: string;
+    icon: React.ReactNode;
+    listings: Listing[];
+    badge: string;
+  }) {
+
+    if (!listings.length) {
+      return null;
+    }
+
+    return (
+
+      <section>
+
+        <div className="mb-8 flex items-center justify-between">
+
+          <div>
+
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-[#2F5D50]/10 px-4 py-2 text-sm font-black text-[#2F5D50]">
+
+              {icon}
+
+              AI Marketplace Discovery
+
+            </div>
+
+            <h2 className="text-4xl font-black text-[#111827]">
+
+              {title}
+
+            </h2>
+
+            <p className="mt-3 text-lg text-[#6B7280]">
+
+              {description}
+
+            </p>
+
+          </div>
+
+          <Link
+            href="/listings"
+            className="rounded-2xl bg-[#2F5D50] px-6 py-4 text-sm font-black text-white transition hover:bg-[#24473d]"
+          >
+
+            Explore More
+
+          </Link>
+
+        </div>
+
+        <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
+
+          {listings.map((listing) => (
+
+            <ListingCard
+              key={listing.id}
+              listing={listing}
+              badge={badge}
+            />
+
+          ))}
+
+        </div>
+
+      </section>
 
     );
 
@@ -349,7 +393,7 @@ export function TrendingListings() {
               className="overflow-hidden rounded-3xl bg-white shadow-sm"
             >
 
-              <div className="h-[240px] animate-pulse bg-gray-200" />
+              <div className="h-[260px] animate-pulse bg-gray-200" />
 
               <div className="p-6">
 
@@ -373,100 +417,37 @@ export function TrendingListings() {
 
   return (
 
-    <section className="space-y-20">
+    <section className="space-y-24">
 
-      {/* RECOMMENDED */}
+      <ListingSection
+        title="Recommended For You"
+        description="Adaptive AI-powered marketplace recommendations based on your interests and behavior."
+        icon={
+          <Brain className="h-4 w-4" />
+        }
+        listings={recommended}
+        badge="⭐ Recommended"
+      />
 
-      {recommended.length > 0 && (
+      <ListingSection
+        title="Popular In Your Regions"
+        description="Marketplace activity and listings popular in your preferred Wyoming regions."
+        icon={
+          <Sparkles className="h-4 w-4" />
+        }
+        listings={regional}
+        badge="📍 Regional"
+      />
 
-        <div>
-
-          <div className="mb-8 flex items-center justify-between">
-
-            <div>
-
-              <h2 className="text-4xl font-black text-[#111827]">
-
-                Recommended For You
-
-              </h2>
-
-              <p className="mt-2 text-lg text-[#6B7280]">
-
-                Personalized listings based on your activity.
-
-              </p>
-
-            </div>
-
-          </div>
-
-          <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
-
-            {recommended.map((listing) => (
-
-              <ListingCard
-                key={listing.id}
-                listing={listing}
-                badge="⭐ Recommended"
-              />
-
-            ))}
-
-          </div>
-
-        </div>
-
-      )}
-
-      {/* TRENDING */}
-
-      <div>
-
-        <div className="mb-8 flex items-center justify-between">
-
-          <div>
-
-            <h2 className="text-4xl font-black text-[#111827]">
-
-              Trending Listings
-
-            </h2>
-
-            <p className="mt-2 text-lg text-[#6B7280]">
-
-              Most active listings across Wyoming.
-
-            </p>
-
-          </div>
-
-          <Link
-            href="/listings"
-            className="rounded-2xl bg-[#2F5D50] px-6 py-4 text-sm font-black text-white transition hover:bg-[#24473d]"
-          >
-
-            Browse All
-
-          </Link>
-
-        </div>
-
-        <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
-
-          {trending.map((listing) => (
-
-            <ListingCard
-              key={listing.id}
-              listing={listing}
-              badge="🔥 Trending"
-            />
-
-          ))}
-
-        </div>
-
-      </div>
+      <ListingSection
+        title="Trending Across Wyoming"
+        description="Most active and engaging listings across the platform right now."
+        icon={
+          <Flame className="h-4 w-4" />
+        }
+        listings={trending}
+        badge="🔥 Trending"
+      />
 
     </section>
 
