@@ -31,20 +31,63 @@ export default function ListingPage() {
     useState(false);
 
   useEffect(() => {
-    loadListing();
+
+    if (slug) {
+      loadListing();
+    }
+
   }, [slug]);
 
   async function loadListing() {
 
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("listings")
       .select("*")
-    .or("status.is.null,status.neq.removed")
-    .or("hidden_by_system.is.null,hidden_by_system.neq.true")
+      .or("status.is.null,status.neq.removed")
+      .or("hidden_by_system.is.null,hidden_by_system.neq.true")
       .eq("slug", slug)
       .single();
 
-    setListing(data);
+    console.log("LISTING LOAD:", data);
+    console.log("LISTING ERROR:", error);
+
+    if (!data) {
+
+      setLoading(false);
+      return;
+
+    }
+
+    // =====================================
+    // VIEW COUNT DEBUG
+    // =====================================
+
+    const currentViews =
+      data.views ?? 0;
+
+    const newViews =
+      currentViews + 1;
+
+    console.log("CURRENT VIEWS:", currentViews);
+    console.log("NEW VIEWS:", newViews);
+
+    const updateResult = await supabase
+      .from("listings")
+      .update({
+        views: newViews,
+      })
+      .eq("id", data.id);
+
+    console.log("UPDATE RESULT:", updateResult);
+
+    // =====================================
+    // UPDATE LOCAL STATE
+    // =====================================
+
+    setListing({
+      ...data,
+      views: newViews,
+    });
 
     setLoading(false);
   }
@@ -57,9 +100,11 @@ export default function ListingPage() {
   async function submitReport() {
 
     if (!reportReason.trim()) {
+
       alert(
         "Please enter a reason."
       );
+
       return;
     }
 
@@ -67,10 +112,10 @@ export default function ListingPage() {
       data: { user },
     } = await supabase.auth.getUser();
 
-    
     // =====================================
     // DUPLICATE REPORT PROTECTION
     // =====================================
+
     const {
       data: existingReport
     } = await supabase
@@ -91,8 +136,6 @@ export default function ListingPage() {
 
       return;
     }
-
-
 
     await supabase
       .from("reports")
@@ -183,7 +226,6 @@ export default function ListingPage() {
                   Seller Profile
                 </Link>
 
-
                 <button
                   onClick={async () => {
 
@@ -193,22 +235,25 @@ export default function ListingPage() {
                       await supabase.auth.getUser();
 
                     if (!user) {
+
                       alert(
                         "Login required."
                       );
+
                       return;
                     }
 
                     // =========================
                     // FIND EXISTING
                     // =========================
+
                     const {
                       data: existing
                     } = await supabase
                       .from("conversations")
                       .select("*")
-    .or("status.is.null,status.neq.removed")
-    .or("hidden_by_system.is.null,hidden_by_system.neq.true")
+                      .or("status.is.null,status.neq.removed")
+                      .or("hidden_by_system.is.null,hidden_by_system.neq.true")
                       .eq(
                         "listing_id",
                         listing.id
@@ -230,6 +275,7 @@ export default function ListingPage() {
                     // =========================
                     // CREATE
                     // =========================
+
                     const { data } =
                       await supabase
                         .from(
@@ -251,6 +297,7 @@ export default function ListingPage() {
                     // =========================
                     // NOTIFY SELLER
                     // =========================
+
                     await supabase
                       .from(
                         "notifications"
@@ -277,7 +324,6 @@ export default function ListingPage() {
                 >
                   Contact Seller
                 </button>
-
 
               </div>
 
