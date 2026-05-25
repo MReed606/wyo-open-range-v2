@@ -81,6 +81,127 @@ export default function PostPage() {
     );
   }
 
+  // =====================================
+  // MATCH SAVED SEARCHES
+  // =====================================
+
+  async function triggerSavedSearchNotifications(
+    listingId: string,
+    listingSlug: string
+  ) {
+
+    const {
+      data: savedSearches
+    } =
+      await supabase
+        .from("saved_searches")
+        .select("*");
+
+    if (!savedSearches?.length) {
+      return;
+    }
+
+    const matchingSearches =
+      savedSearches.filter(
+        (searchItem) => {
+
+          // SEARCH TERM
+
+          if (
+            searchItem.search &&
+            !title
+              .toLowerCase()
+              .includes(
+                searchItem.search.toLowerCase()
+              )
+          ) {
+
+            return false;
+          }
+
+          // CATEGORY
+
+          if (
+            searchItem.category &&
+            searchItem.category !== category
+          ) {
+
+            return false;
+          }
+
+          // REGION
+
+          if (
+            searchItem.region &&
+            searchItem.region !== region
+          ) {
+
+            return false;
+          }
+
+          // MIN PRICE
+
+          if (
+            searchItem.min_price &&
+            Number(price) <
+              Number(
+                searchItem.min_price
+              )
+          ) {
+
+            return false;
+          }
+
+          // MAX PRICE
+
+          if (
+            searchItem.max_price &&
+            Number(price) >
+              Number(
+                searchItem.max_price
+              )
+          ) {
+
+            return false;
+          }
+
+          return true;
+        }
+      );
+
+    if (!matchingSearches.length) {
+      return;
+    }
+
+    const notifications =
+      matchingSearches.map(
+        (searchItem) => ({
+
+          user_id:
+            searchItem.user_id,
+
+          type:
+            "saved_search_match",
+
+          title:
+            "New Matching Listing",
+
+          message:
+            `"${title}" matches one of your saved searches.`,
+
+          link:
+            `/listing/${listingSlug}`,
+
+        })
+      );
+
+    await supabase
+      .from(
+        "user_notifications"
+      )
+      .insert(notifications);
+  }
+
   async function createListing() {
 
     setLoading(true);
@@ -111,7 +232,10 @@ export default function PostPage() {
       "-" +
       Date.now();
 
-    const { error } =
+    const {
+      data,
+      error
+    } =
       await supabase
         .from("listings")
         .insert({
@@ -122,7 +246,9 @@ export default function PostPage() {
           region,
           slug,
           owner_id: user.id,
-        });
+        })
+        .select()
+        .single();
 
     setLoading(false);
 
@@ -136,6 +262,15 @@ export default function PostPage() {
 
       return;
     }
+
+    // =====================================
+    // TRIGGER MATCH NOTIFICATIONS
+    // =====================================
+
+    await triggerSavedSearchNotifications(
+      data.id,
+      slug
+    );
 
     window.location.href =
       "/dashboard/listings";
