@@ -876,12 +876,18 @@ export default function ListingPage() {
 
             {/* REVIEW */}
 
-            <LeaveReviewForm
-              sellerId={
-                listing.owner_id
-              }
-            />
+<div className="rounded-3xl bg-white p-8 shadow-sm">
 
+  <LeaveReviewForm
+    sellerId={
+      listing.owner_id
+    }
+    listingId={
+      listing.id
+    }
+  />
+
+</div>
             {/* REPORT */}
 
             <div className="rounded-3xl bg-white p-8 shadow-sm">
