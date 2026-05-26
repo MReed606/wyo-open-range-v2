@@ -69,11 +69,12 @@ export async function getRecommendedListings({
         views,
         trending_score,
         image_url,
-        price
+        price,
+        created_at
       `)
       .or("status.is.null,status.neq.removed")
       .or("hidden_by_system.is.null,hidden_by_system.neq.true")
-      .limit(100);
+      .limit(48);
 
   if (error || !listings) {
 
@@ -204,13 +205,20 @@ export async function getRecommendedListings({
 
           score += 80;
         }
+// RECENCY BOOST
 
-        // =====================================
-        // RANDOMIZATION
-        // =====================================
+const ageHours =
+  (
+    Date.now() -
+    new Date(
+      listing.created_at
+    ).getTime()
+  ) /
+  1000 /
+  60 /
+  60;
 
-        score +=
-          Math.random() * 25;
+score += Math.min(72, Math.max(0, 72 - ageHours));
 
         return {
 
@@ -275,21 +283,21 @@ export async function getRelatedListings({
     await supabase
       .from("listings")
       .select(`
-        id,
-        title,
-        slug,
-        category,
-        region,
-        views,
-        trending_score,
-        image_url,
-        price
-      `)
-      .neq(
-        "id",
-        listingId
-      )
-      .limit(50);
+  id,
+  title,
+  slug,
+  category,
+  region,
+  views,
+  trending_score,
+  image_url,
+  price,
+  created_at
+`)
+.or("status.is.null,status.neq.removed")
+.or("hidden_by_system.is.null,hidden_by_system.neq.true")
+.neq("id", listingId)
+.limit(24);
 
   if (!listings) {
     return [];
@@ -324,8 +332,20 @@ export async function getRelatedListings({
             listing.trending_score || 0
           ) * 5;
 
-        score +=
-          Math.random() * 20;
+// RECENCY BOOST
+
+const ageHours =
+  (
+    Date.now() -
+    new Date(
+      listing.created_at
+    ).getTime()
+  ) /
+  1000 /
+  60 /
+  60;
+
+score += Math.min(24, Math.max(0, 48 - ageHours));
 
         return {
 
