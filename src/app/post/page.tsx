@@ -1,4 +1,7 @@
 "use client";
+import {
+  ImageUploader
+} from "@/components/post/ImageUploader";
 
 import {
   useEffect,
@@ -22,6 +25,10 @@ export default function PostPage() {
   const [title,
     setTitle] =
     useState("");
+  
+  const [images,
+    setImages] =
+    useState<string[]>([]);
 
   const [description,
     setDescription] =
@@ -497,7 +504,10 @@ const [regions] =
           region,
 
           slug,
-
+          
+          images,
+            image_url:
+              images[0] ?? null,
           owner_id:
             user.id,
 
@@ -832,6 +842,10 @@ const [regions] =
               ))}
 
             </select>
+<ImageUploader
+  images={images}
+  setImages={setImages}
+/>
 
             <button
               onClick={createListing}
