@@ -39,13 +39,57 @@ export default function PostPage() {
     setRegion] =
     useState("");
 
-  const [categories,
-    setCategories] =
-    useState<string[]>([]);
+ const [categories] =
+  useState<string[]>([
 
-  const [regions,
-    setRegions] =
-    useState<string[]>([]);
+    "Vehicles",
+    "Ranching",
+    "Livestock",
+    "Equipment",
+    "Land",
+    "Real Estate",
+    "Farm & Garden",
+    "Heavy Equipment",
+    "Trailers",
+    "Services",
+    "Jobs",
+    "Firearms",
+    "Recreation",
+    "Outdoor",
+    "Tools",
+    "Pets",
+    "Electronics",
+    "Community",
+    "Wanted",
+    "Other",
+
+  ]);
+
+const [regions] =
+  useState<string[]>([
+
+    "Cheyenne",
+    "Casper",
+    "Laramie",
+    "Gillette",
+    "Rock Springs",
+    "Sheridan",
+    "Jackson",
+    "Evanston",
+    "Riverton",
+    "Green River",
+    "Rawlins",
+    "Torrington",
+    "Cody",
+    "Buffalo",
+    "Douglas",
+    "Worland",
+    "Thermopolis",
+    "Wheatland",
+    "Newcastle",
+    "Statewide",
+
+  ]);
 
   const [loading,
     setLoading] =
@@ -67,59 +111,7 @@ export default function PostPage() {
   // LOAD FILTERS
   // =====================================
 
-  useEffect(() => {
-
-    loadFilters();
-
-  }, []);
-
-  async function loadFilters() {
-
-    const {
-      data: listings
-    } =
-      await supabase
-        .from("listings")
-        .select(
-          "category, region"
-        );
-
-    if (!listings) {
-      return;
-    }
-
-    const uniqueCategories =
-      Array.from(
-        new Set(
-          listings
-            .map(
-              (x) => x.category
-            )
-            .filter(Boolean)
-        )
-      );
-
-    const uniqueRegions =
-      Array.from(
-        new Set(
-          listings
-            .map(
-              (x) => x.region
-            )
-            .filter(Boolean)
-        )
-      );
-
-    setCategories(
-      uniqueCategories as string[]
-    );
-
-    setRegions(
-      uniqueRegions as string[]
-    );
-  }
-
-  // =====================================
+   // =====================================
   // AI SAFETY ENGINE
   // =====================================
 
