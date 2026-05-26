@@ -53,6 +53,7 @@ export function TrendingListings() {
     setLoading] =
     useState(true);
 
+
   // =====================================
   // INITIALIZE
   // =====================================
@@ -66,16 +67,25 @@ export function TrendingListings() {
   async function initialize() {
 
     setLoading(true);
+const {
+  data: { user }
+} =
+  await supabase.auth.getUser();
+
 
     await Promise.all([
 
-      loadTrending(),
+  loadTrending(),
 
-      loadRecommended(),
+  loadRecommended(
+    user?.id ?? null
+  ),
 
-      loadRegional(),
+  loadRegional(
+    user?.id ?? null
+  ),
 
-    ]);
+]);
 
     setLoading(false);
   }
@@ -98,90 +108,82 @@ export function TrendingListings() {
     );
   }
 
-  // =====================================
-  // RECOMMENDED
-  // =====================================
+// =====================================
+// RECOMMENDED
+// =====================================
 
-  async function loadRecommended() {
+async function loadRecommended(
+  userId: string | null
+) {
 
-    const {
-      data: { user }
-    } =
-      await supabase.auth.getUser();
-
-    if (!user) {
-      return;
-    }
-
-    const data =
-      await getRecommendedListings({
-
-        userId:
-          user.id,
-
-        limit: 6,
-
-      });
-
-    setRecommended(
-      data as Listing[]
-    );
+  if (!userId) {
+    return;
   }
 
-  // =====================================
-  // REGIONAL
-  // =====================================
+  const data =
+    await getRecommendedListings({
 
-  async function loadRegional() {
+      userId,
 
-    const {
-      data: { user }
-    } =
-      await supabase.auth.getUser();
+      limit: 6,
 
-    if (!user) {
-      return;
-    }
+    });
 
-    const {
-      data: profile
-    } =
-      await supabase
-        .from(
-          "user_preference_profiles"
-        )
-        .select("*")
-        .eq(
-          "user_id",
-          user.id
-        )
-        .maybeSingle();
+  setRecommended(
+    data as Listing[]
+  );
+}
 
-    const regions =
-      profile
-        ?.favorite_regions ?? [];
+// =====================================
+// REGIONAL
+// =====================================
 
-    if (!regions.length) {
-      return;
-    }
+async function loadRegional(
+  userId: string | null
+) {
 
-    const data =
-      await getRecommendedListings({
-
-        userId:
-          user.id,
-
-        limit: 6,
-
-        regionBoost:
-          regions,
-
-      });
-
-    setRegional(
-      data as Listing[]
-    );
+  if (!userId) {
+    return;
   }
+
+  const {
+    data: profile
+  } =
+    await supabase
+      .from(
+        "user_preference_profiles"
+      )
+      .select("*")
+      .eq(
+        "user_id",
+        userId
+      )
+      .maybeSingle();
+
+  const regions =
+    profile
+      ?.favorite_regions ?? [];
+
+  if (!regions.length) {
+    return;
+  }
+
+  const data =
+    await getRecommendedListings({
+
+      userId,
+
+      limit: 6,
+
+      regionBoost:
+        regions,
+
+    });
+
+  setRegional(
+    data as Listing[]
+  );
+}
 
   // =====================================
   // CARD
