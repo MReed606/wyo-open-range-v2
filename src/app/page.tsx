@@ -55,21 +55,21 @@ export default function HomePage() {
 
     });
 
-  const [realtimeEvents,
-    setRealtimeEvents] =
-    useState<any[]>([]);
-
+ 
   // =====================================
   // INITIALIZE
   // =====================================
 
-  useEffect(() => {
+ useEffect(() => {
 
-    initialize();
+  initialize();
 
+  const cleanup =
     subscribeRealtime();
 
-  }, []);
+  return cleanup;
+
+}, []);
 
   async function initialize() {
 
@@ -77,8 +77,7 @@ export default function HomePage() {
 
       loadLiveStats(),
 
-      loadRealtimeEvents(),
-
+  
     ]);
   }
 
@@ -102,31 +101,7 @@ export default function HomePage() {
       },
       async (payload) => {
 
-        setRealtimeEvents(
-          (prev) => [
-
-            {
-
-              type:
-                "listing",
-
-              title:
-                payload.new.title,
-
-              region:
-                payload.new.region,
-
-              created_at:
-                new Date()
-                  .toISOString(),
-
-            },
-
-            ...prev,
-
-          ].slice(0, 10)
-        );
-
+        
         await loadLiveStats();
       }
     );
@@ -213,12 +188,7 @@ export default function HomePage() {
     setLiveStats({
 
       activeUsers:
-        Math.max(
-          12,
-          Math.round(
-            listings.length * 0.35
-          )
-        ),
+  listings.length,
 
       liveListings:
         listings.length,
@@ -240,48 +210,7 @@ export default function HomePage() {
   // LIVE FEED
   // =====================================
 
-  async function loadRealtimeEvents() {
-
-    const {
-      data
-    } =
-      await supabase
-        .from("listings")
-        .select(`
-          id,
-          title,
-          region,
-          created_at
-        `)
-        .order(
-          "created_at",
-          {
-            ascending: false,
-          }
-        )
-        .limit(10);
-
-    setRealtimeEvents(
-      (data ?? []).map(
-        (listing) => ({
-
-          type:
-            "listing",
-
-          title:
-            listing.title,
-
-          region:
-            listing.region,
-
-          created_at:
-            listing.created_at,
-
-        })
-      )
-    );
-  }
-
+  
   // =====================================
   // START SELLING
   // =====================================
