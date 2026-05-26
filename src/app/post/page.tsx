@@ -1,4 +1,5 @@
 "use client";
+import { useRouter } from "next/navigation";
 import {
   ImageUploader
 } from "@/components/post/ImageUploader";
@@ -21,6 +22,8 @@ import {
 } from "@/lib/supabase";
 
 export default function PostPage() {
+const router =
+  useRouter();
 
   const [title,
     setTitle] =
@@ -46,8 +49,7 @@ export default function PostPage() {
     setRegion] =
     useState("");
 
- const [categories] =
-  useState<string[]>([
+ const categories = [
 
     "Vehicles",
     "Ranching",
@@ -70,10 +72,9 @@ export default function PostPage() {
     "Wanted Ads",
     "Other",
 
-  ]);
+  ];
 
-const [regions] =
-  useState<string[]>([
+const regions = [
 
     "Cheyenne",
     "Casper",
@@ -96,7 +97,7 @@ const [regions] =
     "Newcastle",
     "Statewide",
 
-  ]);
+  ];
 
   const [loading,
     setLoading] =
@@ -124,15 +125,23 @@ const [regions] =
 
   useEffect(() => {
 
-    analyzeListing();
+  const timeout =
+    setTimeout(() => {
 
-  }, [
+      analyzeListing();
 
-    title,
-    description,
-    price,
+    }, 500);
 
-  ]);
+  return () =>
+    clearTimeout(timeout);
+
+}, [
+
+  title,
+  description,
+  price,
+
+]);
 
   async function analyzeListing() {
 
@@ -324,7 +333,14 @@ const [regions] =
     } =
       await supabase
         .from("saved_searches")
-        .select("*");
+        .select(`
+  user_id,
+  search,
+  category,
+  region,
+  min_price,
+  max_price
+`);
 
     if (!savedSearches?.length) {
       return;
@@ -435,7 +451,59 @@ const [regions] =
   async function createListing() {
 
     setLoading(true);
+if (
 
+  !title.trim() ||
+  !description.trim() ||
+  !price.trim() ||
+  !category ||
+  !region
+
+) {
+
+  alert(
+    "Please complete all required fields."
+  );
+
+  setLoading(false);
+
+  return;
+}
+   const numericPrice =
+  Number(
+    price.replace(
+      /[^0-9.]/g,
+      ""
+    )
+  );
+
+if (
+  Number.isNaN(
+    numericPrice
+  ) ||
+  numericPrice < 0
+) {
+
+  alert(
+    "Please enter a valid price."
+  );
+
+  setLoading(false);
+
+  return;
+}
+   if (
+  images.length === 0
+) {
+
+  alert(
+    "Please upload at least one image."
+  );
+
+  setLoading(false);
+
+  return;
+}
     const {
       data: { user },
     } =
@@ -575,8 +643,9 @@ const [regions] =
 
     );
 
-    window.location.href =
-      "/dashboard/listings";
+    router.push(
+  "/dashboard/listings"
+);
   }
 
   return (
