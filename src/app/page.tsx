@@ -12,9 +12,7 @@ import {
   Brain,
   Activity,
   Flame,
-  Sparkles,
-  TrendingUp,
-  Shield,
+
 } from "lucide-react";
 
 import {
@@ -205,10 +203,6 @@ export default function HomePage() {
 
     });
   }
-
-  // =====================================
-  // LIVE FEED
-  // =====================================
 
   
   // =====================================
@@ -480,7 +474,7 @@ export default function HomePage() {
 
           </section>
 
-          {/* LEGACY FEED */}
+          {/* LIVE MARKETPLACE FEED */}
 
           <section className="mt-24">
 
