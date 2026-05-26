@@ -233,7 +233,7 @@ export function MarketplaceLiveFeed() {
           <Link
             key={listing.id}
             href={`/listing/${listing.slug}`}
-            className="block rounded-3xl bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+            className="relative z-10 block rounded-3xl bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
           >
 
             <div className="flex flex-wrap items-center justify-between gap-4">
