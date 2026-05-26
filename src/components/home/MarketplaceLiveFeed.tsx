@@ -25,8 +25,47 @@ export function MarketplaceLiveFeed() {
     useState(true);
 
   useEffect(() => {
+let active = true;
+    async function loadFeed() {
 
-    loadFeed();
+  setLoading(true);
+
+  const { data, error } =
+    await supabase
+      .from("listings")
+      .select(`
+        id,
+        title,
+        region,
+        slug,
+        created_at,
+        views,
+        trending_score
+      `)
+      .eq("status", "active")
+      .order("created_at", {
+        ascending: false,
+      })
+      .limit(10);
+
+  if (error) {
+
+    console.error(
+      "LIVE FEED ERROR:",
+      error
+    );
+
+    setLoading(false);
+    return;
+  }
+
+  if (active) {
+    setListings(data ?? []);
+  }
+
+  setLoading(false);
+}
+loadFeed();
 
     // =====================================
     // REALTIME SUBSCRIPTIONS
@@ -49,22 +88,37 @@ export function MarketplaceLiveFeed() {
             const newListing =
               payload.new as FeedItem;
 
-            setListings((prev) => [
+            setListings((prev) => {
 
-              {
-                ...newListing,
-              },
+  const exists =
+    prev.some(
+      (x) =>
+        x.id ===
+        newListing.id
+    );
 
-              ...prev,
+  if (exists) {
+    return prev;
+  }
 
-            ].slice(0, 10));
+  return [
+
+    {
+      ...newListing,
+    },
+
+    ...prev,
+
+  ].slice(0, 10);
+
+});
 
           }
         )
         .subscribe();
 
     return () => {
-
+active = false;
       supabase.removeChannel(
         channel
       );
@@ -73,43 +127,7 @@ export function MarketplaceLiveFeed() {
 
   }, []);
 
-  async function loadFeed() {
-
-    setLoading(true);
-
-    const { data, error } =
-      await supabase
-        .from("listings")
-        .select(`
-          id,
-          title,
-          region,
-          slug,
-          created_at,
-          views,
-          trending_score
-        `)
-        .eq("status", "active")
-        .order("created_at", {
-          ascending: false,
-        })
-        .limit(10);
-
-    if (error) {
-
-      console.error(
-        "LIVE FEED ERROR:",
-        error
-      );
-
-      setLoading(false);
-      return;
-    }
-
-    setListings(data ?? []);
-
-    setLoading(false);
-  }
+ 
 
   function getRelativeTime(
     dateString: string
