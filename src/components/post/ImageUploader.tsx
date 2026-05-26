@@ -64,18 +64,51 @@ export function ImageUploader({
   ) {
 
     if (!files?.length) {
-      return;
-    }
+  return;
+}
 
-    setUploading(true);
+if (
+  files.length > 12
+) {
 
+  alert(
+    "Maximum 12 images allowed."
+  );
+
+  return;
+}
+
+setUploading(true);
+   
     const uploaded:
       string[] = [];
 
     for (
       const file of Array.from(files)
     ) {
+if (
+  file.size >
+  5 * 1024 * 1024
+) {
 
+  alert(
+    `${file.name} exceeds 5MB limit.`
+  );
+
+  continue;
+}
+if (
+  !file.type.startsWith(
+    "image/"
+  )
+) {
+
+  alert(
+    `${file.name} is not a valid image.`
+  );
+
+  continue;
+}
       // SAFE FILE NAME
 
       const fileExt =
@@ -129,13 +162,18 @@ export function ImageUploader({
       );
     }
 
-    setImages((prev) => [
+    setImages((prev) =>
+
+  Array.from(
+    new Set([
 
       ...prev,
 
       ...uploaded,
 
-    ]);
+    ])
+  )
+);
 
     setUploading(false);
   }
