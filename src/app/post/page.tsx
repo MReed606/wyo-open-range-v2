@@ -60,7 +60,7 @@ export default function PostPage() {
     "Pets",
     "Electronics",
     "Community",
-    "Wanted",
+    "Wanted Ads",
     "Other",
 
   ]);
