@@ -19,6 +19,14 @@ import { AdminVerificationLink } from "@/components/AdminVerificationLink";
 import { isAdmin as checkAdmin }
 from "@/lib/admin";
 
+import {
+  getNavbarUser,
+  getMessageCount,
+  getNotifications,
+  markNotificationsRead as markNotificationsReadService,
+  logoutUser,
+} from "@/lib/navbarService";
+
 export default function NavBar() {
 
   const [loggedIn,
@@ -133,17 +141,17 @@ export default function NavBar() {
 
   async function checkUser() {
 
-    const {
-      data: { user },
-    } =
-      await supabase.auth.getUser();
+  const result =
+    await getNavbarUser();
 
-    setLoggedIn(!!user);
+  setLoggedIn(
+    result.loggedIn
+  );
 
-    setIsAdmin(
-      await checkAdmin()
-    );
-  }
+  setIsAdmin(
+    result.isAdmin
+  );
+}
 
   // =====================================
   // LOAD MESSAGES
@@ -151,29 +159,13 @@ export default function NavBar() {
 
   async function loadMessageCount() {
 
-    const {
-      data: { user },
-    } =
-      await supabase.auth.getUser();
+  const count =
+    await getMessageCount();
 
-    if (!user) {
-      return;
-    }
-
-    const { data } =
-      await supabase
-        .from("messages")
-        .select("*")
-        .eq("read", false)
-        .neq(
-          "sender_id",
-          user.id
-        );
-
-    setMessageCount(
-      data?.length ?? 0
-    );
-  }
+  setMessageCount(
+    count
+  );
+}
 
   // =====================================
   // LOAD NOTIFICATIONS
@@ -181,47 +173,13 @@ export default function NavBar() {
 
   async function loadNotifications() {
 
-    const {
-      data: { user },
-    } =
-      await supabase.auth.getUser();
+  const data =
+    await getNotifications();
 
-    if (!user) {
-      return;
-    }
-
-    const { data, error } =
-      await supabase
-        .from(
-          "user_notifications"
-        )
-        .select("*")
-        .eq(
-          "user_id",
-          user.id
-        )
-        .order(
-          "created_at",
-          {
-            ascending: false,
-          }
-        )
-        .limit(10);
-
-    if (error) {
-
-      console.error(
-        "NOTIFICATION ERROR:",
-        error
-      );
-
-      return;
-    }
-
-    setNotifications(
-      data ?? []
-    );
-  }
+  setNotifications(
+    data
+  );
+}
 
   // =====================================
   // MARK READ
@@ -229,33 +187,10 @@ export default function NavBar() {
 
   async function markNotificationsRead() {
 
-    const {
-      data: { user },
-    } =
-      await supabase.auth.getUser();
+  await markNotificationsReadService();
 
-    if (!user) {
-      return;
-    }
-
-    await supabase
-      .from(
-        "user_notifications"
-      )
-      .update({
-        read: true,
-      })
-      .eq(
-        "user_id",
-        user.id
-      )
-      .eq(
-        "read",
-        false
-      );
-
-    await loadNotifications();
-  }
+  await loadNotifications();
+}
 
   // =====================================
   // LOGOUT
@@ -263,10 +198,8 @@ export default function NavBar() {
 
   async function logout() {
 
-    await supabase.auth.signOut();
-
-    window.location.href = "/";
-  }
+  await logoutUser();
+}
 
   const unreadCount =
     notifications.filter(
