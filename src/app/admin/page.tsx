@@ -28,6 +28,15 @@ import {
   AuthGuard
 } from "@/components/auth/AuthGuard";
 
+import {
+  loadAdminStats
+} from "@/lib/adminStats";
+
+import {
+  loadFlaggedListings as loadFlaggedListingsData,
+  loadAdminAlerts,
+} from "@/lib/adminAlerts";
+
 export default function AdminPage() {
 
   const [stats,
@@ -134,142 +143,33 @@ export default function AdminPage() {
   // =====================================
 
   async function loadStats() {
+  const stats =
+    await loadAdminStats();
 
-    const [
-
-      usersRes,
-
-      listingsRes,
-
-      flaggedRes,
-
-      removedRes,
-
-      verificationRes,
-
-      reportsRes,
-
-      conversationsRes,
-
-    ] = await Promise.all([
-
-      supabase
-        .from("profiles")
-        .select("id"),
-
-      supabase
-        .from("listings")
-        .select("id"),
-
-      supabase
-        .from("listings")
-        .select("id")
-        .eq("flagged", true),
-
-      supabase
-        .from("listings")
-        .select("id")
-        .eq(
-          "status",
-          "removed"
-        ),
-
-      supabase
-        .from("profiles")
-        .select("id")
-        .eq(
-          "verification_submitted",
-          true
-        )
-        .neq(
-          "verified",
-          true
-        ),
-
-      supabase
-        .from("reports")
-        .select("id"),
-
-      supabase
-        .from("conversations")
-        .select("id"),
-
-    ]);
-
-    setStats({
-
-      totalUsers:
-        usersRes.data?.length ?? 0,
-
-      totalListings:
-        listingsRes.data?.length ?? 0,
-
-      flaggedListings:
-        flaggedRes.data?.length ?? 0,
-
-      flaggedUsers: 0,
-
-      removedListings:
-        removedRes.data?.length ?? 0,
-
-      pendingVerifications:
-        verificationRes.data?.length ?? 0,
-
-      reports:
-        reportsRes.data?.length ?? 0,
-
-      activeConversations:
-        conversationsRes.data?.length ?? 0,
-
-    });
-  }
+  setStats(stats);
+}
 
   // =====================================
   // FLAGGED LISTINGS
   // =====================================
 
   async function loadFlaggedListings() {
+  const data =
+    await loadFlaggedListingsData();
 
-    const { data } =
-      await supabase
-        .from("listings")
-        .select("*")
-        .eq("flagged", true)
-        .order(
-          "moderation_score",
-          {
-            ascending: false,
-          }
-        )
-        .limit(10);
-
-    setFlaggedListings(
-      data ?? []
-    );
-  }
+  setFlaggedListings(data);
+}
 
   // =====================================
   // ALERTS
   // =====================================
 
   async function loadAlerts() {
+  const data =
+    await loadAdminAlerts();
 
-    const { data } =
-      await supabase
-        .from("admin_alerts")
-        .select("*")
-        .order(
-          "created_at",
-          {
-            ascending: false,
-          }
-        )
-        .limit(10);
-
-    setAlerts(
-      data ?? []
-    );
-  }
+  setAlerts(data);
+}
 
   // =====================================
   // REMOVE LISTING
