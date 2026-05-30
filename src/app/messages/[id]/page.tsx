@@ -12,6 +12,13 @@ import { supabase } from "@/lib/supabase";
 
 import { AuthGuard } from "@/components/auth/AuthGuard";
 
+import {
+  getCurrentUserId,
+  loadConversationMessages,
+  markConversationRead,
+  sendConversationMessage,
+} from "@/lib/messageThreadService";
+
 export default function ConversationPage() {
 
   const params = useParams();
@@ -87,15 +94,13 @@ export default function ConversationPage() {
 
   async function loadUser() {
 
-    const {
-      data: { user },
-    } =
-      await supabase.auth.getUser();
+  const userId =
+    await getCurrentUserId();
 
-    setCurrentUserId(
-      user?.id ?? ""
-    );
-  }
+  setCurrentUserId(
+    userId
+  );
+}
 
   // =====================================
   // LOAD MESSAGES
@@ -103,33 +108,15 @@ export default function ConversationPage() {
 
   async function loadMessages() {
 
-    const { data, error } =
-      await supabase
-        .from("messages")
-        .select("*")
-        .eq(
-          "conversation_id",
-          id
-        )
-        .order(
-          "created_at",
-          {
-            ascending: true,
-          }
-        );
+  const data =
+    await loadConversationMessages(
+      id
+    );
 
-    if (error) {
-
-      console.error(
-        "MESSAGE LOAD ERROR:",
-        error
-      );
-
-      return;
-    }
-
-    setMessages(data ?? []);
-  }
+  setMessages(
+    data
+  );
+}
 
   // =====================================
   // REALTIME SUBSCRIPTION
@@ -184,34 +171,10 @@ export default function ConversationPage() {
 
   async function markMessagesRead() {
 
-    const {
-      data: { user },
-    } =
-      await supabase.auth.getUser();
-
-    if (!user) {
-      return;
-    }
-
-    await supabase
-      .from("messages")
-      .update({
-
-        read: true,
-
-        read_at:
-          new Date(),
-
-      })
-      .eq(
-        "conversation_id",
-        id
-      )
-      .neq(
-        "sender_id",
-        user.id
-      );
-  }
+  await markConversationRead(
+    id
+  );
+}
 
   // =====================================
   // SEND MESSAGE
@@ -219,65 +182,43 @@ export default function ConversationPage() {
 
   async function sendMessage() {
 
-    if (!message.trim()) {
-      return;
-    }
+  if (!message.trim()) {
+    return;
+  }
 
-    setSending(true);
+  setSending(true);
 
-    const {
-      data: { user },
-    } =
-      await supabase.auth.getUser();
+  const messageText =
+    message;
 
-    if (!user) {
+  setMessage("");
 
-      setSending(false);
+  try {
 
-      return;
-    }
-
-    const messageText =
-      message;
-
-    setMessage("");
-
-    const { error } =
-      await supabase
-        .from("messages")
-        .insert({
-
-          conversation_id:
-            id,
-
-          sender_id:
-            user.id,
-
-          message:
-            messageText,
-
-        });
-
-    if (error) {
-
-      console.error(
-        "SEND ERROR:",
-        error
-      );
-
-      setSending(false);
-
-      return;
-    }
-
-    setSending(false);
+    await sendConversationMessage(
+      id,
+      messageText
+    );
 
     setTyping(false);
 
     window.dispatchEvent(
-      new Event("message-sent")
+      new Event(
+        "message-sent"
+      )
     );
+
+  } catch (error) {
+
+    console.error(
+      "SEND ERROR:",
+      error
+    );
+
   }
+
+  setSending(false);
+}
 
   // =====================================
   // TYPING
