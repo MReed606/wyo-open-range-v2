@@ -35,6 +35,10 @@ type Props = {
 
 };
 
+import {
+  uploadImages
+} from "@/lib/imageUploadService";
+
 export function ImageUploader({
   images,
   setImages,
@@ -82,293 +86,57 @@ export function ImageUploader({
   // =====================================
 
   async function handleFiles(
-    files: FileList | null
-  ) {
+  files: FileList | null
+) {
 
-    if (!files?.length) {
-      return;
-    }
+  if (!files?.length) {
+    return;
+  }
 
-    if (
-      images.length +
-      files.length >
-      MAX_IMAGES
-    ) {
-
-      alert(
-        `Maximum ${MAX_IMAGES} images allowed.`
-      );
-
-      return;
-    }
+  try {
 
     setUploading(true);
 
-    const uploaded:
-      string[] = [];
-
-    const warnings:
-      string[] = [];
-
-    for (
-      const file of Array.from(files)
-    ) {
-
-      // =====================================
-      // VALIDATION
-      // =====================================
-
-      if (
-        !file.type.startsWith(
-          "image/"
-        )
-      ) {
-
-        warnings.push(
-          `${file.name}: Invalid file type`
-        );
-
-        continue;
-      }
-
-      // =====================================
-      // SIZE CHECK
-      // =====================================
-
-      const originalSizeMB =
-        (
-          file.size /
-          1024 /
-          1024
-        ).toFixed(2);
-
-      // =====================================
-      // IMAGE MODERATION
-      // =====================================
-
-      const lowerName =
-        file.name.toLowerCase();
-
-      const suspiciousTerms = [
-
-        "weapon",
-        "blood",
-        "violence",
-        "drugs",
-        "explicit",
-
-      ];
-
-      suspiciousTerms.forEach(
-        (term) => {
-
-          if (
-            lowerName.includes(term)
-          ) {
-
-            warnings.push(
-              `${file.name}: Potentially restricted image content detected`
-            );
-          }
-        }
+    const result =
+      await uploadImages(
+        files,
+        images.length
       );
-
-      // =====================================
-      // COMPRESS IMAGE
-      // =====================================
-
-      const compressed =
-        await compressImage(file);
-
-      const compressedSizeMB =
-        (
-          compressed.size /
-          1024 /
-          1024
-        ).toFixed(2);
-
-      setCompressionStats(
-
-        `${originalSizeMB}MB → ${compressedSizeMB}MB`
-
-      );
-
-      // =====================================
-      // SAFE FILE NAME
-      // =====================================
-
-      const safeName =
-        `${Date.now()}-${Math.random()
-          .toString(36)
-          .slice(2)}.${file.name
-            .split(".")
-            .pop()}`;
-
-      // =====================================
-      // UPLOAD
-      // =====================================
-
-      const {
-        error
-      } =
-        await supabase.storage
-          .from(
-            "listing-images"
-          )
-          .upload(
-            safeName,
-            compressed,
-            {
-              cacheControl:
-                "3600",
-
-              upsert:
-                false,
-            }
-          );
-
-      if (error) {
-
-        console.error(error);
-
-        warnings.push(
-          `${file.name}: Upload failed`
-        );
-
-        continue;
-      }
-
-      // =====================================
-      // PUBLIC URL
-      // =====================================
-
-      const {
-        data
-      } =
-        supabase.storage
-          .from(
-            "listing-images"
-          )
-          .getPublicUrl(
-            safeName
-          );
-
-      uploaded.push(
-        data.publicUrl
-      );
-    }
 
     setModerationWarnings(
-      warnings
+      result.warnings
+    );
+
+    setCompressionStats(
+      result.compressionStats
     );
 
     setImages((prev) => [
 
       ...prev,
 
-      ...uploaded,
+      ...result.uploaded,
 
     ]);
 
+  } catch (error: any) {
+
+    alert(
+      error.message
+    );
+
+  } finally {
+
     setUploading(false);
+
   }
+}
 
   // =====================================
   // COMPRESS IMAGE
   // =====================================
 
-  async function compressImage(
-    file: File
-  ): Promise<File> {
-
-    return new Promise(
-      (resolve) => {
-
-        const img =
-          document.createElement(
-            "img"
-          );
-
-        const canvas =
-          document.createElement(
-            "canvas"
-          );
-
-        const ctx =
-          canvas.getContext("2d");
-
-        const reader =
-          new FileReader();
-
-        reader.onload =
-          (e) => {
-
-            img.src =
-              e.target?.result as string;
-          };
-
-        img.onload =
-          () => {
-
-            const MAX_WIDTH = 1800;
-
-            const scale =
-              Math.min(
-                1,
-                MAX_WIDTH /
-                img.width
-              );
-
-            canvas.width =
-              img.width * scale;
-
-            canvas.height =
-              img.height * scale;
-
-            ctx?.drawImage(
-              img,
-              0,
-              0,
-              canvas.width,
-              canvas.height
-            );
-
-            canvas.toBlob(
-              (blob) => {
-
-                if (!blob) {
-
-                  resolve(file);
-
-                  return;
-                }
-
-                const compressed =
-                  new File(
-                    [blob],
-                    file.name,
-                    {
-                      type:
-                        "image/jpeg",
-                    }
-                  );
-
-                resolve(
-                  compressed
-                );
-
-              },
-              "image/jpeg",
-              0.82
-            );
-          };
-
-        reader.readAsDataURL(
-          file
-        );
-      }
-    );
-  }
+  
 
   // =====================================
   // REMOVE IMAGE
