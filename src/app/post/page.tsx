@@ -30,6 +30,10 @@ import {
   triggerSavedSearchNotifications
 } from "@/lib/savedSearchNotifications";
 
+import {
+  PostListingForm
+} from "@/components/post/PostListingForm";
+
 export default function PostPage() {
 const router =
   useRouter();
@@ -540,136 +544,26 @@ if (
 
         </div>
 
-        {/* FORM */}
+       {/* FORM */}
 
-        <div className="rounded-3xl bg-white p-8 shadow-sm">
-
-          <div className="mb-8 flex items-center gap-3">
-
-            <Sparkles className="h-7 w-7 text-[#2F5D50]" />
-
-            <h2 className="text-3xl font-black text-[#111827]">
-
-              Listing Details
-
-            </h2>
-
-          </div>
-
-          <div className="space-y-6">
-
-            <input
-              value={title}
-              onChange={(e) =>
-                setTitle(
-                  e.target.value
-                )
-              }
-              placeholder="Listing Title"
-              className="w-full rounded-2xl border border-gray-300 px-5 py-4 text-lg"
-            />
-
-            <textarea
-              value={description}
-              onChange={(e) =>
-                setDescription(
-                  e.target.value
-                )
-              }
-              placeholder="Description"
-              className="min-h-40 w-full rounded-2xl border border-gray-300 px-5 py-4 text-lg"
-            />
-
-            <input
-              value={price}
-              onChange={(e) =>
-                setPrice(
-                  e.target.value
-                )
-              }
-              placeholder="Price"
-              className="w-full rounded-2xl border border-gray-300 px-5 py-4 text-lg"
-            />
-
-            <select
-              value={category}
-              onChange={(e) =>
-                setCategory(
-                  e.target.value
-                )
-              }
-              className="w-full rounded-2xl border border-gray-300 px-5 py-4 text-lg"
-            >
-
-              <option value="">
-                Select Category
-              </option>
-
-              {categories.map(
-                (cat) => (
-
-                <option
-                  key={cat}
-                  value={cat}
-                >
-
-                  {cat}
-
-                </option>
-
-              ))}
-
-            </select>
-
-            <select
-              value={region}
-              onChange={(e) =>
-                setRegion(
-                  e.target.value
-                )
-              }
-              className="w-full rounded-2xl border border-gray-300 px-5 py-4 text-lg"
-            >
-
-              <option value="">
-                Select Region
-              </option>
-
-              {regions.map(
-                (reg) => (
-
-                <option
-                  key={reg}
-                  value={reg}
-                >
-
-                  {reg}
-
-                </option>
-
-              ))}
-
-            </select>
-<ImageUploader
+<PostListingForm
+  title={title}
+  description={description}
+  price={price}
+  category={category}
+  region={region}
   images={images}
+  categories={categories}
+  regions={regions}
+  loading={loading}
+  setTitle={setTitle}
+  setDescription={setDescription}
+  setPrice={setPrice}
+  setCategory={setCategory}
+  setRegion={setRegion}
   setImages={setImages}
+  onCreateListing={createListing}
 />
-
-            <button
-              onClick={createListing}
-              disabled={loading}
-              className="w-full rounded-2xl bg-[#2F5D50] px-6 py-5 text-lg font-black text-white transition hover:bg-[#24473d] disabled:opacity-50"
-            >
-
-              {loading
-                ? "Creating..."
-                : "Create Listing"}
-
-            </button>
-
-          </div>
-
-        </div>
 
       </div>
 
