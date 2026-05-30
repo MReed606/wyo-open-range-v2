@@ -49,6 +49,10 @@ import {
   ListingGallery
 } from "@/components/listing-detail/ListingGallery";
 
+import {
+  ListingHeader
+} from "@/components/listing-detail/ListingHeader";
+
 type RelatedListing = {
   id: string;
   title: string;
@@ -524,7 +528,7 @@ export default function ListingPage() {
 
 {/* CONTENT */} 
 
-        {/* CONTENT */}
+        
 
         <div className="mt-10 grid gap-10 xl:grid-cols-[1fr_380px]">
 
@@ -532,95 +536,15 @@ export default function ListingPage() {
 
           <div className="space-y-10">
 
-            <div className="rounded-3xl bg-white p-8 shadow-sm">
-
-              <div className="flex flex-wrap items-start justify-between gap-6">
-
-                <div>
-
-                  <h1 className="text-5xl font-black text-[#111827]">
-
-                    {listing.title}
-
-                  </h1>
-
-                  {listing.category && (
-
-                    <div className="mt-5 inline-flex rounded-full bg-[#2F5D50]/10 px-5 py-3 text-sm font-black text-[#2F5D50]">
-
-                      {listing.category}
-
-                    </div>
-
-                  )}
-
-                  <div className="mt-6">
-
-                    <SellerRating
-                      sellerId={
-                        listing.owner_id
-                      }
-                    />
-
-                  </div>
-
-                </div>
-
-                <div className="text-right">
-
-                  <div className="text-5xl font-black text-[#2F5D50]">
-
-                    {listing.price ??
-                      "Contact"}
-
-                  </div>
-
-                  <div className="mt-5 flex flex-wrap justify-end gap-3">
-
-                    <div className="rounded-full bg-[#F3F4F6] px-4 py-2 text-sm font-black text-[#111827]">
-
-                      👁
-                      {" "}
-                      {listing.views ?? 0}
-                      {" "}
-                      views
-
-                    </div>
-
-                    <div className="rounded-full bg-[#F3F4F6] px-4 py-2 text-sm font-black text-[#111827]">
-
-                      📍
-                      {" "}
-                      {listing.region ??
-                        "Wyoming"}
-
-                    </div>
-
-                  </div>
-
-                </div>
-
-              </div>
-
-              {/* DESCRIPTION */}
-
-              <div className="mt-12">
-
-                <h2 className="text-3xl font-black text-[#111827]">
-
-                  Description
-
-                </h2>
-
-                <p className="mt-6 whitespace-pre-wrap text-lg leading-8 text-[#374151]">
-
-                  {listing.description}
-
-                </p>
-
-              </div>
-
-            </div>
+           <ListingHeader
+  title={listing.title}
+  category={listing.category}
+  sellerId={listing.owner_id}
+  price={listing.price}
+  views={listing.views}
+  region={listing.region}
+  description={listing.description}
+/> 
 
             {/* RELATED */}
 
