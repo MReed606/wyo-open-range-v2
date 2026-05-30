@@ -53,6 +53,11 @@ import {
   ListingHeader
 } from "@/components/listing-detail/ListingHeader";
 
+import {
+  contactListingSeller,
+  submitListingReport,
+} from "@/lib/listingDetailService";
+
 type RelatedListing = {
   id: string;
   title: string;
@@ -281,93 +286,10 @@ export default function ListingPage() {
 
   async function contactSeller() {
 
-    const {
-      data: { user }
-    } =
-      await supabase.auth.getUser();
-
-    if (!user) {
-
-      alert(
-        "Login required."
-      );
-
-      return;
-    }
-
-    const {
-      data: existing
-    } =
-      await supabase
-        .from("conversations")
-        .select("*")
-        .eq(
-          "listing_id",
-          listing.id
-        )
-        .eq(
-          "buyer_id",
-          user.id
-        )
-        .single();
-
-    if (existing) {
-
-      window.location.href =
-        `/messages/${existing.id}`;
-
-      return;
-    }
-
-    const {
-      data
-    } =
-      await supabase
-        .from("conversations")
-        .insert({
-
-          listing_id:
-            listing.id,
-
-          buyer_id:
-            user.id,
-
-          seller_id:
-            listing.owner_id,
-
-        })
-        .select()
-        .single();
-
-    if (data) {
-
-      await supabase
-        .from(
-          "user_notifications"
-        )
-        .insert({
-
-          user_id:
-            listing.owner_id,
-
-          type:
-            "message",
-
-          title:
-            "New Buyer Message",
-
-          message:
-            `"${listing.title}" received a new buyer message.`,
-
-          link:
-            `/messages/${data.id}`,
-
-        });
-
-      window.location.href =
-        `/messages/${data.id}`;
-    }
-  }
+  await contactListingSeller(
+    listing
+  );
+}
 
   // =====================================
   // REPORT
@@ -375,31 +297,22 @@ export default function ListingPage() {
 
   async function submitReport() {
 
-    if (
-      !reportReason.trim()
-    ) {
-
-      return;
-    }
-
-    await supabase
-      .from("reports")
-      .insert({
-
-        listing_id:
-          listing.id,
-
-        reason:
-          reportReason,
-
-      });
-
-    setReportSubmitted(
-      true
+  const success =
+    await submitListingReport(
+      listing.id,
+      reportReason
     );
 
-    setReportReason("");
+  if (!success) {
+    return;
   }
+
+  setReportSubmitted(
+    true
+  );
+
+  setReportReason("");
+} 
 
   // =====================================
   // GALLERY NAV
