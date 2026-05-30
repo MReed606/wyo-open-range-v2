@@ -21,16 +21,9 @@ import {
   Images,
 } from "lucide-react";
 
-import FavoriteButton
-from "@/components/listings/FavoriteButton";
-
 import {
   SellerRating
 } from "@/components/reviews/SellerRating";
-
-import {
-  LeaveReviewForm
-} from "@/components/reviews/LeaveReviewForm";
 
 import {
   supabase
@@ -39,6 +32,18 @@ import {
 import {
   getRelatedListings
 } from "@/lib/recommendations";
+
+import {
+  ListingReportPanel
+} from "@/components/listing-detail/ListingReportPanel";
+
+import {
+  ListingReviewPanel
+} from "@/components/listing-detail/ListingReviewPanel";
+
+import {
+  ListingActionsPanel
+} from "@/components/listing-detail/ListingActionsPanel";
 
 type RelatedListing = {
   id: string;
@@ -840,97 +845,28 @@ export default function ListingPage() {
 
             {/* ACTIONS */}
 
-            <div className="rounded-3xl bg-white p-8 shadow-sm">
+<ListingActionsPanel
+  listingId={listing.id}
+  ownerId={listing.owner_id}
+  onContactSeller={contactSeller}
+/>
 
-              <div className="space-y-4">
-
-                <FavoriteButton
-                  listingId={
-                    listing.id
-                  }
-                />
-
-                <button
-                  onClick={
-                    contactSeller
-                  }
-                  className="w-full rounded-2xl bg-blue-600 px-6 py-5 text-lg font-black text-white transition hover:bg-blue-700"
-                >
-
-                  Contact Seller
-
-                </button>
-
-                <Link
-                  href={`/seller/profile/${listing.owner_id}`}
-                  className="block w-full rounded-2xl bg-[#2F5D50] px-6 py-5 text-center text-lg font-black text-white transition hover:bg-[#24473d]"
-                >
-
-                  Seller Profile
-
-                </Link>
-
-              </div>
-
-            </div>
-
+                
             {/* REVIEW */}
 
-<div className="rounded-3xl bg-white p-8 shadow-sm">
+<ListingReviewPanel
+  sellerId={listing.owner_id}
+  listingId={listing.id}
+/>
 
-  <LeaveReviewForm
-    sellerId={
-      listing.owner_id
-    }
-    listingId={
-      listing.id
-    }
-  />
-
-</div>
             {/* REPORT */}
 
-            <div className="rounded-3xl bg-white p-8 shadow-sm">
-
-              <h2 className="text-2xl font-black text-[#111827]">
-
-                Report Listing
-
-              </h2>
-
-              <textarea
-                value={reportReason}
-                onChange={(e) =>
-                  setReportReason(
-                    e.target.value
-                  )
-                }
-                placeholder="Describe the issue..."
-                className="mt-5 min-h-40 w-full rounded-2xl border border-gray-300 px-5 py-4"
-              />
-
-              <button
-                onClick={
-                  submitReport
-                }
-                className="mt-5 w-full rounded-2xl bg-red-600 px-6 py-4 text-lg font-black text-white transition hover:bg-red-700"
-              >
-
-                Submit Report
-
-              </button>
-
-              {reportSubmitted && (
-
-                <div className="mt-5 rounded-2xl bg-red-50 p-4 text-sm font-bold text-red-700">
-
-                  Report submitted successfully.
-
-                </div>
-
-              )}
-
-            </div>
+            <ListingReportPanel
+  reportReason={reportReason}
+  reportSubmitted={reportSubmitted}
+  onReportReasonChange={setReportReason}
+  onSubmitReport={submitReport}
+/>
 
           </div>
 
