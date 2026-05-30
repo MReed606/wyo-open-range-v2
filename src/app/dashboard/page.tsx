@@ -30,6 +30,10 @@ import {
   AuthGuard
 } from "@/components/auth/AuthGuard";
 
+import {
+  loadDashboardAnalytics
+} from "@/lib/dashboardAnalytics";
+
 export default function DashboardPage() {
 
   const [profile,
@@ -120,179 +124,21 @@ export default function DashboardPage() {
   // =====================================
 
   async function loadAnalytics() {
+  const result =
+    await loadDashboardAnalytics();
 
-    const {
-      data: { user },
-    } =
-      await supabase.auth.getUser();
-
-    if (!user) {
-      return;
-    }
-
-    // =====================================
-    // LISTINGS
-    // =====================================
-
-    const {
-      data: listings
-    } =
-      await supabase
-        .from("listings")
-        .select("*")
-        .eq(
-          "user_id",
-          user.id
-        );
-
-    const userListings =
-      listings ?? [];
-
-    // =====================================
-    // TOTAL VIEWS
-    // =====================================
-
-    const totalViews =
-      userListings.reduce(
-        (sum, listing) =>
-          sum +
-          (
-            listing.views || 0
-          ),
-        0
-      );
-
-    // =====================================
-    // TRENDING
-    // =====================================
-
-    const averageTrending =
-      userListings.length
-
-        ? (
-            userListings.reduce(
-              (sum, listing) =>
-                sum +
-                (
-                  listing.trending_score || 0
-                ),
-              0
-            )
-            /
-            userListings.length
-          )
-
-        : 0;
-
-    // =====================================
-    // FAVORITES
-    // =====================================
-
-    const listingIds =
-      userListings.map(
-        (l) => l.id
-      );
-
-    let totalFavorites = 0;
-
-    if (listingIds.length) {
-
-      const {
-        data: favorites
-      } =
-        await supabase
-          .from("favorites")
-          .select("id, listing_id")
-          .in(
-            "listing_id",
-            listingIds
-          );
-
-      totalFavorites =
-        favorites?.length ?? 0;
-    }
-
-    // =====================================
-    // MESSAGES
-    // =====================================
-
-    const {
-      data: conversations
-    } =
-      await supabase
-        .from("conversations")
-        .select("*")
-        .or(`
-          buyer_id.eq.${user.id},
-          seller_id.eq.${user.id}
-        `);
-
-    const totalMessages =
-      conversations?.length ?? 0;
-
-    // =====================================
-    // RECOMMENDATION SCORE
-    // =====================================
-
-    const recommendationScore =
-      Math.min(
-        100,
-        Math.round(
-          (
-            totalViews * 0.02
-          ) +
-          (
-            totalFavorites * 2
-          ) +
-          (
-            averageTrending * 5
-          )
-        )
-      );
-
-    // =====================================
-    // TOP LISTINGS
-    // =====================================
-
-    const ranked =
-      [...userListings]
-        .sort(
-          (a, b) =>
-
-            (
-              b.trending_score || 0
-            )
-            -
-            (
-              a.trending_score || 0
-            )
-        )
-        .slice(0, 5);
-
-    setTopListings(
-      ranked
-    );
-
-    setStats({
-
-      listings:
-        userListings.length,
-
-      totalViews,
-
-      totalFavorites,
-
-      totalMessages,
-
-      recommendationScore,
-
-      averageTrending:
-        Number(
-          averageTrending.toFixed(1)
-        ),
-
-    });
+  if (!result) {
+    return;
   }
+
+  setTopListings(
+    result.topListings
+  );
+
+  setStats(
+    result.stats
+  );
+}
 
   // =====================================
   // METRIC CARD
