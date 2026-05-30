@@ -21,6 +21,15 @@ import {
   supabase
 } from "@/lib/supabase";
 
+import {
+  analyzePostSafety,
+  getTrustLevel,
+} from "@/lib/postSafety";
+
+import {
+  triggerSavedSearchNotifications
+} from "@/lib/savedSearchNotifications";
+
 export default function PostPage() {
 const router =
   useRouter();
@@ -144,305 +153,34 @@ const regions = [
 ]);
 
   async function analyzeListing() {
+  const result =
+    await analyzePostSafety({
+      title,
+      description,
+      price,
+    });
 
-    const flags:
-      string[] = [];
-
-    let score = 0;
-
-    const combined =
-      `
-        ${title}
-        ${description}
-      `
-      .toLowerCase();
-
-    // =====================================
-    // SPAM WORDS
-    // =====================================
-
-    const suspiciousWords = [
-
-      "wire transfer",
-      "western union",
-      "gift cards",
-      "crypto only",
-      "text me only",
-      "whatsapp",
-      "telegram",
-      "urgent sale",
-      "guaranteed profit",
-
-    ];
-
-    suspiciousWords.forEach(
-      (word) => {
-
-        if (
-          combined.includes(word)
-        ) {
-
-          score += 25;
-
-          flags.push(
-            `Suspicious phrase detected: "${word}"`
-          );
-        }
-      }
-    );
-
-    // =====================================
-    // VERY LOW PRICE
-    // =====================================
-
-    const numericPrice =
-      Number(
-        price.replace(
-          /[^0-9.]/g,
-          ""
-        )
-      );
-
-    if (
-      numericPrice > 0 &&
-      numericPrice < 10
-    ) {
-
-      score += 15;
-
-      flags.push(
-        "Unusually low price detected"
-      );
-    }
-
-    // =====================================
-    // EXCESSIVE CAPS
-    // =====================================
-
-    const upperCount =
-      (
-        title.match(
-          /[A-Z]/g
-        ) || []
-      ).length;
-
-    if (
-      upperCount > 15
-    ) {
-
-      score += 10;
-
-      flags.push(
-        "Excessive capital letters"
-      );
-    }
-
-    // =====================================
-    // DUPLICATE DETECTION
-    // =====================================
-
-    if (
-      title.trim().length > 5
-    ) {
-
-      const {
-        data: similarListings
-      } =
-        await supabase
-          .from("listings")
-          .select(
-            "id, title"
-          )
-          .ilike(
-            "title",
-            `%${title.trim()}%`
-          )
-          .limit(3);
-
-      if (
-        similarListings &&
-        similarListings.length > 0
-      ) {
-
-        score += 20;
-
-        setDuplicateWarning(
-          true
-        );
-
-      } else {
-
-        setDuplicateWarning(
-          false
-        );
-      }
-    }
-
-    setRiskScore(score);
-
-    setRiskFlags(flags);
-  }
+  setRiskScore(result.riskScore);
+  setRiskFlags(result.riskFlags);
+  setDuplicateWarning(result.duplicateWarning);
+}
 
   // =====================================
   // TRUST LEVEL
   // =====================================
 
   const trustLevel =
-    useMemo(() => {
-
-      if (riskScore >= 50) {
-
-        return {
-          label:
-            "High Risk",
-          color:
-            "bg-red-100 text-red-700",
-        };
-      }
-
-      if (riskScore >= 25) {
-
-        return {
-          label:
-            "Moderate Risk",
-          color:
-            "bg-yellow-100 text-yellow-700",
-        };
-      }
-
-      return {
-        label:
-          "Trusted Listing",
-        color:
-          "bg-green-100 text-green-700",
-      };
-
-    }, [riskScore]);
+  useMemo(() => {
+    return getTrustLevel(
+      riskScore
+    );
+  }, [riskScore]);
 
   // =====================================
   // MATCH SAVED SEARCHES
   // =====================================
 
-  async function triggerSavedSearchNotifications(
-    listingId: string,
-    listingSlug: string
-  ) {
-
-    const {
-      data: savedSearches
-    } =
-      await supabase
-        .from("saved_searches")
-        .select(`
-  user_id,
-  search,
-  category,
-  region,
-  min_price,
-  max_price
-`);
-
-    if (!savedSearches?.length) {
-      return;
-    }
-
-    const matchingSearches =
-      savedSearches.filter(
-        (searchItem) => {
-
-          if (
-            searchItem.search &&
-            !title
-              .toLowerCase()
-              .includes(
-                searchItem.search.toLowerCase()
-              )
-          ) {
-
-            return false;
-          }
-
-          if (
-            searchItem.category &&
-            searchItem.category !== category
-          ) {
-
-            return false;
-          }
-
-          if (
-            searchItem.region &&
-            searchItem.region !== region
-          ) {
-
-            return false;
-          }
-
-          if (
-            searchItem.min_price &&
-            Number(price)
-            <
-            Number(
-              searchItem.min_price
-            )
-          ) {
-
-            return false;
-          }
-
-          if (
-            searchItem.max_price &&
-            Number(price)
-            >
-            Number(
-              searchItem.max_price
-            )
-          ) {
-
-            return false;
-          }
-
-          return true;
-        }
-      );
-
-    if (
-      !matchingSearches.length
-    ) {
-
-      return;
-    }
-
-    const notifications =
-      matchingSearches.map(
-        (searchItem) => ({
-
-          user_id:
-            searchItem.user_id,
-
-          type:
-            "saved_search_match",
-
-          title:
-            "New Matching Listing",
-
-          message:
-            `"${title}" matches one of your saved searches.`,
-
-          link:
-            `/listing/${listingSlug}`,
-
-        })
-      );
-
-    await supabase
-      .from(
-        "user_notifications"
-      )
-      .insert(
-        notifications
-      );
-  }
+  
 
   // =====================================
   // CREATE LISTING
@@ -635,13 +373,14 @@ if (
     // SAVED SEARCH MATCHES
     // =====================================
 
-    await triggerSavedSearchNotifications(
-
-      data.id,
-
-      slug
-
-    );
+    await triggerSavedSearchNotifications({
+  listingId: data.id,
+  listingSlug: slug,
+  title,
+  category,
+  region,
+  price,
+});
 
     router.push(
   "/dashboard/listings"
