@@ -19,9 +19,10 @@ import {
 } from "@/lib/supabase";
 
 import {
-  getRecommendedListings,
-  getTrendingListings,
-} from "@/lib/recommendations";
+  loadTrendingListings,
+  loadRecommendedListings,
+  loadRegionalListings,
+} from "@/lib/trendingListingsService";
 
 type Listing = {
   id: string;
@@ -96,17 +97,13 @@ const {
 
   async function loadTrending() {
 
-    await supabase.rpc(
-      "update_listing_trending_scores"
-    );
+  const data =
+    await loadTrendingListings();
 
-    const data =
-      await getTrendingListings(6);
-
-    setTrending(
-      data as Listing[]
-    );
-  }
+  setTrending(
+    data as Listing[]
+  );
+}
 
 // =====================================
 // RECOMMENDED
@@ -116,18 +113,10 @@ async function loadRecommended(
   userId: string | null
 ) {
 
-  if (!userId) {
-    return;
-  }
-
   const data =
-    await getRecommendedListings({
-
-      userId,
-
-      limit: 6,
-
-    });
+    await loadRecommendedListings(
+      userId
+    );
 
   setRecommended(
     data as Listing[]
@@ -142,43 +131,10 @@ async function loadRegional(
   userId: string | null
 ) {
 
-  if (!userId) {
-    return;
-  }
-
-  const {
-    data: profile
-  } =
-    await supabase
-      .from(
-        "user_preference_profiles"
-      )
-      .select("*")
-      .eq(
-        "user_id",
-        userId
-      )
-      .maybeSingle();
-
-  const regions =
-    profile
-      ?.favorite_regions ?? [];
-
-  if (!regions.length) {
-    return;
-  }
-
   const data =
-    await getRecommendedListings({
-
-      userId,
-
-      limit: 6,
-
-      regionBoost:
-        regions,
-
-    });
+    await loadRegionalListings(
+      userId
+    );
 
   setRegional(
     data as Listing[]

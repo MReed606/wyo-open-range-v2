@@ -56,6 +56,8 @@ import {
 import {
   contactListingSeller,
   submitListingReport,
+  incrementListingView,
+  loadRelatedListings,
 } from "@/lib/listingDetailService";
 
 type RelatedListing = {
@@ -181,63 +183,31 @@ export default function ListingPage() {
   // =====================================
 
   async function incrementViewCount(
-    listingId: string
-  ) {
+  listingId: string
+) {
 
-    const storageKey =
-      `viewed_listing_${listingId}`;
-
-    if (
-      sessionStorage.getItem(
-        storageKey
-      )
-    ) {
-
-      return;
-    }
-
-    sessionStorage.setItem(
-      storageKey,
-      "true"
-    );
-
-    await supabase.rpc(
-      "increment_listing_views",
-      {
-        listing_id:
-          listingId,
-      }
-    );
-  }
+  await incrementListingView(
+    listingId
+  );
+}
 
   // =====================================
   // LOAD RELATED
   // =====================================
 
   async function loadRelated(
-    currentListing: any
-  ) {
+  currentListing: any
+) {
 
-    const related =
-      await getRelatedListings({
-
-        listingId:
-          currentListing.id,
-
-        category:
-          currentListing.category,
-
-        region:
-          currentListing.region,
-
-        limit: 6,
-
-      });
-
-    setRelatedListings(
-      related as RelatedListing[]
+  const related =
+    await loadRelatedListings(
+      currentListing
     );
-  }
+
+  setRelatedListings(
+    related as RelatedListing[]
+  );
+}
 
   // =====================================
   // LOAD LISTING

@@ -114,3 +114,57 @@ export async function submitListingReport(
 
   return true;
 }
+export async function incrementListingView(
+  listingId: string
+) {
+
+  const storageKey =
+    `viewed_listing_${listingId}`;
+
+  if (
+    sessionStorage.getItem(
+      storageKey
+    )
+  ) {
+    return;
+  }
+
+  sessionStorage.setItem(
+    storageKey,
+    "true"
+  );
+
+  await supabase.rpc(
+    "increment_listing_views",
+    {
+      listing_id:
+        listingId,
+    }
+  );
+}
+
+export async function loadRelatedListings(
+  currentListing: any
+) {
+
+  const {
+    getRelatedListings
+  } = await import(
+    "@/lib/recommendations"
+  );
+
+  return await getRelatedListings({
+
+    listingId:
+      currentListing.id,
+
+    category:
+      currentListing.category,
+
+    region:
+      currentListing.region,
+
+    limit: 6,
+
+  });
+}

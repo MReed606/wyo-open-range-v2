@@ -6,6 +6,12 @@ import { supabase } from "@/lib/supabase";
 
 import { AuthGuard } from "@/components/auth/AuthGuard";
 
+import {
+  loadUserProfile,
+  saveUserProfile,
+  deleteUserAccount,
+} from "@/lib/settingsService";
+
 export default function SettingsPage() {
 
   const [loading,
@@ -70,175 +76,121 @@ export default function SettingsPage() {
 
   async function loadProfile() {
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+  const data =
+    await loadUserProfile();
 
-    if (!user) return;
-
-    const { data } =
-      await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .maybeSingle();
-
-    setFullName(
-      data?.full_name ?? ""
-    );
-
-    setPhone(
-      data?.phone ?? ""
-    );
-
-    setBio(
-      data?.bio ?? ""
-    );
-
-    setAvatar(
-      data?.avatar_url ?? ""
-    );
-
-    // =====================================
-    // PRIVACY
-    // =====================================
-
-    setPublicPhone(
-      data?.public_phone ?? false
-    );
-
-    setPublicEmail(
-      data?.public_email ?? false
-    );
-
-    // =====================================
-    // NOTIFICATIONS
-    // =====================================
-
-    setEmailNotifications(
-      data?.email_notifications ?? true
-    );
-
-    setSmsNotifications(
-      data?.sms_notifications ?? false
-    );
-
-    setMessageNotifications(
-      data?.message_notifications ?? true
-    );
-
-    setForumNotifications(
-      data?.forum_notifications ?? true
-    );
-
-    setListingNotifications(
-      data?.listing_notifications ?? true
-    );
+  if (!data) {
 
     setLoading(false);
+
+    return;
   }
+
+  setFullName(
+    data.full_name ?? ""
+  );
+
+  setPhone(
+    data.phone ?? ""
+  );
+
+  setBio(
+    data.bio ?? ""
+  );
+
+  setAvatar(
+    data.avatar_url ?? ""
+  );
+
+  setPublicPhone(
+    data.public_phone ?? false
+  );
+
+  setPublicEmail(
+    data.public_email ?? false
+  );
+
+  setEmailNotifications(
+    data.email_notifications ?? true
+  );
+
+  setSmsNotifications(
+    data.sms_notifications ?? false
+  );
+
+  setMessageNotifications(
+    data.message_notifications ?? true
+  );
+
+  setForumNotifications(
+    data.forum_notifications ?? true
+  );
+
+  setListingNotifications(
+    data.listing_notifications ?? true
+  );
+
+  setLoading(false);
+}
 
   async function saveProfile() {
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+  await saveUserProfile({
 
-    if (!user) return;
+    full_name:
+      fullName,
 
-    await supabase
-      .from("profiles")
-      .update({
-        full_name:
-          fullName,
+    phone,
 
-        phone,
+    bio,
 
-        bio,
+    avatar_url:
+      avatar,
 
-        avatar_url:
-          avatar,
+    public_phone:
+      publicPhone,
 
-        // =====================================
-        // PRIVACY
-        // =====================================
+    public_email:
+      publicEmail,
 
-        public_phone:
-          publicPhone,
+    email_notifications:
+      emailNotifications,
 
-        public_email:
-          publicEmail,
+    sms_notifications:
+      smsNotifications,
 
-        // =====================================
-        // NOTIFICATIONS
-        // =====================================
+    message_notifications:
+      messageNotifications,
 
-        email_notifications:
-          emailNotifications,
+    forum_notifications:
+      forumNotifications,
 
-        sms_notifications:
-          smsNotifications,
+    listing_notifications:
+      listingNotifications,
 
-        message_notifications:
-          messageNotifications,
+  });
 
-        forum_notifications:
-          forumNotifications,
-
-        listing_notifications:
-          listingNotifications,
-      })
-      .eq("id", user.id);
-
-    alert(
-      "Settings saved"
-    );
-  }
+  alert(
+    "Settings saved"
+  );
+}
 
   
   async function deleteAccount() {
 
-    const confirmed =
-      confirm(
-        "Are you sure you want to permanently delete your account?"
-      );
+  const confirmed =
+    confirm(
+      "Are you sure you want to permanently delete your account?"
+    );
 
-    if (!confirmed) {
-      return;
-    }
-
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) return;
-
-    // =====================================
-    // DELETE LISTINGS
-    // =====================================
-
-    await supabase
-      .from("listings")
-      .delete()
-      .eq("owner_id", user.id);
-
-    // =====================================
-    // DELETE PROFILE
-    // =====================================
-
-    await supabase
-      .from("profiles")
-      .delete()
-      .eq("id", user.id);
-
-    // =====================================
-    // SIGN OUT
-    // =====================================
-
-    await supabase.auth.signOut();
-
-    window.location.href = "/";
+  if (!confirmed) {
+    return;
   }
+
+  await deleteUserAccount();
+
+  window.location.href = "/";
+}
 
 
 if (loading) {

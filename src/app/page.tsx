@@ -35,6 +35,11 @@ import {
   MarketplaceLiveFeed
 } from "@/components/home/MarketplaceLiveFeed";
 
+import {
+  loadHomePageStats,
+  getSellingDestination,
+} from "@/lib/homePageService";
+
 export default function HomePage() {
 
   const [liveStats,
@@ -121,88 +126,13 @@ export default function HomePage() {
 
   async function loadLiveStats() {
 
-    const today =
-      new Date();
+  const stats =
+    await loadHomePageStats();
 
-    today.setHours(
-      0,
-      0,
-      0,
-      0
-    );
-
-    const [
-      listingsRes,
-      todayListingsRes,
-      conversationsRes,
-    ] = await Promise.all([
-
-      supabase
-        .from("listings")
-        .select(
-          "id, trending_score"
-        ),
-
-      supabase
-        .from("listings")
-        .select("id")
-        .gte(
-          "created_at",
-          today.toISOString()
-        ),
-
-      supabase
-        .from("messages")
-        .select("id"),
-
-    ]);
-
-    const listings =
-      listingsRes.data ?? [];
-
-    const trendingVelocity =
-      listings.length
-
-        ? Math.round(
-            listings.reduce(
-              (
-                sum,
-                listing
-              ) =>
-
-                sum +
-                (
-                  listing.trending_score || 0
-                ),
-
-              0
-            )
-            /
-            listings.length
-          )
-
-        : 0;
-
-    setLiveStats({
-
-      activeUsers:
-  listings.length,
-
-      liveListings:
-        listings.length,
-
-      listingsToday:
-        todayListingsRes
-          .data?.length ?? 0,
-
-      activeMessages:
-        conversationsRes
-          .data?.length ?? 0,
-
-      trendingVelocity,
-
-    });
-  }
+  setLiveStats(
+    stats
+  );
+}
 
   
   // =====================================
@@ -211,22 +141,12 @@ export default function HomePage() {
 
   async function startSelling() {
 
-    const {
-      data: { user },
-    } =
-      await supabase.auth.getUser();
+  const destination =
+    await getSellingDestination();
 
-    if (user) {
-
-      window.location.href =
-        "/post";
-
-      return;
-    }
-
-    window.location.href =
-      "/login";
-  }
+  window.location.href =
+    destination;
+}
 
   // =====================================
   // MARKETPLACE HEALTH
