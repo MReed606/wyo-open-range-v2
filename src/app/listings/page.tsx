@@ -30,6 +30,14 @@ import {
   getRecommendedListings,
 } from "@/lib/recommendations";
 
+import {
+  saveSearch as saveSearchHelper
+} from "@/lib/saveSearch";
+
+import {
+  searchListings
+} from "@/lib/listingSearch";
+
 const PAGE_SIZE = 12;
 
 function ListingsContent() {
@@ -149,54 +157,29 @@ function ListingsContent() {
   // =====================================
 
   async function saveSearch() {
-
+  try {
     setSavingSearch(true);
 
-    const {
-      data: { user }
-    } =
-      await supabase.auth.getUser();
+    await saveSearchHelper({
+      search,
+      category,
+      region,
+      minPrice,
+      maxPrice,
+    });
 
-    if (!user) {
-
+    alert(
+      "Search saved successfully."
+    );
+  } catch (error: any) {
+    if (
+      error?.message ===
+      "LOGIN_REQUIRED"
+    ) {
       alert(
         "Please login first."
       );
-
-      setSavingSearch(false);
-
-      return;
-    }
-
-    const { error } =
-      await supabase
-        .from("saved_searches")
-        .insert({
-
-          user_id:
-            user.id,
-
-          search:
-            search || null,
-
-          category:
-            category || null,
-
-          region:
-            region || null,
-
-          min_price:
-            minPrice || null,
-
-          max_price:
-            maxPrice || null,
-
-        });
-
-    setSavingSearch(false);
-
-    if (error) {
-
+    } else {
       console.error(
         "SAVE SEARCH ERROR:",
         error
@@ -205,14 +188,11 @@ function ListingsContent() {
       alert(
         "Unable to save search."
       );
-
-      return;
     }
-
-    alert(
-      "Search saved successfully."
-    );
+  } finally {
+    setSavingSearch(false);
   }
+}
 
   // =====================================
   // INFINITE SCROLL
@@ -279,282 +259,44 @@ function ListingsContent() {
   // =====================================
 
   async function loadListings(
-    currentPage: number,
-    replace: boolean
-  ) {
-
-    if (replace) {
-
-      setLoading(true);
-
-    } else {
-
-      setLoadingMore(true);
-
-    }
-
-    const {
-      data: { user }
-    } =
-      await supabase.auth.getUser();
-
-    // =====================================
-    // AI ENGINE
-    // =====================================
-
-    let results =
-      await getRecommendedListings({
-
-        userId:
-          user?.id,
-
-        limit: 100,
-
-        categoryBoost:
-          category
-            ? [category]
-            : [],
-
-        regionBoost:
-          region
-            ? [region]
-            : [],
-
-      });
-
-    // =====================================
-    // SEARCH FILTER
-    // =====================================
-
-    if (search.trim()) {
-
-      const searchLower =
-        search.toLowerCase();
-
-      results =
-        results.filter(
-          (listing: any) => {
-
-            return (
-
-              listing.title
-                ?.toLowerCase()
-                .includes(
-                  searchLower
-                )
-
-              ||
-
-              listing.category
-                ?.toLowerCase()
-                .includes(
-                  searchLower
-                )
-
-              ||
-
-              listing.region
-                ?.toLowerCase()
-                .includes(
-                  searchLower
-                )
-
-            );
-
-          }
-        );
-    }
-
-    // =====================================
-    // CATEGORY
-    // =====================================
-
-    if (category) {
-
-      results =
-        results.filter(
-          (listing: any) =>
-            listing.category ===
-            category
-        );
-    }
-
-    // =====================================
-    // REGION
-    // =====================================
-
-    if (region.trim()) {
-
-      results =
-        results.filter(
-          (listing: any) =>
-
-            listing.region
-              ?.toLowerCase()
-              .includes(
-                region.toLowerCase()
-              )
-        );
-    }
-
-    // =====================================
-    // PRICE FILTERS
-    // =====================================
-
-    if (minPrice) {
-
-      results =
-        results.filter(
-          (listing: any) =>
-
-            Number(
-              listing.price
-                ?.replace(
-                  /[^0-9.]/g,
-                  ""
-                )
-            )
-            >=
-            Number(minPrice)
-        );
-    }
-
-    if (maxPrice) {
-
-      results =
-        results.filter(
-          (listing: any) =>
-
-            Number(
-              listing.price
-                ?.replace(
-                  /[^0-9.]/g,
-                  ""
-                )
-            )
-            <=
-            Number(maxPrice)
-        );
-    }
-
-    // =====================================
-    // SORTING
-    // =====================================
-
-    switch (sortBy) {
-
-      case "popular":
-
-        results.sort(
-          (a: any, b: any) =>
-            (b.views || 0)
-            -
-            (a.views || 0)
-        );
-
-        break;
-
-      case "trending":
-
-        results.sort(
-          (a: any, b: any) =>
-            (b.trending_score || 0)
-            -
-            (a.trending_score || 0)
-        );
-
-        break;
-
-      case "price_low":
-
-        results.sort(
-          (a: any, b: any) =>
-
-            Number(
-              a.price?.replace(
-                /[^0-9.]/g,
-                ""
-              ) || 0
-            )
-            -
-            Number(
-              b.price?.replace(
-                /[^0-9.]/g,
-                ""
-              ) || 0
-            )
-        );
-
-        break;
-
-      case "price_high":
-
-        results.sort(
-          (a: any, b: any) =>
-
-            Number(
-              b.price?.replace(
-                /[^0-9.]/g,
-                ""
-              ) || 0
-            )
-            -
-            Number(
-              a.price?.replace(
-                /[^0-9.]/g,
-                ""
-              ) || 0
-            )
-        );
-
-        break;
-    }
-
-    // =====================================
-    // PAGINATION
-    // =====================================
-
-    const from =
-      currentPage * PAGE_SIZE;
-
-    const to =
-      from + PAGE_SIZE;
-
-    const paginated =
-      results.slice(
-        from,
-        to
-      );
-
-    if (
-      paginated.length <
-      PAGE_SIZE
-    ) {
-
-      setHasMore(false);
-    }
-
-    if (replace) {
-
-      setListings(
-        paginated
-      );
-
-    } else {
-
-      setListings((prev) => [
-
-        ...prev,
-
-        ...paginated,
-
-      ]);
-    }
-
-    setLoading(false);
-
-    setLoadingMore(false);
+  currentPage: number,
+  replace: boolean
+) {
+  if (replace) {
+    setLoading(true);
+  } else {
+    setLoadingMore(true);
   }
+
+  const result =
+    await searchListings({
+      category,
+      region,
+      search,
+      minPrice,
+      maxPrice,
+      sortBy,
+      currentPage,
+    });
+
+  setHasMore(
+    result.hasMore
+  );
+
+  if (replace) {
+    setListings(
+      result.listings
+    );
+  } else {
+    setListings((prev) => [
+      ...prev,
+      ...result.listings,
+    ]);
+  }
+
+  setLoading(false);
+  setLoadingMore(false);
+}
 
   return (
 
