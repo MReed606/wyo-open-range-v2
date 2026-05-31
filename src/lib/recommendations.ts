@@ -254,6 +254,7 @@ export async function getTrendingListings(limit = 6) {
       image_url,
       price
     `)
+    .eq("status", "active")
     .order("trending_score", { ascending: false })
     .limit(20);
 
