@@ -173,21 +173,23 @@ export async function hideMessageDashboardConversation(
   }
 
   if (
-    conversation.buyer_id ===
-    user.id
-  ) {
+  conversation.buyer_id ===
+  user.id
+) {
+  const result =
     await supabase
-      .from("conversations")
-      .update({
-        hidden_by_buyer: true,
-      })
-      .eq("id", id);
-  } else {
+  .from("conversations")
+  .update({
+    hidden_by_buyer: true,
+  })
+  .eq("id", id);
+} else {
+  const result =
     await supabase
-      .from("conversations")
-      .update({
-        hidden_by_seller: true,
-      })
-      .eq("id", id);
-  }
+  .from("conversations")
+  .update({
+    hidden_by_seller: true,
+  })
+  .eq("id", id);
+}
 }
