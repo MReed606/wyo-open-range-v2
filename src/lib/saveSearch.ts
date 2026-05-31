@@ -1,6 +1,7 @@
 import {
   supabase
 } from "@/lib/supabase";
+import { getCurrentUser } from "@/lib/currentUser";
 
 export async function saveSearch({
   search,
@@ -15,10 +16,8 @@ export async function saveSearch({
   minPrice: string;
   maxPrice: string;
 }) {
-  const {
-    data: { user }
-  } =
-    await supabase.auth.getUser();
+  const user =
+  await getCurrentUser();
 
   if (!user) {
     throw new Error(

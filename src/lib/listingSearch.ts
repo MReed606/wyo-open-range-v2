@@ -6,6 +6,8 @@ import {
   getRecommendedListings
 } from "@/lib/recommendations";
 
+import { getCurrentUser } from "@/lib/currentUser";
+
 const PAGE_SIZE = 12;
 
 export async function searchListings({
@@ -25,10 +27,8 @@ export async function searchListings({
   sortBy: string;
   currentPage: number;
 }) {
-  const {
-    data: { user }
-  } =
-    await supabase.auth.getUser();
+  const user =
+  await getCurrentUser();
 
   let results =
     await getRecommendedListings({

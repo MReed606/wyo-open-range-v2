@@ -1,5 +1,5 @@
 import { supabase } from "@/lib/supabase";
-
+import { getCurrentUser } from "@/lib/currentUser";
 export async function loadHomePageStats() {
 
   const today =
@@ -87,10 +87,8 @@ export async function loadHomePageStats() {
 
 export async function getSellingDestination() {
 
-  const {
-    data: { user },
-  } =
-    await supabase.auth.getUser();
+  const user =
+  await getCurrentUser();
 
   return user
     ? "/post"

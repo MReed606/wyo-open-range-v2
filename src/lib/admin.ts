@@ -1,10 +1,9 @@
 import { supabase } from "@/lib/supabase";
-
+import { getCurrentUser } from "@/lib/currentUser";
 export async function isAdmin() {
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user =
+  await getCurrentUser();
 
   if (!user) {
     return false;
