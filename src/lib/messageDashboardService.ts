@@ -44,7 +44,8 @@ export async function loadMessageDashboardConversations() {
     }
   );
 
-  const enhanced = await Promise.all(
+  const enhanced = (
+  await Promise.all(
     filtered.map(async (conversation) => {
       const otherUserId =
         conversation.buyer_id === user.id
@@ -74,6 +75,11 @@ export async function loadMessageDashboardConversations() {
 
       const latest =
         latestMessages?.[0];
+
+// Hide orphan conversations
+if (!latest) {
+  return null;
+}
 
       const {
         data: unreadMessages,
@@ -118,8 +124,8 @@ export async function loadMessageDashboardConversations() {
         online,
       };
     })
-  );
-
+  )
+).filter(Boolean) as any[];
   enhanced.sort((a, b) => {
     if (
       b.unreadCount !==
