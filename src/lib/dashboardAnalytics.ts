@@ -15,12 +15,12 @@ export async function loadDashboardAnalytics() {
     data: listings
   } =
     await supabase
-      .from("listings")
-      .select("*")
-      .eq(
-        "user_id",
-        user.id
-      );
+  .from("listings")
+  .select("*")
+  .eq(
+    "owner_id",
+    user.id
+  );
 
   const userListings =
     listings ?? [];
