@@ -27,14 +27,14 @@ export default function PresenceTracker() {
       }
 
       await supabase
-        .from("profiles")
-        .update({
+  .from("profiles")
+  .update({
 
-          last_active:
-  new Date()
-    .toISOString(),
+    last_active_at:
+      new Date()
+        .toISOString(),
 
-        })
+  })
         .eq(
           "id",
           user.id
