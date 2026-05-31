@@ -34,6 +34,14 @@ import {
   loadDashboardAnalytics
 } from "@/lib/dashboardAnalytics";
 
+import {
+  DashboardMetricCard
+} from "@/components/dashboard/DashboardMetricCard";
+
+import {
+  DashboardHero
+} from "@/components/dashboard/DashboardHero";
+
 export default function DashboardPage() {
 
   const [profile,
@@ -144,53 +152,7 @@ export default function DashboardPage() {
   // METRIC CARD
   // =====================================
 
-  function MetricCard({
-    title,
-    value,
-    icon,
-    color,
-  }: {
-    title: string;
-    value: string | number;
-    icon: React.ReactNode;
-    color: string;
-  }) {
-
-    return (
-
-      <div className="rounded-3xl bg-white p-6 shadow-sm">
-
-        <div className="flex items-center justify-between">
-
-          <div>
-
-            <div className="text-sm font-bold text-[#6B7280]">
-
-              {title}
-
-            </div>
-
-            <div className="mt-3 text-4xl font-black text-[#111827]">
-
-              {value}
-
-            </div>
-
-          </div>
-
-          <div className={`flex h-16 w-16 items-center justify-center rounded-2xl ${color}`}>
-
-            {icon}
-
-          </div>
-
-        </div>
-
-      </div>
-
-    );
-
-  }
+  
 
   return (
 
@@ -203,63 +165,11 @@ export default function DashboardPage() {
 
           {/* HERO */}
 
-          <div className="mb-10 overflow-hidden rounded-[32px] bg-gradient-to-r from-[#2F5D50] to-[#1F2933] p-10 text-white shadow-xl">
-
-            <div className="flex flex-wrap items-center justify-between gap-8">
-
-              <div>
-
-                <div className="mb-5 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-black backdrop-blur">
-
-                  <Brain className="h-4 w-4" />
-
-                  AI Marketplace Intelligence
-
-                </div>
-
-                <h1 className="text-5xl font-black">
-
-                  Welcome back,
-                  {" "}
-                  {profile?.full_name ??
-                    "Seller"}
-
-                </h1>
-
-                <p className="mt-5 max-w-2xl text-lg leading-8 text-white/80">
-
-                  Track marketplace performance, seller growth,
-                  engagement metrics, and AI recommendation visibility.
-
-                </p>
-
-              </div>
-
-              <div className="flex flex-wrap gap-4">
-
-                <Link
-                  href="/post"
-                  className="rounded-2xl bg-white px-6 py-4 text-lg font-black text-[#111827]"
-                >
-
-                  Create Listing
-
-                </Link>
-
-                <Link
-                  href="/dashboard/listings"
-                  className="rounded-2xl border border-white/20 bg-white/10 px-6 py-4 text-lg font-black text-white backdrop-blur"
-                >
-
-                  Manage Listings
-
-                </Link>
-
-              </div>
-
-            </div>
-
-          </div>
+          <DashboardHero
+  fullName={
+    profile?.full_name
+  }
+/>
 
           {/* PROFILE */}
 
@@ -344,7 +254,7 @@ export default function DashboardPage() {
 
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
 
-            <MetricCard
+            <DashboardMetricCard
               title="Total Listings"
               value={stats.listings}
               icon={
@@ -353,7 +263,7 @@ export default function DashboardPage() {
               color="bg-[#2F5D50]"
             />
 
-            <MetricCard
+            <DashboardMetricCard
               title="Marketplace Views"
               value={stats.totalViews}
               icon={
@@ -362,7 +272,7 @@ export default function DashboardPage() {
               color="bg-blue-600"
             />
 
-            <MetricCard
+            <DashboardMetricCard
               title="Saved By Buyers"
               value={stats.totalFavorites}
               icon={
@@ -371,7 +281,7 @@ export default function DashboardPage() {
               color="bg-red-500"
             />
 
-            <MetricCard
+            <DashboardMetricCard
               title="Conversation Activity"
               value={stats.totalMessages}
               icon={
@@ -380,7 +290,7 @@ export default function DashboardPage() {
               color="bg-yellow-500"
             />
 
-            <MetricCard
+            <DashboardMetricCard
               title="AI Recommendation Score"
               value={`${stats.recommendationScore}%`}
               icon={
@@ -389,7 +299,7 @@ export default function DashboardPage() {
               color="bg-purple-600"
             />
 
-            <MetricCard
+            <DashboardMetricCard
               title="Average Trending Score"
               value={stats.averageTrending}
               icon={

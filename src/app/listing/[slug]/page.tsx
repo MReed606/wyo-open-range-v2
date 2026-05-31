@@ -60,6 +60,10 @@ import {
   loadRelatedListings,
 } from "@/lib/listingDetailService";
 
+import {
+  ListingFullscreenViewer
+} from "@/components/listing-detail/ListingFullscreenViewer";
+
 type RelatedListing = {
   id: string;
   title: string;
@@ -353,47 +357,18 @@ export default function ListingPage() {
 
     <main className="min-h-screen bg-[#F7F5F2] p-6 md:p-10">
 
-      {/* FULLSCREEN */}
-
-      {fullscreen && (
-
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black">
-
-          <button
-            onClick={() =>
-              setFullscreen(false)
-            }
-            className="absolute right-5 top-5 z-50 rounded-full bg-white/10 p-3 text-white backdrop-blur"
-          >
-
-            <X className="h-6 w-6" />
-
-          </button>
-
-          {!!galleryImages.length && (
-
-            <div className="relative h-full w-full">
-
-              <Image
-                src={
-                  galleryImages[
-                    activeImage
-                  ]
-                }
-                alt={
-                  listing.title
-                }
-                fill
-                className="object-contain"
-              />
-
-            </div>
-
-          )}
-
-        </div>
-
-      )}
+      <ListingFullscreenViewer
+  isOpen={fullscreen}
+  imageUrl={
+    galleryImages[
+      activeImage
+    ] ?? null
+  }
+  title={listing.title}
+  onClose={() =>
+    setFullscreen(false)
+  }
+/>
 
       <div className="mx-auto max-w-7xl">
 

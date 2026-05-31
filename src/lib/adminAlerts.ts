@@ -34,3 +34,31 @@ export async function loadAdminAlerts() {
 
   return data ?? [];
 }
+export async function removeAdminListing(
+  id: string
+) {
+
+  const confirmed =
+    confirm(
+      "Remove listing?"
+    );
+
+  if (!confirmed) {
+    return false;
+  }
+
+  await supabase
+    .from("listings")
+    .update({
+
+      status:
+        "removed",
+
+    })
+    .eq(
+      "id",
+      id
+    );
+
+  return true;
+}

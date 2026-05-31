@@ -35,6 +35,7 @@ import {
 import {
   loadFlaggedListings as loadFlaggedListingsData,
   loadAdminAlerts,
+  removeAdminListing,
 } from "@/lib/adminAlerts";
 
 import {
@@ -44,6 +45,14 @@ import {
 import {
   AdminAlertsPanel
 } from "@/components/admin/AdminAlertsPanel";
+
+import {
+  AdminMetricCard
+} from "@/components/admin/AdminMetricCard";
+
+import {
+  AdminHero
+} from "@/components/admin/AdminHero";
 
 export default function AdminPage() {
 
@@ -184,85 +193,22 @@ export default function AdminPage() {
   // =====================================
 
   async function removeListing(
-    id: string
-  ) {
+  id: string
+) {
 
-    const confirmed =
-      confirm(
-        "Remove listing?"
-      );
-
-    if (!confirmed) {
-      return;
-    }
-
-    await supabase
-      .from("listings")
-      .update({
-
-        status:
-          "removed",
-
-      })
-      .eq(
-        "id",
-        id
-      );
-
-    await initialize();
-  }
-
-  // =====================================
-  // METRIC CARD
-  // =====================================
-
-  function MetricCard({
-    title,
-    value,
-    icon,
-    color,
-  }: {
-    title: string;
-    value: string | number;
-    icon: React.ReactNode;
-    color: string;
-  }) {
-
-    return (
-
-      <div className="rounded-3xl bg-white p-6 shadow-sm">
-
-        <div className="flex items-center justify-between">
-
-          <div>
-
-            <div className="text-sm font-bold text-[#6B7280]">
-
-              {title}
-
-            </div>
-
-            <div className="mt-3 text-4xl font-black text-[#111827]">
-
-              {value}
-
-            </div>
-
-          </div>
-
-          <div className={`flex h-16 w-16 items-center justify-center rounded-2xl ${color}`}>
-
-            {icon}
-
-          </div>
-
-        </div>
-
-      </div>
-
+  const success =
+    await removeAdminListing(
+      id
     );
 
+  if (!success) {
+    return;
   }
+
+  await initialize();
+}
+
+  
 
   return (
 
@@ -275,69 +221,13 @@ export default function AdminPage() {
 
           {/* HERO */}
 
-          <div className="mb-10 overflow-hidden rounded-[32px] bg-gradient-to-r from-[#111827] to-[#1F2937] p-10 text-white shadow-xl">
-
-            <div className="flex flex-wrap items-center justify-between gap-8">
-
-              <div>
-
-                <div className="mb-5 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-black backdrop-blur">
-
-                  <Brain className="h-4 w-4" />
-
-                  AI Marketplace Moderation
-
-                </div>
-
-                <h1 className="text-5xl font-black">
-
-                  Admin Command Center
-
-                </h1>
-
-                <p className="mt-5 max-w-3xl text-lg leading-8 text-white/80">
-
-                  Marketplace intelligence, trust enforcement,
-                  moderation analytics, safety systems,
-                  and realtime platform oversight.
-
-                </p>
-
-              </div>
-
-              <div className="rounded-3xl bg-white/10 p-8 backdrop-blur">
-
-                <div className="text-sm font-black uppercase tracking-wide text-white/60">
-
-                  Marketplace Health
-
-                </div>
-
-                <div className="mt-3 text-5xl font-black">
-
-                  96%
-
-                </div>
-
-                <div className="mt-3 flex items-center gap-2 text-green-300">
-
-                  <TrendingUp className="h-5 w-5" />
-
-                  Stable & Protected
-
-                </div>
-
-              </div>
-
-            </div>
-
-          </div>
+          <AdminHero />
 
           {/* METRICS */}
 
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
 
-            <MetricCard
+            <AdminMetricCard
               title="Marketplace Users"
               value={stats.totalUsers}
               icon={
@@ -346,7 +236,7 @@ export default function AdminPage() {
               color="bg-blue-600"
             />
 
-            <MetricCard
+            <AdminMetricCard
               title="Total Listings"
               value={stats.totalListings}
               icon={
@@ -355,7 +245,7 @@ export default function AdminPage() {
               color="bg-[#2F5D50]"
             />
 
-            <MetricCard
+            <AdminMetricCard
               title="Flagged Listings"
               value={stats.flaggedListings}
               icon={
@@ -364,7 +254,7 @@ export default function AdminPage() {
               color="bg-red-500"
             />
 
-            <MetricCard
+            <AdminMetricCard
               title="Pending Verifications"
               value={stats.pendingVerifications}
               icon={
@@ -373,7 +263,7 @@ export default function AdminPage() {
               color="bg-yellow-500"
             />
 
-            <MetricCard
+            <AdminMetricCard
               title="Marketplace Reports"
               value={stats.reports}
               icon={
@@ -382,7 +272,7 @@ export default function AdminPage() {
               color="bg-purple-600"
             />
 
-            <MetricCard
+            <AdminMetricCard
               title="Removed Listings"
               value={stats.removedListings}
               icon={
@@ -391,7 +281,7 @@ export default function AdminPage() {
               color="bg-gray-700"
             />
 
-            <MetricCard
+            <AdminMetricCard
               title="Realtime Conversations"
               value={stats.activeConversations}
               icon={
@@ -400,7 +290,7 @@ export default function AdminPage() {
               color="bg-green-600"
             />
 
-            <MetricCard
+            <AdminMetricCard
               title="AI Safety Status"
               value="ACTIVE"
               icon={

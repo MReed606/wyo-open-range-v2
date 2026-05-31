@@ -38,6 +38,14 @@ import {
   searchListings
 } from "@/lib/listingSearch";
 
+import {
+  ListingsHero
+} from "@/components/listings/ListingsHero";
+
+import {
+  ListingsFilterBar
+} from "@/components/listings/ListingsFilterBar";
+
 const PAGE_SIZE = 12;
 
 function ListingsContent() {
@@ -304,170 +312,24 @@ function ListingsContent() {
 
       <div className="mx-auto max-w-7xl">
 
-        {/* HEADER */}
+        <ListingsHero
+  category={category}
+  savingSearch={savingSearch}
+  onSaveSearch={saveSearch}
+/>
 
-        <div className="mb-10 flex flex-wrap items-start justify-between gap-6">
-
-          <div>
-
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-[#2F5D50]/10 px-4 py-2 text-sm font-black text-[#2F5D50]">
-
-              <Brain className="h-4 w-4" />
-
-              AI Marketplace Search
-
-            </div>
-
-            <h1 className="text-5xl font-black text-[#111827]">
-
-              {category
-                ? `${category} Listings`
-                : "Marketplace Listings"}
-
-            </h1>
-
-            <p className="mt-4 text-lg text-[#6B7280]">
-
-              Adaptive AI-powered discovery across Wyoming.
-
-            </p>
-
-          </div>
-
-          <button
-            onClick={saveSearch}
-            disabled={savingSearch}
-            className="rounded-2xl bg-[#2F5D50] px-6 py-4 text-sm font-black text-white transition hover:bg-[#24473d] disabled:opacity-50"
-          >
-
-            {savingSearch
-              ? "Saving..."
-              : "Save Search"}
-
-          </button>
-
-        </div>
-
-        {/* FILTER BAR */}
-
-        <div className="mb-10 rounded-3xl bg-white p-6 shadow-sm">
-
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
-
-            <div className="relative xl:col-span-2">
-
-              <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-
-              <input
-                type="text"
-                placeholder="Search marketplace..."
-                value={search}
-                onChange={(e) =>
-                  setSearch(
-                    e.target.value
-                  )
-                }
-                className="w-full rounded-2xl border border-gray-200 bg-white py-4 pl-12 pr-5 text-sm font-semibold text-[#111827] outline-none transition focus:border-[#2F5D50]"
-              />
-
-            </div>
-
-            <input
-              type="text"
-              placeholder="Region"
-              value={region}
-              onChange={(e) =>
-                setRegion(
-                  e.target.value
-                )
-              }
-              className="rounded-2xl border border-gray-200 bg-white px-5 py-4 text-sm font-semibold text-[#111827] outline-none transition focus:border-[#2F5D50]"
-            />
-
-            <input
-              type="number"
-              placeholder="Min Price"
-              value={minPrice}
-              onChange={(e) =>
-                setMinPrice(
-                  e.target.value
-                )
-              }
-              className="rounded-2xl border border-gray-200 bg-white px-5 py-4 text-sm font-semibold text-[#111827] outline-none transition focus:border-[#2F5D50]"
-            />
-
-            <input
-              type="number"
-              placeholder="Max Price"
-              value={maxPrice}
-              onChange={(e) =>
-                setMaxPrice(
-                  e.target.value
-                )
-              }
-              className="rounded-2xl border border-gray-200 bg-white px-5 py-4 text-sm font-semibold text-[#111827] outline-none transition focus:border-[#2F5D50]"
-            />
-
-            <select
-              value={sortBy}
-              onChange={(e) =>
-                setSortBy(
-                  e.target.value
-                )
-              }
-              className="rounded-2xl border border-gray-200 bg-white px-5 py-4 text-sm font-semibold text-[#111827] outline-none transition focus:border-[#2F5D50]"
-            >
-
-              <option value="recommended">
-                Recommended
-              </option>
-
-              <option value="popular">
-                Most Viewed
-              </option>
-
-              <option value="trending">
-                Trending
-              </option>
-
-              <option value="price_low">
-                Price: Low to High
-              </option>
-
-              <option value="price_high">
-                Price: High to Low
-              </option>
-
-            </select>
-
-          </div>
-
-          {/* RESET */}
-
-          <div className="mt-5 flex justify-end">
-
-            <button
-              onClick={() => {
-
-                setSearch("");
-                setRegion("");
-                setMinPrice("");
-                setMaxPrice("");
-                setSortBy(
-                  "recommended"
-                );
-
-              }}
-              className="rounded-2xl bg-[#111827] px-5 py-3 text-sm font-black text-white transition hover:bg-[#1F2937]"
-            >
-
-              Reset Filters
-
-            </button>
-
-          </div>
-
-        </div>
+        <ListingsFilterBar
+  search={search}
+  region={region}
+  minPrice={minPrice}
+  maxPrice={maxPrice}
+  sortBy={sortBy}
+  setSearch={setSearch}
+  setRegion={setRegion}
+  setMinPrice={setMinPrice}
+  setMaxPrice={setMaxPrice}
+  setSortBy={setSortBy}
+/>
 
         {/* GRID */}
 
