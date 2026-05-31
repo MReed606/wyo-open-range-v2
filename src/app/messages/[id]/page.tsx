@@ -46,10 +46,6 @@ export default function ConversationPage() {
     setTyping] =
     useState(false);
 
-  const [otherTyping,
-    setOtherTyping] =
-    useState(false);
-
   const messagesEndRef =
     useRef<HTMLDivElement | null>(
       null
@@ -61,19 +57,22 @@ export default function ConversationPage() {
 
   useEffect(() => {
 
-    loadUser();
+  loadUser();
 
-    loadMessages();
+  loadMessages();
 
+  const cleanup =
     subscribeToMessages();
 
-    markMessagesRead();
+  markMessagesRead();
 
-    window.dispatchEvent(
-      new Event("message-read")
-    );
+  window.dispatchEvent(
+    new Event("message-read")
+  );
 
-  }, [id]);
+  return cleanup;
+
+}, [id]);
 
   // =====================================
   // AUTO SCROLL
@@ -351,29 +350,7 @@ export default function ConversationPage() {
 
                 })}
 
-                {/* TYPING */}
-
-                {otherTyping && (
-
-                  <div className="flex justify-start">
-
-                    <div className="rounded-3xl bg-[#F3F4F6] px-6 py-5 shadow-sm">
-
-                      <div className="flex gap-1">
-
-                        <div className="h-2 w-2 animate-bounce rounded-full bg-gray-500" />
-
-                        <div className="h-2 w-2 animate-bounce rounded-full bg-gray-500 [animation-delay:0.2s]" />
-
-                        <div className="h-2 w-2 animate-bounce rounded-full bg-gray-500 [animation-delay:0.4s]" />
-
-                      </div>
-
-                    </div>
-
-                  </div>
-
-                )}
+                
 
                 <div ref={messagesEndRef} />
 
