@@ -11,6 +11,7 @@ type ListingHeaderProps = {
   region: string | null;
   description: string | null;
 };
+import { formatPrice } from "@/lib/formatPrice";
 
 export function ListingHeader({
   title,
@@ -42,7 +43,7 @@ export function ListingHeader({
 
         <div className="text-right">
           <div className="text-5xl font-black text-[#2F5D50]">
-            {price ?? "Contact"}
+            {formatPrice(price)}
           </div>
 
           <div className="mt-5 flex flex-wrap justify-end gap-3">

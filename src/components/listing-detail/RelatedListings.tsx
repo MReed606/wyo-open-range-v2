@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { formatPrice } from "@/lib/formatPrice";
 
 export type RelatedListing = {
   id: string;
@@ -63,7 +64,7 @@ export function RelatedListings({
               </h3>
 
               <div className="mt-4 text-3xl font-black text-[#2F5D50]">
-                {item.price}
+                {formatPrice(item.price)}
               </div>
             </div>
           </Link>

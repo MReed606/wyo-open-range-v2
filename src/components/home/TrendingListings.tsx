@@ -24,6 +24,8 @@ import {
   loadRegionalListings,
 } from "@/lib/trendingListingsService";
 
+import { formatPrice } from "@/lib/formatPrice";
+
 type Listing = {
   id: string;
   title: string;
@@ -217,7 +219,7 @@ async function loadRegional(
 
           <p className="mt-4 text-3xl font-black text-[#2F5D50]">
 
-            {listing.price ?? "Contact"}
+            {formatPrice(listing.price)}
 
           </p>
 

@@ -12,6 +12,8 @@ type ListingCardProps = {
   sellerSlug?: string;
 };
 
+import { formatPrice } from "@/lib/formatPrice";
+
 export function ListingCard({
   title,
   price,
@@ -81,7 +83,7 @@ export function ListingCard({
 
         <p className="mt-3 text-2xl font-bold text-[#2F5D50]">
 
-          {price}
+          {formatPrice(price)}
 
         </p>
 
