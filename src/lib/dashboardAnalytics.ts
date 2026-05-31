@@ -75,10 +75,9 @@ export async function loadDashboardAnalytics() {
     await supabase
       .from("conversations")
       .select("*")
-      .or(`
-        buyer_id.eq.${user.id},
-        seller_id.eq.${user.id}
-      `);
+      .or(
+  `buyer_id.eq.${user.id},seller_id.eq.${user.id}`
+);
 
   const totalMessages =
     conversations?.length ?? 0;
