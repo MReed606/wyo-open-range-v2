@@ -7,10 +7,6 @@ import {
 
 export async function loadTrendingListings() {
 
-  await supabase.rpc(
-    "update_listing_trending_scores"
-  );
-
   return await getTrendingListings(
     6
   );
