@@ -209,16 +209,16 @@ export default function DashboardPage() {
 
                   )}
 
-                  {profile
-                    ?.verification_submitted && (
+                  {profile?.verification_submitted &&
+ !profile?.verified && (
 
-                    <div className="rounded-full bg-yellow-100 px-4 py-2 text-sm font-black text-yellow-700">
+  <div className="rounded-full bg-yellow-100 px-4 py-2 text-sm font-black text-yellow-700">
 
-                      Verification Pending
+    Verification Pending
 
-                    </div>
+  </div>
 
-                  )}
+)}
 
                 </div>
 
