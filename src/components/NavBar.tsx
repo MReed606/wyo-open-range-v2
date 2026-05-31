@@ -31,6 +31,7 @@ import NavNotifications from "@/components/navbar/NavNotifications";
 
 export default function NavBar() {
 
+  
   const [loggedIn,
     setLoggedIn] =
     useState(false);
@@ -57,48 +58,51 @@ export default function NavBar() {
 
   useEffect(() => {
 
-    checkUser();
+  checkUser();
 
-    loadMessageCount();
+  loadMessageCount();
 
-    loadNotifications();
+  loadNotifications();
 
+  const cleanupRealtime =
     subscribeToNotifications();
 
-    const refreshMessages =
-      () => {
+  const refreshMessages =
+    () => {
 
-        loadMessageCount();
+      loadMessageCount();
 
-        loadNotifications();
+      loadNotifications();
 
-      };
+    };
 
-    window.addEventListener(
+  window.addEventListener(
+    "message-read",
+    refreshMessages
+  );
+
+  window.addEventListener(
+    "message-sent",
+    refreshMessages
+  );
+
+  return () => {
+
+    cleanupRealtime();
+
+    window.removeEventListener(
       "message-read",
       refreshMessages
     );
 
-    window.addEventListener(
+    window.removeEventListener(
       "message-sent",
       refreshMessages
     );
 
-    return () => {
+  };
 
-      window.removeEventListener(
-        "message-read",
-        refreshMessages
-      );
-
-      window.removeEventListener(
-        "message-sent",
-        refreshMessages
-      );
-
-    };
-
-  }, []);
+}, []);
 
   // =====================================
   // REALTIME NOTIFICATIONS
@@ -106,36 +110,56 @@ export default function NavBar() {
 
   function subscribeToNotifications() {
 
-    const channel =
-      supabase.channel(
-        "live-notifications"
-      );
-
-    channel.on(
-      "postgres_changes",
-      {
-        event: "INSERT",
-        schema: "public",
-        table:
-          "user_notifications",
-      },
-      async () => {
-
-        await loadNotifications();
-
-      }
+  const channel =
+    supabase.channel(
+      "live-notifications"
     );
 
-    channel.subscribe();
+  channel.on(
+  "postgres_changes",
+  {
+    event: "INSERT",
+    schema: "public",
+    table: "messages",
+  },
+  async () => {
 
-    return () => {
+  const count =
+    await getMessageCount();
 
-      supabase.removeChannel(
-        channel
-      );
+  
 
-    };
-  }
+  setMessageCount(
+    count
+  );
+
+}
+);
+
+  channel.on(
+    "postgres_changes",
+    {
+      event: "INSERT",
+      schema: "public",
+      table: "messages",
+    },
+    async () => {
+
+      await loadMessageCount();
+
+    }
+  );
+
+  channel.subscribe();
+
+  return () => {
+
+    supabase.removeChannel(
+      channel
+    );
+
+  };
+}
 
   // =====================================
   // CHECK USER
