@@ -1,9 +1,10 @@
 import { supabase } from "@/lib/supabase";
+import { getCurrentUser } from "@/lib/currentUser";
 
 export async function loadMessageDashboardConversations() {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+
+  const user =
+    await getCurrentUser();
 
   if (!user) {
     return [];
@@ -149,9 +150,8 @@ export async function hideMessageDashboardConversation(
   id: string,
   conversations: any[]
 ) {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user =
+  await getCurrentUser();
 
   if (!user) {
     return;

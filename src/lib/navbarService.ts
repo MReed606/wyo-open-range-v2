@@ -1,11 +1,11 @@
 import { supabase } from "@/lib/supabase";
 import { isAdmin as checkAdmin } from "@/lib/admin";
 
+import { getCurrentUser } from "@/lib/currentUser";
+
 export async function getNavbarUser() {
-  const {
-    data: { user },
-  } =
-    await supabase.auth.getUser();
+  const user =
+  await getCurrentUser();
 
   return {
     loggedIn: !!user,
@@ -14,10 +14,8 @@ export async function getNavbarUser() {
 }
 
 export async function getMessageCount() {
-  const {
-    data: { user },
-  } =
-    await supabase.auth.getUser();
+  const user =
+  await getCurrentUser();
 
   if (!user) {
     return 0;
@@ -37,10 +35,8 @@ export async function getMessageCount() {
 }
 
 export async function getNotifications() {
-  const {
-    data: { user },
-  } =
-    await supabase.auth.getUser();
+  const user =
+  await getCurrentUser();
 
   if (!user) {
     return [];
@@ -75,10 +71,8 @@ export async function getNotifications() {
 }
 
 export async function markNotificationsRead() {
-  const {
-    data: { user },
-  } =
-    await supabase.auth.getUser();
+  const user =
+  await getCurrentUser();
 
   if (!user) {
     return;

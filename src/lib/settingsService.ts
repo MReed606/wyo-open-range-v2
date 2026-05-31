@@ -1,9 +1,9 @@
 import { supabase } from "@/lib/supabase";
+import { getCurrentUser } from "@/lib/currentUser";
 
 export async function loadUserProfile() {
-const {
-data: { user },
-} = await supabase.auth.getUser();
+const user =
+  await getCurrentUser();
 
 if (!user) {
 return null;
@@ -22,9 +22,8 @@ return data;
 export async function saveUserProfile(
 profile: Record<string, any>
 ) {
-const {
-data: { user },
-} = await supabase.auth.getUser();
+const user =
+  await getCurrentUser();
 
 if (!user) {
 return;
@@ -37,9 +36,8 @@ await supabase
 }
 
 export async function deleteUserAccount() {
-const {
-data: { user },
-} = await supabase.auth.getUser();
+const user =
+  await getCurrentUser();
 
 if (!user) {
 return;

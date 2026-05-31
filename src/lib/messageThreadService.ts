@@ -1,9 +1,10 @@
 import { supabase } from "@/lib/supabase";
 
+import { getCurrentUser } from "@/lib/currentUser";
+
 export async function getCurrentUserId() {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user =
+  await getCurrentUser();
 
   return user?.id ?? "";
 }
@@ -41,9 +42,8 @@ export async function loadConversationMessages(
 export async function markConversationRead(
   conversationId: string
 ) {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user =
+  await getCurrentUser();
 
   if (!user) {
     return;
@@ -69,9 +69,8 @@ export async function sendConversationMessage(
   conversationId: string,
   text: string
 ) {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user =
+  await getCurrentUser();
 
   if (!user) {
     throw new Error(
