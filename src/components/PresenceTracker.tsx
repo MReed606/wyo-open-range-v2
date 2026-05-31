@@ -30,9 +30,9 @@ export default function PresenceTracker() {
         .from("profiles")
         .update({
 
-          last_seen:
-            new Date()
-              .toISOString(),
+          last_active:
+  new Date()
+    .toISOString(),
 
         })
         .eq(

@@ -101,10 +101,10 @@ if (!latest) {
 
       let online = false;
 
-      if (profile?.last_seen) {
+      if (profile?.last_active) {
         const lastSeen =
           new Date(
-            profile.last_seen
+            profile.last_active
           ).getTime();
 
         const diffMinutes =

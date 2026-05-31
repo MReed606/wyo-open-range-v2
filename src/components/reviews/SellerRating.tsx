@@ -145,7 +145,7 @@ export function SellerRating({
       await supabase
         .from("profiles")
         .select(`
-          last_seen
+          last_active
         `)
         .eq(
           "id",
@@ -153,7 +153,7 @@ export function SellerRating({
         )
         .single();
 
-    if (!data?.last_seen) {
+    if (!data?.last_active) {
 
       setOnline(false);
 
@@ -162,7 +162,7 @@ export function SellerRating({
 
     const lastSeen =
       new Date(
-        data.last_seen
+        data.last_active
       ).getTime();
 
     const now =
