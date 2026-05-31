@@ -27,6 +27,8 @@ import {
   logoutUser,
 } from "@/lib/navbarService";
 
+import NavNotifications from "@/components/navbar/NavNotifications";
+
 export default function NavBar() {
 
   const [loggedIn,
@@ -325,118 +327,14 @@ export default function NavBar() {
 
           )}
 
-          {/* NOTIFICATIONS */}
-
-          {loggedIn && (
-
-            <div className="relative">
-
-              <button
-                onClick={async () => {
-
-                  setShowNotifications(
-                    !showNotifications
-                  );
-
-                  await markNotificationsRead();
-
-                }}
-                className="relative flex h-11 w-11 items-center justify-center rounded-2xl border border-gray-200 bg-white transition hover:bg-gray-50"
-              >
-
-                <Bell className="h-5 w-5 text-[#111827]" />
-
-                {unreadCount > 0 && (
-
-                  <div className="absolute -right-1 -top-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#2F5D50] px-1 text-[10px] font-black text-white">
-
-                    {unreadCount}
-
-                  </div>
-
-                )}
-
-              </button>
-
-              {/* DROPDOWN */}
-
-              {showNotifications && (
-
-                <div className="absolute right-0 mt-3 w-[380px] overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-2xl">
-
-                  <div className="border-b border-gray-100 px-6 py-5">
-
-                    <h2 className="text-xl font-black text-[#111827]">
-
-                      Notifications
-
-                    </h2>
-
-                  </div>
-
-                  <div className="max-h-[500px] overflow-y-auto">
-
-                    {!notifications.length && (
-
-                      <div className="p-8 text-center text-sm font-semibold text-[#6B7280]">
-
-                        No notifications yet.
-
-                      </div>
-
-                    )}
-
-                    {notifications.map((n) => (
-
-                      <Link
-                        key={n.id}
-                        href={n.link || "#"}
-                        className={`block border-b border-gray-100 px-6 py-5 transition hover:bg-gray-50 ${
-                          !n.read
-                            ? "bg-[#2F5D50]/5"
-                            : ""
-                        }`}
-                      >
-
-                        <div className="flex items-start justify-between gap-4">
-
-                          <div>
-
-                            <div className="text-sm font-black text-[#111827]">
-
-                              {n.title}
-
-                            </div>
-
-                            <div className="mt-2 text-sm leading-6 text-[#4B5563]">
-
-                              {n.message}
-
-                            </div>
-
-                          </div>
-
-                          {!n.read && (
-
-                            <div className="mt-1 h-3 w-3 rounded-full bg-[#2F5D50]" />
-
-                          )}
-
-                        </div>
-
-                      </Link>
-
-                    ))}
-
-                  </div>
-
-                </div>
-
-              )}
-
-            </div>
-
-          )}
+          <NavNotifications
+  loggedIn={loggedIn}
+  unreadCount={unreadCount}
+  showNotifications={showNotifications}
+  notifications={notifications}
+  setShowNotifications={setShowNotifications}
+  markNotificationsRead={markNotificationsRead}
+/>
 
           {/* AUTH */}
 
