@@ -56,7 +56,7 @@ export async function getRecommendedListings({
 
   const cached = recommendationCache[cacheKey];
 
-  if (cached && now - cached.timestamp < 60000) {
+  if (cached && now - cached.timestamp < 300000) {
     return cached.data.slice(0, limit);
   }
 
@@ -236,7 +236,7 @@ export async function getTrendingListings(limit = 6) {
 
   if (
     trendingCache &&
-    now - trendingCache.timestamp < 60000
+    now - trendingCache.timestamp < 300000
   ) {
     return trendingCache.data.slice(0, limit);
   }
