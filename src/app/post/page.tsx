@@ -346,14 +346,14 @@ if (
 
     if (error) {
 
-      console.log(error);
+  console.error(error);
 
-      alert(
-        "Failed to create listing."
-      );
+  alert(
+    `Error: ${error.message}`
+  );
 
-      return;
-    }
+  return;
+}
 
     // =====================================
     // ADMIN ALERT
