@@ -42,6 +42,10 @@ import {
   DashboardHero
 } from "@/components/dashboard/DashboardHero";
 
+import {
+  ProfileCompletionGuard
+} from "@/components/auth/ProfileCompletionGuard";
+
 export default function DashboardPage() {
 
   const [profile,
@@ -157,9 +161,10 @@ export default function DashboardPage() {
   return (
 
     <>
-      <AuthGuard />
+  <AuthGuard />
+  <ProfileCompletionGuard />
 
-      <main className="min-h-screen bg-[#F7F5F2] p-6 md:p-10">
+  <main className="min-h-screen bg-[#F7F5F2] p-6 md:p-10">
 
         <div className="mx-auto max-w-7xl">
 
@@ -408,6 +413,6 @@ export default function DashboardPage() {
 
       </main>
 
-    </>
+        </>
   );
 }
