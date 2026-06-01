@@ -14,7 +14,10 @@ export async function loadAdminStats() {
   ] = await Promise.all([
     supabase.from("profiles").select("id"),
     supabase.from("listings").select("id"),
-    supabase.from("listings").select("id").eq("flagged", true),
+    supabase
+  .from("listings")
+  .select("id")
+  .gte("moderation_score", 50),
     supabase.from("listings").select("id").eq("status", "removed"),
     supabase
       .from("profiles")

@@ -4,10 +4,13 @@ import {
 
 export async function loadFlaggedListings() {
   const { data } =
-    await supabase
-      .from("listings")
-      .select("*")
-      .eq("flagged", true)
+  await supabase
+    .from("listings")
+    .select("*")
+    .gte(
+      "moderation_score",
+      50
+    )
       .order(
         "moderation_score",
         {

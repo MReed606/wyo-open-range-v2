@@ -332,11 +332,7 @@ if (
           moderation_score:
             riskScore,
 
-          moderation_flags:
-            riskFlags,
-
-          flagged:
-            riskScore >= 50,
+                  
 
         })
         .select()
