@@ -43,10 +43,6 @@ import {
 } from "@/components/admin/AdminFlaggedListings";
 
 import {
-  AdminAlertsPanel
-} from "@/components/admin/AdminAlertsPanel";
-
-import {
   AdminMetricCard
 } from "@/components/admin/AdminMetricCard";
 
@@ -82,10 +78,6 @@ export default function AdminPage() {
     setFlaggedListings] =
     useState<any[]>([]);
 
-  const [alerts,
-    setAlerts] =
-    useState<any[]>([]);
-
   const [loading,
     setLoading] =
     useState(true);
@@ -96,25 +88,19 @@ export default function AdminPage() {
 
   useEffect(() => {
 
-    initialize();
+  initialize();
 
-    subscribeRealtime();
-
-  }, []);
+}, []);
 
   async function initialize() {
 
     setLoading(true);
 
     await Promise.all([
+  loadStats(),
+  loadFlaggedListings(),
 
-      loadStats(),
-
-      loadFlaggedListings(),
-
-      loadAlerts(),
-
-    ]);
+      ]);
 
     setLoading(false);
   }
@@ -122,38 +108,6 @@ export default function AdminPage() {
   // =====================================
   // REALTIME
   // =====================================
-
-  function subscribeRealtime() {
-
-    const channel =
-      supabase.channel(
-        "admin-realtime"
-      );
-
-    channel.on(
-      "postgres_changes",
-      {
-        event: "*",
-        schema: "public",
-        table: "admin_alerts",
-      },
-      async () => {
-
-        await loadAlerts();
-
-      }
-    );
-
-    channel.subscribe();
-
-    return () => {
-
-      supabase.removeChannel(
-        channel
-      );
-
-    };
-  }
 
   // =====================================
   // LOAD STATS
@@ -180,13 +134,6 @@ export default function AdminPage() {
   // =====================================
   // ALERTS
   // =====================================
-
-  async function loadAlerts() {
-  const data =
-    await loadAdminAlerts();
-
-  setAlerts(data);
-}
 
   // =====================================
   // REMOVE LISTING
@@ -388,9 +335,7 @@ export default function AdminPage() {
   onRemoveListing={removeListing}
 />
 
-          <AdminAlertsPanel
-  alerts={alerts}
-/>
+          
         </div>
 
       </main>
