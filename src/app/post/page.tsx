@@ -44,6 +44,8 @@ import {
 
 import { categories } from "@/data/categories";
 
+import { marketplaceRegions } from "@/data/marketplaceRegions";
+
 export default function PostPage() {
 const router =
   useRouter();
@@ -97,30 +99,6 @@ const router =
 
   ];
 
-const regions = [
-
-    "Cheyenne",
-    "Casper",
-    "Laramie",
-    "Gillette",
-    "Rock Springs",
-    "Sheridan",
-    "Jackson",
-    "Evanston",
-    "Riverton",
-    "Green River",
-    "Rawlins",
-    "Torrington",
-    "Cody",
-    "Buffalo",
-    "Douglas",
-    "Worland",
-    "Thermopolis",
-    "Wheatland",
-    "Newcastle",
-    "Statewide",
-
-  ];
 
   const [loading,
     setLoading] =
@@ -422,7 +400,7 @@ if (
   region={region}
   images={images}
   categories={categories}
-  regions={regions}
+  regions={marketplaceRegions}
   loading={loading}
   setTitle={setTitle}
   setDescription={setDescription}
