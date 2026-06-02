@@ -44,11 +44,14 @@ export default function MessagesPage() {
 
   useEffect(() => {
 
-    loadConversations();
+  loadConversations();
 
+  const cleanup =
     subscribeToRealtime();
 
-  }, []);
+  return cleanup;
+
+}, []);
 
   // =====================================
   // REALTIME
