@@ -36,6 +36,10 @@ import {
 } from "@/components/home/MarketplaceLiveFeed";
 
 import {
+  BrowseCategories
+} from "@/components/home/BrowseCategories";
+
+import {
   loadHomePageStats,
   getSellingDestination,
 } from "@/lib/homePageService";
@@ -385,6 +389,9 @@ export default function HomePage() {
 
           <MarketplaceStats />
 
+{/* BROWSE CATEGORIES */}
+
+<BrowseCategories />
           
           {/* AI DISCOVERY */}
 

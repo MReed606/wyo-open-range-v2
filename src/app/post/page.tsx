@@ -42,6 +42,8 @@ import {
   PostHero
 } from "@/components/post/PostHero";
 
+import { categories } from "@/data/categories";
+
 export default function PostPage() {
 const router =
   useRouter();

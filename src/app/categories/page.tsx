@@ -1,11 +1,4 @@
-const categories = [
-  "Vehicles",
-  "Firearms & Outdoors",
-  "Ranch & Ag",
-  "Local Services",
-  "Jobs",
-  "General Marketplace",
-];
+import { categories } from "@/data/categories";
 
 export default function CategoriesPage() {
   return (
