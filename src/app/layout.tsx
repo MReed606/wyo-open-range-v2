@@ -11,9 +11,11 @@ import Footer
 from "@/components/Footer";
 
 import PresenceTracker
-from "@/components/PresenceTracker";
+ from "@/components/PresenceTracker";
+ import { MobileBottomNav }
+ from "@/components/mobile/MobileBottomNav";
 
-export const metadata: Metadata = {
+  export const metadata: Metadata = {
 
   title:
     "Wyo Open Range",
@@ -42,7 +44,7 @@ export default function RootLayout({
         {children}
 
         <Footer />
-
+<MobileBottomNav />
       </body>
 
     </html>

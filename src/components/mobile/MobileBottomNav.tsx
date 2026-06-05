@@ -46,13 +46,13 @@ export function MobileBottomNav() {
           <Link
             key={item.href}
             href={item.href}
-            className={`flex h-16 flex-col items-center justify-center gap-1 text-[11px] font-black ${
+            className={`flex h-18 flex-col items-center justify-center gap-1.5 text-[11px] font-black ${
               pathname === item.href
                 ? "text-[#2F5D50]"
                 : "text-gray-500"
             }`}
           >
-  <item.icon className="mb-1 h-5 w-5" />
+  <item.icon className="h-5 w-5" />
 
   <span>
     {item.label}

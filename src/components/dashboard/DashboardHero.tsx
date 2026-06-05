@@ -14,7 +14,7 @@ export function DashboardHero({
 
   return (
 
-    <div className="mb-10 overflow-hidden rounded-[32px] bg-gradient-to-r from-[#2F5D50] to-[#1F2933] p-10 text-white shadow-xl">
+    <div className="mb-8 overflow-hidden rounded-[32px] bg-gradient-to-r from-[#2F5D50] to-[#1F2933] p-6 md:p-10 text-white shadow-xl">
 
       <div className="flex flex-wrap items-center justify-between gap-8">
 
@@ -28,7 +28,7 @@ export function DashboardHero({
 
           </div>
 
-          <h1 className="text-5xl font-black">
+          <h1 className="text-3xl md:text-5xl font-black">
 
             Welcome back,
             {" "}
@@ -36,7 +36,7 @@ export function DashboardHero({
 
           </h1>
 
-          <p className="mt-5 max-w-2xl text-lg leading-8 text-white/80">
+          <p className="mt-4 max-w-2xl text-base md:text-lg leading-7 md:leading-8 text-white/80">
 
             Track marketplace performance, seller growth,
             engagement metrics, and AI recommendation visibility.
@@ -45,11 +45,11 @@ export function DashboardHero({
 
         </div>
 
-        <div className="flex flex-wrap gap-4">
+        <div className="flex w-full flex-col gap-3 md:w-auto md:flex-row">
 
           <Link
             href="/post"
-            className="rounded-2xl bg-white px-6 py-4 text-lg font-black text-[#111827]"
+            className="w-full md:w-auto rounded-2xl bg-white px-6 py-4 text-center text-lg font-black text-[#111827]"
           >
 
             Create Listing
@@ -58,7 +58,7 @@ export function DashboardHero({
 
           <Link
             href="/dashboard/listings"
-            className="rounded-2xl border border-white/20 bg-white/10 px-6 py-4 text-lg font-black text-white backdrop-blur"
+            className="w-full md:w-auto rounded-2xl border border-white/20 bg-white/10 px-6 py-4 text-center text-lg font-black text-white backdrop-blur"
           >
 
             Manage Listings

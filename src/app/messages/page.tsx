@@ -225,7 +225,7 @@ export default function MessagesPage() {
 
                     {/* AVATAR */}
 
-                    <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-[#2F5D50] text-2xl font-black text-white">
+                    <div className="relative flex h-14 w-14 md:h-16 md:w-16 items-center justify-center rounded-full bg-[#2F5D50] text-xl md:text-2xl font-black text-white">
 
                       {conversation
                         ?.profile
@@ -248,7 +248,7 @@ export default function MessagesPage() {
 
                       <div className="flex flex-wrap items-center gap-3">
 
-                        <h2 className="truncate text-2xl font-black text-[#111827]">
+                        <h2 className="truncate text-xl md:text-2xl font-black text-[#111827]">
 
                           {conversation
                             ?.profile
@@ -288,7 +288,7 @@ export default function MessagesPage() {
 
                       </div>
 
-                      <div className="mt-2 text-sm text-gray-500">
+                      <div className="mt-1 text-xs md:text-sm text-gray-500">
 
                         {new Date(
                           conversation
@@ -300,7 +300,7 @@ export default function MessagesPage() {
 
                       </div>
 
-                      <p className="mt-4 truncate text-lg text-[#374151]">
+                      <p className="mt-2 truncate text-base md:text-lg text-[#374151]">
 
                         {conversation
                           ?.latest
@@ -322,7 +322,7 @@ export default function MessagesPage() {
                         conversation.id
                       )
                     }
-                    className="flex items-center gap-2 rounded-2xl bg-red-600 px-5 py-3 font-black text-white transition hover:bg-red-700"
+                    className="flex items-center gap-2 rounded-xl bg-red-600 px-3 py-2 md:px-5 md:py-3 font-black text-white transition hover:bg-red-700"
                   >
 
                     <Trash2 className="h-4 w-4" />

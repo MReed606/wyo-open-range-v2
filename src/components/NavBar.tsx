@@ -240,7 +240,7 @@ export default function NavBar() {
 
         {/* LEFT */}
 
-        <div className="flex min-w-0 flex-1 items-center gap-5 overflow-x-auto">
+        <div className="flex min-w-0 flex-1 items-center gap-5 overflow-hidden">
 
           <Link
             href="/"
@@ -255,7 +255,7 @@ export default function NavBar() {
 
           <Link
             href="/listings"
-            className="shrink-0 text-sm font-bold text-[#1F2933]"
+            className="hidden shrink-0 text-sm font-bold text-[#1F2933] md:block"
           >
             Browse
           </Link>
@@ -266,35 +266,35 @@ export default function NavBar() {
 
               <Link
                 href="/regions"
-                className="shrink-0 text-sm font-bold text-[#1F2933]"
+                className="hidden shrink-0 text-sm font-bold text-[#1F2933] md:block"
               >
                 Regions
               </Link>
 
               <Link
                 href="/forums"
-                className="shrink-0 text-sm font-bold text-[#1F2933]"
+                className="hidden shrink-0 text-sm font-bold text-[#1F2933] md:block"
               >
                 Forums
               </Link>
 
               <Link
                 href="/businesses"
-                className="shrink-0 text-sm font-bold text-[#1F2933]"
+                className="hidden shrink-0 text-sm font-bold text-[#1F2933] md:block"
               >
                 Businesses
               </Link>
 
               <Link
                 href="/dashboard"
-                className="shrink-0 text-sm font-bold text-[#1F2933]"
+                className="hidden shrink-0 text-sm font-bold text-[#1F2933] md:block"
               >
                 Dashboard
               </Link>
 
               <Link
                 href="/saved"
-                className="shrink-0 text-sm font-bold text-[#1F2933]"
+                className="hidden shrink-0 text-sm font-bold text-[#1F2933] md:block"
               >
                 Saved
               </Link>
@@ -305,7 +305,7 @@ export default function NavBar() {
 
                   <Link
                     href="/admin"
-                    className="shrink-0 text-sm font-bold text-[#1F2933]"
+                    className="hidden shrink-0 text-sm font-bold text-[#1F2933] md:block"
                   >
                     Admin
                   </Link>
@@ -324,7 +324,7 @@ export default function NavBar() {
 
         {/* RIGHT */}
 
-        <div className="flex shrink-0 items-center gap-3">
+        <div className="flex shrink-0 items-center gap-2 md:gap-3">
 
           {/* MESSAGES */}
 
@@ -377,7 +377,7 @@ export default function NavBar() {
 
               <Link
                 href="/post"
-                className="rounded-2xl bg-[#2F5D50] px-5 py-3 text-sm font-black text-white transition hover:bg-[#24473d]"
+                className="hidden rounded-2xl bg-[#2F5D50] px-5 py-3 text-sm font-black text-white transition hover:bg-[#24473d] md:block hover:bg-[#24473d]"
               >
 
                 Post Listing
