@@ -74,33 +74,7 @@ const router =
     setRegion] =
     useState("");
 
- const categories = [
-
-    "Vehicles",
-    "Ranching",
-    "Livestock",
-    "Equipment",
-    "Land",
-    "Real Estate",
-    "Farm & Garden",
-    "Heavy Equipment",
-    "Trailers",
-    "Services",
-    "Jobs",
-    "Firearms",
-    "Recreation",
-    "Outdoor",
-    "Tools",
-    "Pets",
-    "Electronics",
-    "Community",
-    "Wanted Ads",
-    "Other",
-
-  ];
-
-
-  const [loading,
+   const [loading,
     setLoading] =
     useState(false);
 
