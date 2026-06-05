@@ -293,7 +293,7 @@ export default function ConversationPage() {
 
           <div className="overflow-hidden rounded-3xl bg-white shadow-sm">
 
-            <div className="h-[700px] overflow-y-auto p-6">
+            <div className="max-h-[450px] md:h-[700px] overflow-y-auto p-6">
 
               <div className="space-y-5">
 
