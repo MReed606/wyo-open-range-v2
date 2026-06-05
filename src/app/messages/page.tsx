@@ -300,7 +300,7 @@ export default function MessagesPage() {
 
                       </div>
 
-                      <p className="mt-2 truncate text-base md:text-lg text-[#374151]">
+                      <p className="mt-2 line-clamp-2 text-base md:text-lg text-[#374151]">
 
                         {conversation
                           ?.latest
@@ -322,7 +322,7 @@ export default function MessagesPage() {
                         conversation.id
                       )
                     }
-                    className="flex items-center gap-2 rounded-xl bg-red-600 px-3 py-2 md:px-5 md:py-3 font-black text-white transition hover:bg-red-700"
+                    className="flex w-full justify-center items-center gap-2 rounded-xl bg-red-600 px-3 py-2 md:w-auto md:px-5 md:py-3 font-black text-white transition hover:bg-red-700"
                   >
 
                     <Trash2 className="h-4 w-4" />

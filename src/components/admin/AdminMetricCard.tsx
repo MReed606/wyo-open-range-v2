@@ -1,8 +1,11 @@
+import Link from "next/link";
+
 type AdminMetricCardProps = {
   title: string;
   value: string | number;
   icon: React.ReactNode;
   color: string;
+  href?: string;
 };
 
 export function AdminMetricCard({
@@ -10,11 +13,11 @@ export function AdminMetricCard({
   value,
   icon,
   color,
+  href,
 }: AdminMetricCardProps) {
 
-  return (
-
-    <div className="rounded-3xl bg-white p-6 shadow-sm">
+  const card = (
+    <div className="rounded-3xl bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
 
       <div className="flex items-center justify-between">
 
@@ -43,6 +46,16 @@ export function AdminMetricCard({
       </div>
 
     </div>
-
   );
+
+  if (href) {
+
+    return (
+      <Link href={href}>
+        {card}
+      </Link>
+    );
+  }
+
+  return card;
 }

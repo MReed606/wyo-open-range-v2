@@ -175,8 +175,9 @@ export default function AdminPage() {
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
 
             <AdminMetricCard
-              title="Marketplace Users"
-              value={stats.totalUsers}
+  title="Marketplace Users"
+  value={stats.totalUsers}
+  href="/admin/users"
               icon={
                 <Users className="h-8 w-8 text-white" />
               }
@@ -184,8 +185,9 @@ export default function AdminPage() {
             />
 
             <AdminMetricCard
-              title="Total Listings"
-              value={stats.totalListings}
+  title="Total Listings"
+  value={stats.totalListings}
+  href="/admin/listings"
               icon={
                 <Sparkles className="h-8 w-8 text-white" />
               }
@@ -193,8 +195,9 @@ export default function AdminPage() {
             />
 
             <AdminMetricCard
-              title="Flagged Listings"
-              value={stats.flaggedListings}
+  title="Flagged Listings"
+  value={stats.flaggedListings}
+  href="/admin/reports"
               icon={
                 <AlertTriangle className="h-8 w-8 text-white" />
               }
@@ -202,8 +205,9 @@ export default function AdminPage() {
             />
 
             <AdminMetricCard
-              title="Pending Verifications"
-              value={stats.pendingVerifications}
+  title="Pending Verifications"
+  value={stats.pendingVerifications}
+  href="/admin/verification"
               icon={
                 <Shield className="h-8 w-8 text-white" />
               }
@@ -211,8 +215,9 @@ export default function AdminPage() {
             />
 
             <AdminMetricCard
-              title="Marketplace Reports"
-              value={stats.reports}
+  title="Marketplace Reports"
+  value={stats.reports}
+  href="/admin/reports"
               icon={
                 <FileWarning className="h-8 w-8 text-white" />
               }
@@ -229,8 +234,9 @@ export default function AdminPage() {
             />
 
             <AdminMetricCard
-              title="Realtime Conversations"
-              value={stats.activeConversations}
+  title="Realtime Conversations"
+  value={stats.activeConversations}
+  href="/admin/messages"
               icon={
                 <MessageCircle className="h-8 w-8 text-white" />
               }
@@ -248,87 +254,7 @@ export default function AdminPage() {
 
           </div>
 
-          {/* QUICK LINKS */}
-
-          <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-
-            <Link
-              href="/admin/reports"
-              className="rounded-3xl bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
-            >
-
-              <h2 className="text-2xl font-black text-[#111827]">
-
-                Reports
-
-              </h2>
-
-              <p className="mt-3 text-[#374151]">
-
-                Review marketplace reports and trust violations.
-
-              </p>
-
-            </Link>
-
-            <Link
-              href="/admin/listings"
-              className="rounded-3xl bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
-            >
-
-              <h2 className="text-2xl font-black text-[#111827]">
-
-                Listings
-
-              </h2>
-
-              <p className="mt-3 text-[#374151]">
-
-                Manage marketplace listings and moderation.
-
-              </p>
-
-            </Link>
-
-            <Link
-              href="/admin/users"
-              className="rounded-3xl bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
-            >
-
-              <h2 className="text-2xl font-black text-[#111827]">
-
-                Users
-
-              </h2>
-
-              <p className="mt-3 text-[#374151]">
-
-                Review user trust, accounts, and verification.
-
-              </p>
-
-            </Link>
-
-            <Link
-              href="/admin/verification"
-              className="rounded-3xl bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
-            >
-
-              <h2 className="text-2xl font-black text-[#111827]">
-
-                Verification Queue
-
-              </h2>
-
-              <p className="mt-3 text-[#374151]">
-
-                Review seller identity verification requests.
-
-              </p>
-
-            </Link>
-
-          </div>
+          
 
           <AdminFlaggedListings
   flaggedListings={flaggedListings}
