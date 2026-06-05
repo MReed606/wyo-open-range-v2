@@ -161,7 +161,7 @@ export function ListingsFilterBar({
 
       </div>
 
-      <div className="mt-5 flex justify-end">
+      <div className="mt-5 flex justify-center md:justify-end">
 
         <button
           onClick={() => {
