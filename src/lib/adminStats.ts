@@ -6,7 +6,6 @@ export async function loadAdminStats() {
   const [
     usersRes,
     listingsRes,
-    flaggedRes,
     removedRes,
     verificationRes,
     reportsRes,
@@ -14,17 +13,16 @@ export async function loadAdminStats() {
   ] = await Promise.all([
     supabase.from("profiles").select("id"),
     supabase.from("listings").select("id"),
-    supabase
-  .from("listings")
-  .select("id")
-  .gte("moderation_score", 50),
     supabase.from("listings").select("id").eq("status", "removed"),
     supabase
       .from("profiles")
       .select("id")
       .eq("verification_submitted", true)
       .neq("verified", true),
-    supabase.from("reports").select("id"),
+    supabase
+  .from("reports")
+  .select("id")
+  .eq("status", "open"),
     supabase.from("conversations").select("id"),
   ]);
 
@@ -34,9 +32,6 @@ export async function loadAdminStats() {
 
     totalListings:
       listingsRes.data?.length ?? 0,
-
-    flaggedListings:
-      flaggedRes.data?.length ?? 0,
 
     flaggedUsers: 0,
 

@@ -9,7 +9,6 @@ import {
 
 import {
   Shield,
-  AlertTriangle,
   Users,
   FileWarning,
   Activity,
@@ -64,7 +63,7 @@ export default function AdminPage() {
 
       totalListings: 0,
 
-      flaggedListings: 0,
+      
 
       flaggedUsers: 0,
 
@@ -199,16 +198,6 @@ export default function AdminPage() {
                 <Sparkles className="h-8 w-8 text-white" />
               }
               color="bg-[#2F5D50]"
-            />
-
-            <AdminMetricCard
-  title="Flagged Listings"
-  value={stats.flaggedListings}
-  href="/admin/reports"
-              icon={
-                <AlertTriangle className="h-8 w-8 text-white" />
-              }
-              color="bg-red-500"
             />
 
             <AdminMetricCard
