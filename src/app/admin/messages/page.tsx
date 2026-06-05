@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { AuthGuard } from "@/components/auth/AuthGuard";
+import { AdminGuard } from "@/components/auth/AdminGuard";
 
 export default function AdminMessagesPage() {
 
@@ -39,6 +41,9 @@ export default function AdminMessagesPage() {
   }
 
   return (
+  <>
+    <AuthGuard />
+    <AdminGuard />
     <main className="min-h-screen bg-[#F7F5F2] p-10">
 
       <h1 className="mb-8 text-4xl font-black text-[#111827]">
@@ -120,6 +125,7 @@ export default function AdminMessagesPage() {
 
       </div>
 
-    </main>
+          </main>
+    </>
   );
 }
