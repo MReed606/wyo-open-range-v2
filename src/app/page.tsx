@@ -263,7 +263,7 @@ export default function HomePage() {
 
                 <Link
                   href="/listings"
-                  border border-white/40 bg-white/10 backdrop-blur
+                  className="rounded-2xl border border-white/40 bg-white/10 px-8 py-5 text-lg font-black text-white backdrop-blur transition hover:bg-white/20"
                 >
 
                   Explore Marketplace
