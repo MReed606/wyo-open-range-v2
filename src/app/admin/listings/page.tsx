@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import { AuthGuard } from "@/components/auth/AuthGuard";
+import { AdminGuard } from "@/components/auth/AdminGuard";
 
 export default function AdminListingsPage() {
 
@@ -25,6 +27,9 @@ export default function AdminListingsPage() {
   }
 
   return (
+  <>
+    <AuthGuard />
+    <AdminGuard />
     <main className="min-h-screen bg-[#F7F5F2] p-10">
 
       <h1 className="mb-8 text-4xl font-black text-[#111827]">
@@ -79,6 +84,7 @@ export default function AdminListingsPage() {
 
       </div>
 
-    </main>
+          </main>
+    </>
   );
 }
