@@ -30,6 +30,15 @@ type ListingsFilterBarProps = {
   ) => void;
 };
 
+const REGIONS = [
+  "Central Wyoming",
+  "Northeast Wyoming",
+  "Northwest Wyoming",
+  "South Central Wyoming",
+  "Southeast Wyoming",
+  "Southwest Wyoming",
+];
+
 export function ListingsFilterBar({
   search,
   region,
@@ -67,9 +76,7 @@ export function ListingsFilterBar({
 
         </div>
 
-        <input
-          type="text"
-          placeholder="Region"
+        <select
           value={region}
           onChange={(e) =>
             setRegion(
@@ -77,7 +84,24 @@ export function ListingsFilterBar({
             )
           }
           className="rounded-2xl border border-gray-200 bg-white px-5 py-4 text-sm font-semibold text-[#111827] outline-none transition focus:border-[#2F5D50]"
-        />
+        >
+
+          <option value="">
+            All Regions
+          </option>
+
+          {REGIONS.map((regionName) => (
+
+            <option
+              key={regionName}
+              value={regionName}
+            >
+              {regionName}
+            </option>
+
+          ))}
+
+        </select>
 
         <input
           type="number"

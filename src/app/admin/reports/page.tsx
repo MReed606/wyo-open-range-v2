@@ -14,13 +14,17 @@ export default function AdminReportsPage() {
   const [reports, setReports] =
     useState<any[]>([]);
 
+  const [notes, setNotes] =
+    useState<Record<string, string>>({});
+
   useEffect(() => {
+
     checkAdmin();
 
     loadReports();
+
   }, []);
 
-  
   async function checkAdmin() {
 
     const {
@@ -44,8 +48,7 @@ export default function AdminReportsPage() {
 
   }
 
-
-async function loadReports() {
+  async function loadReports() {
 
     const { data } =
       await supabase
@@ -56,7 +59,9 @@ async function loadReports() {
         });
 
     if (!data) {
+
       setReports([]);
+
       return;
     }
 
@@ -73,7 +78,6 @@ async function loadReports() {
               "id",
               report.listing_id
             )
-            .neq("status", "removed")
             .maybeSingle();
 
           return {
@@ -83,7 +87,28 @@ async function loadReports() {
         })
       );
 
-    setReports(enhanced);
+    setReports(
+      enhanced
+    );
+
+    const initialNotes:
+      Record<string, string> = {};
+
+    enhanced.forEach(
+      (report) => {
+
+        initialNotes[
+          report.id
+        ] =
+          report.admin_notes ??
+          "";
+
+      }
+    );
+
+    setNotes(
+      initialNotes
+    );
   }
 
   async function removeListing(
@@ -95,19 +120,26 @@ async function loadReports() {
         "Remove this listing?"
       );
 
-    if (!confirmed) return;
+    if (!confirmed) {
+      return;
+    }
 
     const { error } =
       await supabase
         .from("listings")
         .update({
-          status: "removed"
+          status: "removed",
         })
-        .eq("id", listingId);
-
-    console.log(error);
+        .eq(
+          "id",
+          listingId
+        );
 
     if (error) {
+
+      console.error(
+        error
+      );
 
       alert(
         "Failed to remove listing."
@@ -120,7 +152,90 @@ async function loadReports() {
       "Listing removed."
     );
 
-    loadReports();
+    await loadReports();
+  }
+
+  async function updateReport(
+    reportId: string,
+    updates: any
+  ) {
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return;
+    }
+
+    const { error } =
+      await supabase
+        .from("reports")
+        .update({
+          ...updates,
+          reviewed_by:
+            user.id,
+          reviewed_at:
+            new Date()
+              .toISOString(),
+        })
+        .eq(
+          "id",
+          reportId
+        );
+
+    if (error) {
+
+      console.error(
+        error
+      );
+
+      alert(
+        "Unable to update report."
+      );
+
+      return;
+    }
+
+    await loadReports();
+  }
+
+  async function saveNotes(
+    reportId: string
+  ) {
+
+    await updateReport(
+      reportId,
+      {
+        admin_notes:
+          notes[
+            reportId
+          ] ?? "",
+      }
+    );
+
+  }
+
+  function getStatusColor(
+    status: string
+  ) {
+
+    switch (
+      status
+    ) {
+
+      case "valid":
+        return "bg-green-100 text-green-700";
+
+      case "invalid":
+        return "bg-yellow-100 text-yellow-700";
+
+      case "resolved":
+        return "bg-blue-100 text-blue-700";
+
+      default:
+        return "bg-red-100 text-red-700";
+    }
   }
 
   return (
@@ -129,80 +244,160 @@ async function loadReports() {
 
       <main className="min-h-screen bg-[#F7F5F2] p-10">
 
-      <h1 className="mb-8 text-4xl font-black text-[#111827]">
-        Reported Listings
-      </h1>
+        <h1 className="mb-8 text-4xl font-black text-[#111827]">
+          Reported Listings
+        </h1>
 
+        {!reports.length && (
 
+          <div className="rounded-3xl bg-white p-10 shadow-sm">
 
-      {!reports.length && (
+            <h2 className="text-2xl font-black text-[#111827]">
+              No reports found
+            </h2>
 
-        <div className="rounded-3xl bg-white p-10 shadow-sm">
+          </div>
 
-          <h2 className="text-2xl font-black text-[#111827]">
-            No reports found
-          </h2>
+        )}
 
-        </div>
+        <div className="space-y-6">
 
-      )}
+          {reports.map(
+            (report) => (
 
-      <div className="space-y-6">
+            <div
+              key={report.id}
+              className="rounded-3xl bg-white p-6 shadow-sm"
+            >
 
-        {reports.map((report) => (
+              <div className="flex flex-col gap-6 lg:flex-row">
 
-          <div
-            key={report.id}
-            className="rounded-3xl bg-white p-6 shadow-sm"
-          >
+                {report.listing
+                  ?.image_url && (
 
-            <div className="flex flex-col gap-6 lg:flex-row">
+                  <img
+                    src={
+                      report.listing
+                        .image_url
+                    }
+                    alt={
+                      report.listing
+                        ?.title ?? ""
+                    }
+                    className="h-48 w-full rounded-2xl object-cover lg:w-72"
+                  />
 
-              {report.listing
-                ?.image_url && (
+                )}
 
-                <img
-                  src={
-                    report.listing
-                      .image_url
-                  }
-                  alt={
-                    report.listing
-                      ?.title ?? ""
-                  }
-                  className="h-48 w-full rounded-2xl object-cover lg:w-72"
-                />
+                <div className="flex-1">
 
-              )}
+                  <h2 className="text-3xl font-black text-[#111827]">
 
-              <div className="flex-1">
+                    {report.listing
+                      ?.title ??
 
-                <h2 className="text-3xl font-black text-[#111827]">
+                      "Removed Listing"}
 
-                  {report.listing
-                    ?.title ??
+                  </h2>
 
-                    "Removed Listing"}
+                  <div className="mt-3 flex flex-wrap gap-3">
 
-                </h2>
+                    <div className="inline-flex rounded-full bg-gray-100 px-4 py-2 text-sm font-bold text-gray-700">
 
-                <div className="mt-3 inline-flex rounded-full bg-gray-100 px-4 py-2 text-sm font-bold text-gray-700">
+                      Listing:
+                      {" "}
 
-                  Status:
-                  {" "}
+                      {report.listing
+                        ?.status ??
 
-                  {report.listing
-                    ?.status ??
+                        "removed"}
 
-                    "removed"}
+                    </div>
 
-                </div>
+                    <div className={`inline-flex rounded-full px-4 py-2 text-sm font-bold ${getStatusColor(
+                      report.status ??
+                      "open"
+                    )}`}>
 
-                <div className="mt-6 flex flex-wrap gap-4">
+                      Report:
+                      {" "}
 
-                  {report.listing && (
+                      {(report.status ??
+                        "open")
+                        .toUpperCase()}
 
-                    <>
+                    </div>
+
+                  </div>
+
+                  <div className="mt-6">
+
+                    <div className="mb-2 text-sm font-black text-[#111827]">
+
+                      Report Reason
+
+                    </div>
+
+                    <div className="rounded-2xl bg-gray-100 p-4 text-[#374151]">
+
+                      {report.reason}
+
+                    </div>
+
+                  </div>
+
+                  <div className="mt-6">
+
+                    <div className="mb-2 text-sm font-black text-[#111827]">
+
+                      Admin Notes
+
+                    </div>
+
+                    <textarea
+                      value={
+                        notes[
+                          report.id
+                        ] ?? ""
+                      }
+                      onChange={(
+                        e
+                      ) =>
+                        setNotes(
+                          (
+                            prev
+                          ) => ({
+                            ...prev,
+                            [report.id]:
+                              e.target
+                                .value,
+                          })
+                        )
+                      }
+                      rows={4}
+                      className="w-full rounded-2xl border border-gray-200 p-4 text-[#111827]"
+                    />
+
+                  </div>
+
+                  {report.reviewed_at && (
+
+                    <div className="mt-4 text-sm text-gray-500">
+
+                      Reviewed:
+                      {" "}
+
+                      {new Date(
+                        report.reviewed_at
+                      ).toLocaleString()}
+
+                    </div>
+
+                  )}
+
+                  <div className="mt-6 flex flex-wrap gap-4">
+
+                    {report.listing && (
 
                       <Link
                         href={`/listing/${report.listing.slug}`}
@@ -211,26 +406,69 @@ async function loadReports() {
                         Open Listing
                       </Link>
 
-                      {report.listing
-                        ?.status !==
-                        "removed" && (
+                    )}
 
-                        <button
-                          onClick={() =>
-                            removeListing(
-                              report.listing.id
-                            )
+                    <button
+                      onClick={() =>
+                        saveNotes(
+                          report.id
+                        )
+                      }
+                      className="rounded-xl bg-[#2F5D50] px-5 py-3 font-bold text-white"
+                    >
+                      Save Notes
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        updateReport(
+                          report.id,
+                          {
+                            status:
+                              "valid",
                           }
-                          className="rounded-xl bg-red-600 px-5 py-3 font-bold text-white"
-                        >
-                          Remove Listing
-                        </button>
+                        )
+                      }
+                      className="rounded-xl bg-green-600 px-5 py-3 font-bold text-white"
+                    >
+                      Mark Valid
+                    </button>
 
-                      )}
+                    <button
+                      onClick={() =>
+                        updateReport(
+                          report.id,
+                          {
+                            status:
+                              "invalid",
+                          }
+                        )
+                      }
+                      className="rounded-xl bg-yellow-600 px-5 py-3 font-bold text-white"
+                    >
+                      Dismiss
+                    </button>
 
-                    </>
+                    {report.listing
+                      ?.status !==
+                      "removed" && (
 
-                  )}
+                      <button
+                        onClick={() =>
+                          removeListing(
+                            report
+                              .listing
+                              .id
+                          )
+                        }
+                        className="rounded-xl bg-red-600 px-5 py-3 font-bold text-white"
+                      >
+                        Remove Listing
+                      </button>
+
+                    )}
+
+                  </div>
 
                 </div>
 
@@ -238,13 +476,12 @@ async function loadReports() {
 
             </div>
 
-          </div>
+          ))}
 
-        ))}
+        </div>
 
-      </div>
+      </main>
 
-    </main>
     </>
   );
 }

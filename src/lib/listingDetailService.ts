@@ -6,7 +6,7 @@ export async function contactListingSeller(
 ) {
 
   const user =
-  await getCurrentUser();
+    await getCurrentUser();
 
   if (!user) {
 
@@ -100,19 +100,64 @@ export async function submitListingReport(
     return false;
   }
 
+  const user =
+    await getCurrentUser();
+
+  if (!user) {
+
+    alert(
+      "Login required."
+    );
+
+    return false;
+  }
+
+  const { data, error } =
   await supabase
     .from("reports")
     .insert({
-
       listing_id:
         listingId,
 
-      reason,
+      reporter_id:
+        user.id,
 
-    });
+      reason,
+    })
+    .select();
+
+console.log(
+  "REPORT USER:",
+  user
+);
+
+console.log(
+  "REPORT DATA:",
+  data
+);
+
+console.log(
+  "REPORT ERROR:",
+  error
+);
+
+  if (error) {
+
+    console.error(
+      "REPORT ERROR:",
+      error
+    );
+
+    alert(
+      "Unable to submit report."
+    );
+
+    return false;
+  }
 
   return true;
 }
+
 export async function incrementListingView(
   listingId: string
 ) {

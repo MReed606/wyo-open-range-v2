@@ -1,12 +1,69 @@
 import { supabase } from "@/lib/supabase";
-
 import { getCurrentUser } from "@/lib/currentUser";
 
 export async function getCurrentUserId() {
   const user =
-  await getCurrentUser();
+    await getCurrentUser();
 
   return user?.id ?? "";
+}
+
+export async function loadConversationParticipant(
+  conversationId: string
+) {
+  const user =
+    await getCurrentUser();
+
+  if (!user) {
+    return null;
+  }
+
+  const {
+    data: conversation,
+    error: conversationError,
+  } = await supabase
+    .from("conversations")
+    .select("*")
+    .eq("id", conversationId)
+    .single();
+
+  if (
+    conversationError ||
+    !conversation
+  ) {
+    console.error(
+      "CONVERSATION LOAD ERROR:",
+      conversationError
+    );
+
+    return null;
+  }
+
+  const otherUserId =
+    conversation.buyer_id === user.id
+      ? conversation.seller_id
+      : conversation.buyer_id;
+
+  const {
+    data: profile,
+    error: profileError,
+  } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", otherUserId)
+    .maybeSingle();
+
+  if (profileError) {
+    console.error(
+      "PROFILE LOAD ERROR:",
+      profileError
+    );
+  }
+
+  return {
+    conversation,
+    profile,
+  };
 }
 
 export async function loadConversationMessages(
@@ -43,7 +100,7 @@ export async function markConversationRead(
   conversationId: string
 ) {
   const user =
-  await getCurrentUser();
+    await getCurrentUser();
 
   if (!user) {
     return;
@@ -70,7 +127,7 @@ export async function sendConversationMessage(
   text: string
 ) {
   const user =
-  await getCurrentUser();
+    await getCurrentUser();
 
   if (!user) {
     throw new Error(

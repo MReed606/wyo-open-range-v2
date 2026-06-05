@@ -1,20 +1,32 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { useParams } from "next/navigation";
+import {
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+
+import {
+  useParams,
+} from "next/navigation";
 
 import {
   Send,
   Circle,
 } from "lucide-react";
 
-import { supabase } from "@/lib/supabase";
+import {
+  supabase,
+} from "@/lib/supabase";
 
-import { AuthGuard } from "@/components/auth/AuthGuard";
+import {
+  AuthGuard,
+} from "@/components/auth/AuthGuard";
 
 import {
   getCurrentUserId,
   loadConversationMessages,
+  loadConversationParticipant,
   markConversationRead,
   sendConversationMessage,
 } from "@/lib/messageThreadService";
@@ -23,7 +35,8 @@ import MessageComposer from "@/components/messages/MessageComposer";
 
 export default function ConversationPage() {
 
-  const params = useParams();
+  const params =
+    useParams();
 
   const id =
     params?.id as string;
@@ -31,6 +44,10 @@ export default function ConversationPage() {
   const [messages,
     setMessages] =
     useState<any[]>([]);
+
+  const [participant,
+    setParticipant] =
+    useState<any>(null);
 
   const [currentUserId,
     setCurrentUserId] =
@@ -53,32 +70,26 @@ export default function ConversationPage() {
       null
     );
 
-  // =====================================
-  // INITIAL LOAD
-  // =====================================
-
   useEffect(() => {
 
-  loadUser();
+    loadUser();
 
-  loadMessages();
+    loadMessages();
 
-  const cleanup =
-    subscribeToMessages();
+    loadParticipant();
 
-  markMessagesRead();
+    const cleanup =
+      subscribeToMessages();
 
-  window.dispatchEvent(
-    new Event("message-read")
-  );
+    markMessagesRead();
 
-  return cleanup;
+    window.dispatchEvent(
+      new Event("message-read")
+    );
 
-}, [id]);
+    return cleanup;
 
-  // =====================================
-  // AUTO SCROLL
-  // =====================================
+  }, [id]);
 
   useEffect(() => {
 
@@ -89,39 +100,39 @@ export default function ConversationPage() {
 
   }, [messages]);
 
-  // =====================================
-  // LOAD USER
-  // =====================================
-
   async function loadUser() {
 
-  const userId =
-    await getCurrentUserId();
+    const userId =
+      await getCurrentUserId();
 
-  setCurrentUserId(
-    userId
-  );
-}
-
-  // =====================================
-  // LOAD MESSAGES
-  // =====================================
+    setCurrentUserId(
+      userId
+    );
+  }
 
   async function loadMessages() {
 
-  const data =
-    await loadConversationMessages(
-      id
+    const data =
+      await loadConversationMessages(
+        id
+      );
+
+    setMessages(
+      data
     );
+  }
 
-  setMessages(
-    data
-  );
-}
+  async function loadParticipant() {
 
-  // =====================================
-  // REALTIME SUBSCRIPTION
-  // =====================================
+    const data =
+      await loadConversationParticipant(
+        id
+      );
+
+    setParticipant(
+      data?.profile ?? null
+    );
+  }
 
   function subscribeToMessages() {
 
@@ -141,18 +152,22 @@ export default function ConversationPage() {
       },
       async (payload) => {
 
-        setMessages((prev) => [
+        setMessages(
+          (prev) => [
 
-          ...prev,
+            ...prev,
 
-          payload.new,
+            payload.new,
 
-        ]);
+          ]
+        );
 
         await markMessagesRead();
 
         window.dispatchEvent(
-          new Event("message-read")
+          new Event(
+            "message-read"
+          )
         );
       }
     );
@@ -160,70 +175,60 @@ export default function ConversationPage() {
     channel.subscribe();
 
     return () => {
+
       supabase.removeChannel(
         channel
       );
+
     };
   }
 
-  // =====================================
-  // MARK READ
-  // =====================================
-
   async function markMessagesRead() {
 
-  await markConversationRead(
-    id
-  );
-}
-
-  // =====================================
-  // SEND MESSAGE
-  // =====================================
+    await markConversationRead(
+      id
+    );
+  }
 
   async function sendMessage() {
 
-  if (!message.trim()) {
-    return;
+    if (!message.trim()) {
+      return;
+    }
+
+    setSending(true);
+
+    const messageText =
+      message;
+
+    setMessage("");
+
+    try {
+
+      await sendConversationMessage(
+        id,
+        messageText
+      );
+
+      setTyping(false);
+
+      window.dispatchEvent(
+        new Event(
+          "message-sent"
+        )
+      );
+
+    } catch (error) {
+
+      console.error(
+        "SEND ERROR:",
+        error
+      );
+
+    }
+
+    setSending(false);
   }
-
-  setSending(true);
-
-  const messageText =
-    message;
-
-  setMessage("");
-
-  try {
-
-    await sendConversationMessage(
-      id,
-      messageText
-    );
-
-    setTyping(false);
-
-    window.dispatchEvent(
-      new Event(
-        "message-sent"
-      )
-    );
-
-  } catch (error) {
-
-    console.error(
-      "SEND ERROR:",
-      error
-    );
-
-  }
-
-  setSending(false);
-}
-
-  // =====================================
-  // TYPING
-  // =====================================
 
   function handleTyping(
     value: string
@@ -240,8 +245,14 @@ export default function ConversationPage() {
         setTyping(false);
 
       }, 2000);
+
     }
   }
+
+  const participantName =
+    participant?.full_name ??
+    participant?.email ??
+    "Marketplace User";
 
   return (
 
@@ -252,8 +263,6 @@ export default function ConversationPage() {
 
         <div className="mx-auto max-w-5xl">
 
-          {/* HEADER */}
-
           <div className="mb-8 flex items-center justify-between">
 
             <div>
@@ -263,6 +272,12 @@ export default function ConversationPage() {
                 Messages
 
               </h1>
+
+              <div className="mt-3 text-xl font-bold text-[#2F5D50]">
+
+                {participantName}
+
+              </div>
 
               <div className="mt-4 flex items-center gap-2 text-sm font-bold text-green-600">
 
@@ -276,11 +291,7 @@ export default function ConversationPage() {
 
           </div>
 
-          {/* CHAT */}
-
           <div className="overflow-hidden rounded-3xl bg-white shadow-sm">
-
-            {/* MESSAGES */}
 
             <div className="h-[700px] overflow-y-auto p-6">
 
@@ -315,7 +326,7 @@ export default function ConversationPage() {
 
                           {isMine
                             ? "You"
-                            : "Marketplace User"}
+                            : participantName}
 
                         </div>
 
@@ -352,22 +363,22 @@ export default function ConversationPage() {
 
                 })}
 
-                
-
-                <div ref={messagesEndRef} />
+                <div
+                  ref={messagesEndRef}
+                />
 
               </div>
 
             </div>
 
             <MessageComposer
-  message={message}
-  sending={sending}
-  typing={typing}
-  messageCount={messages.length}
-  handleTyping={handleTyping}
-  sendMessage={sendMessage}
-/>
+              message={message}
+              sending={sending}
+              typing={typing}
+              messageCount={messages.length}
+              handleTyping={handleTyping}
+              sendMessage={sendMessage}
+            />
 
           </div>
 
