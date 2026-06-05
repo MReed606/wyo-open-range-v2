@@ -198,20 +198,20 @@ export default function HomePage() {
         <img
           src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2400&auto=format&fit=crop"
           alt="Wyoming"
-          className="h-[780px] w-full object-cover"
+          className="h-[560px] md:h-[780px] w-full object-cover"
         />
 
         {/* OVERLAY */}
 
         <div className="absolute inset-0">
 
-          <div className="mx-auto flex h-full max-w-7xl items-center px-6 md:px-10">
+          <div className="mx-auto flex h-full max-w-7xl items-start px-6 pt-4 md:items-center md:px-10">
 
             <div className="w-full">
 
               {/* BADGES */}
 
-              <div className="mb-6 flex flex-wrap gap-3">
+              <div className="mb-6 hidden flex-wrap gap-3 md:flex">
 
                 <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-5 py-3 text-sm font-black text-white backdrop-blur">
 
@@ -241,7 +241,7 @@ export default function HomePage() {
 
               {/* TITLE */}
 
-              <h1 className="max-w-5xl text-5xl font-black leading-tight text-white md:text-7xl">
+              <h1 className="max-w-5xl text-5xl md:text-7xl font-black leading-tight text-white">
 
                 Buy, Sell, Trade,
                 <br />
@@ -249,7 +249,7 @@ export default function HomePage() {
 
               </h1>
 
-              <p className="mt-8 max-w-3xl text-xl leading-9 text-white/90">
+              <p className="mt-4 max-w-3xl text-base leading-7 text-white/90 md:text-xl md:leading-9">
 
                 Wyoming's intelligent regional marketplace for ranching,
                 livestock, equipment, vehicles,
@@ -283,7 +283,7 @@ export default function HomePage() {
 
               {/* LIVE STATS */}
 
-              <div className="mt-16 grid gap-5 md:grid-cols-2 xl:grid-cols-5">
+              <div className="hidden md:grid mt-10 gap-4 md:grid-cols-2 xl:grid-cols-5">
 
                 <div className="rounded-3xl bg-white/10 p-6 backdrop-blur">
 
@@ -349,7 +349,7 @@ export default function HomePage() {
 
                 </div>
 
-                <div className="rounded-3xl bg-white/10 p-6 backdrop-blur">
+                <div className="hidden rounded-3xl bg-white/10 p-6 backdrop-blur md:block">
 
                   <div className="text-sm font-black uppercase tracking-wide text-white/60">
 
@@ -377,7 +377,7 @@ export default function HomePage() {
 
       {/* CONTENT */}
 
-      <section className="px-6 py-16 md:px-10">
+      <section className="px-6 py-10 md:px-10 md:py-16">
 
         <div className="mx-auto max-w-7xl">
 
