@@ -404,11 +404,7 @@ export default function ListingPage() {
   description={listing.description}
 /> 
 
-            {/* RELATED */}
-
-            <RelatedListings
-  listings={relatedListings}
-/>
+            
 
           </div>
 
@@ -444,7 +440,13 @@ export default function ListingPage() {
           </div>
 
         </div>
+{/* RELATED */}
 
+<div className="mt-10">
+  <RelatedListings
+    listings={relatedListings}
+  />
+</div>
       </div>
 
     </main>
