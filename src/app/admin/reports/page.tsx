@@ -17,6 +17,13 @@ export default function AdminReportsPage() {
   const [notes, setNotes] =
     useState<Record<string, string>>({});
 
+    const [viewMode, setViewMode] =
+  useState<
+    "open" |
+    "reviewed" |
+    "all"
+  >("open");
+
   useEffect(() => {
 
     checkAdmin();
@@ -70,20 +77,87 @@ export default function AdminReportsPage() {
         data.map(async (report) => {
 
           const {
-            data: listing
-          } = await supabase
-            .from("listings")
-            .select("*")
-            .eq(
-              "id",
-              report.listing_id
-            )
-            .maybeSingle();
+  data: listing
+} = await supabase
+  .from("listings")
+  .select("*")
+  .eq(
+    "id",
+    report.listing_id
+  )
+  .maybeSingle();
 
-          return {
-            ...report,
-            listing,
-          };
+const {
+  data: reporter
+} = await supabase
+  .from("profiles")
+  .select(
+    "full_name,email"
+  )
+  .eq(
+    "id",
+    report.reporter_id
+  )
+  .maybeSingle();
+
+let reviewer = null;
+
+if (
+  report.reviewed_by
+) {
+
+  const {
+    data
+  } = await supabase
+    .from("profiles")
+    .select(
+      "full_name,email"
+    )
+    .eq(
+      "id",
+      report.reviewed_by
+    )
+    .maybeSingle();
+
+  reviewer =
+    data;
+}
+let seller = null;
+
+if (
+  listing?.owner_id
+) {
+
+  const {
+    data
+  } = await supabase
+    .from("profiles")
+    .select(
+      `
+      full_name,
+      email,
+      trust_score,
+      verification_status,
+      status
+      `
+    )
+    .eq(
+      "id",
+      listing.owner_id
+    )
+    .maybeSingle();
+
+  seller = data;
+}
+return {
+  ...report,
+  status:
+    report.status ??
+    "open",
+  listing,
+  reporter,
+  reviewer,
+};
         })
       );
 
@@ -260,10 +334,85 @@ export default function AdminReportsPage() {
 
         )}
 
+<div className="mb-8 flex flex-wrap gap-3">
+
+  <button
+    onClick={() =>
+      setViewMode("open")
+    }
+    className={`rounded-xl px-5 py-3 font-bold ${
+      viewMode === "open"
+        ? "bg-[#2F5D50] text-white"
+        : "bg-white text-[#111827]"
+    }`}
+  >
+    Open Reports
+  </button>
+
+  <button
+    onClick={() =>
+      setViewMode("reviewed")
+    }
+    className={`rounded-xl px-5 py-3 font-bold ${
+      viewMode === "reviewed"
+        ? "bg-[#2F5D50] text-white"
+        : "bg-white text-[#111827]"
+    }`}
+  >
+    Reviewed Reports
+  </button>
+
+  <button
+    onClick={() =>
+      setViewMode("all")
+    }
+    className={`rounded-xl px-5 py-3 font-bold ${
+      viewMode === "all"
+        ? "bg-[#2F5D50] text-white"
+        : "bg-white text-[#111827]"
+    }`}
+  >
+    All Reports
+  </button>
+
+</div>
+
         <div className="space-y-6">
 
-          {reports.map(
-            (report) => (
+          {reports
+  .filter((report) => {
+
+    const status =
+      report.status ??
+      "open";
+
+    if (
+      viewMode ===
+      "open"
+    ) {
+      return (
+        status ===
+        "open"
+      );
+    }
+
+    if (
+      viewMode ===
+      "reviewed"
+    ) {
+      return (
+        status ===
+          "valid" ||
+
+        status ===
+          "invalid"
+      );
+    }
+
+    return true;
+
+  })
+  .map((report) => (
 
             <div
               key={report.id}
@@ -329,7 +478,80 @@ export default function AdminReportsPage() {
                     </div>
 
                   </div>
+<div className="mt-6 grid gap-4 md:grid-cols-2">
 
+  <div>
+
+    <div className="mb-2 text-sm font-black text-[#111827]">
+
+      Reported By
+
+    </div>
+
+    <div className="rounded-2xl bg-gray-100 p-4">
+
+      <div className="font-bold text-[#111827]">
+
+        {report.reporter?.full_name ??
+          "Unknown User"}
+
+      </div>
+
+      <div className="mt-1 text-sm text-gray-600">
+
+        {report.reporter?.email ??
+          "No Email"}
+
+      </div>
+
+    </div>
+
+  </div>
+
+  {report.reviewer && (
+
+    <div>
+
+      <div className="mb-2 text-sm font-black text-[#111827]">
+
+        Reviewed By
+
+      </div>
+
+      <div className="rounded-2xl bg-gray-100 p-4">
+
+        <div className="font-bold text-[#111827]">
+
+          {report.reviewer.full_name ??
+            "Admin"}
+
+        </div>
+
+        <div className="mt-1 text-sm text-gray-600">
+
+          {report.reviewer.email}
+
+        </div>
+
+        {report.reviewed_at && (
+
+          <div className="mt-2 text-xs text-gray-500">
+
+            {new Date(
+              report.reviewed_at
+            ).toLocaleString()}
+
+          </div>
+
+        )}
+
+      </div>
+
+    </div>
+
+  )}
+
+</div>
                   <div className="mt-6">
 
                     <div className="mb-2 text-sm font-black text-[#111827]">
