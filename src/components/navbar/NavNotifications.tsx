@@ -64,7 +64,7 @@ export default function NavNotifications({
 
       {showNotifications && (
 
-        <div className="absolute right-0 mt-3 w-[380px] overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-2xl">
+        <div className="fixed left-1/2 top-24 z-50 w-[calc(100vw-2rem)] max-w-[380px] -translate-x-1/2 overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-2xl md:absolute md:left-auto md:right-0 md:top-auto md:w-[380px] md:translate-x-0">
 
           <div className="border-b border-gray-100 px-6 py-5">
 
