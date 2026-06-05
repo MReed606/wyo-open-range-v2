@@ -34,7 +34,7 @@ export function ListingCard({
 
       {/* IMAGE */}
 
-      <div className="relative h-56 overflow-hidden bg-[#D1D5DB]">
+      <div className="relative h-44 md:h-56 overflow-hidden bg-[#D1D5DB]">
 
         {imageUrl ? (
 
@@ -73,7 +73,7 @@ export function ListingCard({
 
       {/* CONTENT */}
 
-      <div className="p-5">
+      <div className="p-4 md:p-5">
 
         <h2 className="line-clamp-2 text-xl font-bold text-[#1F2933]">
 
