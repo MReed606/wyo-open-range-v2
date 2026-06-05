@@ -203,7 +203,7 @@ if (loading) {
 
         <main className="min-h-screen bg-[#F7F5F2] p-10">
 
-          <div className="mx-auto max-w-4xl rounded-3xl bg-white p-10 shadow-sm">
+          <div className="mx-auto max-w-4xl rounded-3xl bg-white p-6 md:p-10 shadow-sm">
 
             <h1 className="text-4xl font-black text-[#111827]">
               Loading Settings...
@@ -224,7 +224,7 @@ if (loading) {
 
         <div className="mx-auto max-w-4xl rounded-3xl bg-white p-8 shadow-sm">
 
-          <h1 className="mb-10 text-5xl font-black text-[#111827]">
+          <h1 className="mb-8 text-3xl md:text-5xl font-black text-[#111827]">
             Account Settings
           </h1>
 
@@ -245,13 +245,13 @@ if (loading) {
 
             <div className="rounded-3xl border border-gray-200 p-6">
 
-              <h2 className="mb-6 text-2xl font-black text-[#111827]">
+              <h2 className="mb-6 text-xl md:text-2xl font-black text-[#111827]">
                 Public Contact Settings
               </h2>
 
               <div className="space-y-5">
 
-                <label className="flex items-center gap-4 text-lg font-semibold text-[#111827]">
+                <label className="flex items-center gap-4 text-base md:text-lg font-semibold text-[#111827]">
 
                   <input
                     type="checkbox"
@@ -267,7 +267,7 @@ if (loading) {
 
                 </label>
 
-                <label className="flex items-center gap-4 text-lg font-semibold text-[#111827]">
+                <label className="flex items-center gap-4 text-base md:text-lg font-semibold text-[#111827]">
 
                   <input
                     type="checkbox"
@@ -304,7 +304,7 @@ if (loading) {
 
             <button
               onClick={saveProfile}
-              className="w-full rounded-2xl bg-[#2F5D50] px-8 py-5 text-xl font-black text-white"
+              className="w-full rounded-2xl bg-[#2F5D50] px-8 py-4 md:py-5 text-lg md:text-xl font-black text-white"
             >
               Save Settings
             </button>
@@ -313,7 +313,7 @@ if (loading) {
 
             <button
               onClick={deleteAccount}
-              className="w-full rounded-2xl bg-red-600 px-8 py-5 text-xl font-black text-white transition hover:bg-red-700"
+              className="w-full rounded-2xl bg-red-600 px-8 py-4 md:py-5 text-lg md:text-xl font-black text-white transition hover:bg-red-700"
             >
               Delete Account
             </button>
