@@ -43,27 +43,27 @@ export default async function SellerPage({
       <section className="border-b bg-white">
         <div className="mx-auto max-w-7xl px-6 py-12">
           <div className="flex flex-col gap-6 md:flex-row md:items-center">
-            <div className="flex h-32 w-32 items-center justify-center rounded-full bg-gradient-to-br from-[#2F5D50] to-[#1F2933] text-4xl font-bold text-white">
-              {(seller.first_name ?? "U")[0]}
-            </div>
+            <div className="flex h-24 w-24 md:h-32 md:w-32 items-center justify-center rounded-full bg-gradient-to-br from-[#2F5D50] to-[#1F2933] text-3xl md:text-4xl font-bold text-white">
+  {(seller.first_name ?? "U")[0]}
+</div>
 
             <div>
               <div className="flex flex-wrap items-center gap-3">
-                <h1 className="text-5xl font-bold text-[#1F2933]">
-                  {seller.first_name ?? "Seller"} {seller.last_initial ?? ""}
-                </h1>
+                <h1 className="text-3xl md:text-5xl font-bold text-[#1F2933]">
+  {seller.first_name ?? "Seller"} {seller.last_initial ?? ""}
+</h1>
 
                 <div className="rounded-full bg-[#2F5D50] px-4 py-2 text-sm font-bold uppercase tracking-wide text-white">
                   {seller.account_type ?? "standard"}
                 </div>
               </div>
 
-              <p className="mt-4 max-w-3xl text-lg text-[#52606D]">
-                {seller.bio ??
-                  "Wyoming marketplace member on Wyo Open Range."}
-              </p>
+              <p className="mt-4 max-w-3xl text-base md:text-lg text-[#52606D]">
+  {seller.bio ??
+    "Wyoming marketplace member on Wyo Open Range."}
+</p>
 
-              <div className="mt-6 flex flex-wrap gap-4">
+<div className="mt-6 grid grid-cols-1 gap-4 sm:flex sm:flex-wrap">
                 <div className="rounded-xl bg-[#F3F4F6] px-4 py-3">
                   <p className="text-sm font-bold uppercase tracking-wide text-[#52606D]">
                     Reputation
@@ -87,7 +87,7 @@ export default async function SellerPage({
 
               <Link
                 href="/messages"
-                className="mt-6 inline-flex rounded-xl bg-[#2F5D50] px-5 py-3 font-bold text-white"
+                className="mt-6 flex w-full justify-center rounded-xl bg-[#2F5D50] px-5 py-3 font-bold text-white sm:inline-flex sm:w-auto"
               >
                 Contact Seller
               </Link>
@@ -97,7 +97,7 @@ export default async function SellerPage({
       </section>
 
       <section className="mx-auto max-w-7xl px-6 py-12">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h2 className="text-3xl font-bold text-[#1F2933]">
             Seller Listings
           </h2>
