@@ -57,7 +57,7 @@ export default function AdminListingsPage() {
               </h2>
 
               <p className="mt-2 text-[#374151]">
-                ${listing.price ?? "Contact"}
+                {listing.price ?? "Contact"}
               </p>
 
               <div className="mt-4 flex gap-3">

@@ -6,40 +6,79 @@ import {
   Bookmark,
   MessageCircle,
   LayoutGrid,
+  Shield,
 } from "lucide-react";
+import {
+  useEffect,
+  useState,
+} from "react";
+
+import { isAdmin as checkAdmin }
+from "@/lib/admin";
 
 export function MobileBottomNav() {
 
   const pathname =
     usePathname();
 
+  const [isAdmin,
+    setIsAdmin] =
+    useState(false);
+
+  useEffect(() => {
+
+    async function loadAdmin() {
+
+      const admin =
+        await checkAdmin();
+
+      setIsAdmin(admin);
+    }
+
+    loadAdmin();
+
+  }, []);
+
   const nav = [
-  {
-    href: "/listings",
-    label: "Browse",
-    icon: LayoutGrid,
-  },
-  {
-    href: "/saved",
-    label: "Saved",
-    icon: Bookmark,
-  },
-  {
-    href: "/messages",
-    label: "Messages",
-    icon: MessageCircle,
-  },
-  {
-    href: "/dashboard",
-    label: "Dashboard",
-    icon: LayoutGrid,
-  },
-];
+    {
+      href: "/listings",
+      label: "Browse",
+      icon: LayoutGrid,
+    },
+    {
+      href: "/saved",
+      label: "Saved",
+      icon: Bookmark,
+    },
+    {
+      href: "/messages",
+      label: "Messages",
+      icon: MessageCircle,
+    },
+    {
+      href: "/dashboard",
+      label: "Dashboard",
+      icon: LayoutGrid,
+    },
+    ...(isAdmin
+      ? [{
+          href: "/admin",
+          label: "Admin",
+          icon: Shield,
+        }]
+      : []),
+  ];
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-black/10 bg-white/95 backdrop-blur md:hidden">
 
-      <div className="grid grid-cols-4 px-2">
+      <div
+        className={`grid px-2 ${
+          isAdmin
+            ? "grid-cols-5"
+            : "grid-cols-4"
+        }`}
+      >
 
         {nav.map((item) => (
 
@@ -52,12 +91,13 @@ export function MobileBottomNav() {
                 : "text-gray-500"
             }`}
           >
-  <item.icon className="h-5 w-5" />
+            <item.icon className="h-5 w-5" />
 
-  <span>
-    {item.label}
-  </span>
-</Link>
+            <span>
+              {item.label}
+            </span>
+
+          </Link>
 
         ))}
 

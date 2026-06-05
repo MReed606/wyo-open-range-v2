@@ -7,9 +7,9 @@ export function AdminHero() {
 
   return (
 
-    <div className="mb-10 overflow-hidden rounded-[32px] bg-gradient-to-r from-[#111827] to-[#1F2937] p-10 text-white shadow-xl">
+    <div className="mb-10 overflow-hidden rounded-[32px] bg-gradient-to-r from-[#111827] to-[#1F2937] p-6 md:p-10 text-white shadow-xl">
 
-      <div className="flex flex-wrap items-center justify-between gap-8">
+      <div className="flex flex-wrap items-start justify-between gap-3">
 
         <div>
 
@@ -21,13 +21,13 @@ export function AdminHero() {
 
           </div>
 
-          <h1 className="text-5xl font-black">
+          <h1 className="text-3xl md:text-5xl font-black">
 
             Admin Command Center
 
           </h1>
 
-          <p className="mt-5 max-w-3xl text-lg leading-8 text-white/80">
+          <p className="mt-4 max-w-3xl text-base md:text-lg leading-7 md:leading-8 text-white/80">
 
             Marketplace intelligence, trust enforcement,
             moderation analytics, safety systems,
@@ -37,7 +37,7 @@ export function AdminHero() {
 
         </div>
 
-        <div className="rounded-3xl bg-white/10 p-8 backdrop-blur">
+        <div className="-mt-2 rounded-3xl bg-white/10 p-4 md:mt-0 md:p-8 backdrop-blur">
 
           <div className="text-sm font-black uppercase tracking-wide text-white/60">
 
@@ -45,7 +45,7 @@ export function AdminHero() {
 
           </div>
 
-          <div className="mt-3 text-5xl font-black">
+          <div className="mt-3 text-3xl md:text-5xl font-black">
 
             96%
 

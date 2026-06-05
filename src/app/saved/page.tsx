@@ -95,7 +95,7 @@ export default function SavedPage() {
               </h2>
 
               <p className="mt-4 text-3xl font-black text-[#2F5D50]">
-                $${listing.price}
+                {listing.price}
               </p>
 
               <p className="mt-4 text-[#4B5563]">

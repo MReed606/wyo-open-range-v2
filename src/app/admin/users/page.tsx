@@ -272,7 +272,7 @@ export default function AdminUsersPage() {
 
                     {/* ACTIONS */}
 
-                    <div className="mt-6 flex flex-wrap gap-3">
+                    <div className="mt-6 grid grid-cols-2 gap-3 md:flex md:flex-wrap">
 
                       <button
                         onClick={() =>
@@ -281,7 +281,7 @@ export default function AdminUsersPage() {
                             user.suspended
                           )
                         }
-                        className="rounded-2xl bg-yellow-500 px-5 py-3 font-black text-white"
+                        className="rounded-2xl bg-yellow-500 px-4 py-3 text-sm font-black text-white"
                       >
                         {user.suspended
                           ? "Unsuspend User"
@@ -290,7 +290,7 @@ export default function AdminUsersPage() {
 
                       <Link
                         href={`/seller/profile/${user.id}`}
-                        className="rounded-2xl bg-[#111827] px-5 py-3 font-black text-white"
+                        className="rounded-2xl bg-[#111827] px-4 py-3 text-center text-sm font-black text-white"
                       >
                         View Profile
                       </Link>
@@ -300,7 +300,7 @@ export default function AdminUsersPage() {
                           window.location.href =
                             `/messages?user=${user.id}`;
                         }}
-                        className="rounded-2xl bg-blue-600 px-5 py-3 font-black text-white"
+                        className="rounded-2xl bg-blue-600 px-4 py-3 text-sm font-black text-white"
                       >
                         Message User
                       </button>
@@ -311,7 +311,7 @@ export default function AdminUsersPage() {
                             user.id
                           )
                         }
-                        className="rounded-2xl bg-red-600 px-5 py-3 font-black text-white"
+                        className="rounded-2xl bg-red-600 px-4 py-3 text-sm font-black text-white"
                       >
                         Delete User
                       </button>
@@ -322,7 +322,7 @@ export default function AdminUsersPage() {
 
                   {/* BADGES */}
 
-                  <div className="grid gap-3 md:grid-cols-2">
+                  <div className="mt-4 grid gap-2 md:grid-cols-2">
 
                     {badges.map(
                       ([field, label]) => (

@@ -249,7 +249,7 @@ export default function SellerProfilePage() {
                   </p>
 
                   <div className="mt-5 text-2xl font-black text-[#2F5D50]">
-                    $${listing.price}
+                    {listing.price}
                   </div>
 
                 </div>
