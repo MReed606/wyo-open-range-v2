@@ -8,6 +8,7 @@ import {
 
 import {
   useParams,
+  useRouter,
 } from "next/navigation";
 
 import {
@@ -41,6 +42,9 @@ export default function ConversationPage() {
   const id =
     params?.id as string;
 
+    const router =
+  useRouter();
+  
   const [messages,
     setMessages] =
     useState<any[]>([]);
@@ -124,15 +128,24 @@ export default function ConversationPage() {
 
   async function loadParticipant() {
 
-    const data =
-      await loadConversationParticipant(
-        id
-      );
-
-    setParticipant(
-      data?.profile ?? null
+  const data =
+    await loadConversationParticipant(
+      id
     );
+
+  if (!data) {
+
+    router.push(
+      "/messages"
+    );
+
+    return;
   }
+
+  setParticipant(
+    data.profile ?? null
+  );
+}
 
   function subscribeToMessages() {
 

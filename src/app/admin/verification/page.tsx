@@ -1,43 +1,21 @@
 "use client";
-
+import { AdminGuard } from "@/components/auth/AdminGuard";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { AuthGuard } from "@/components/auth/AuthGuard";
-import { isAdmin } from "@/lib/admin";
 
 export default function VerificationPage() {
 
-  const router = useRouter();
-
-  const [profiles, setProfiles] =
+    const [profiles, setProfiles] =
     useState<any[]>([]);
 
   useEffect(() => {
 
-    checkAdmin();
+  loadProfiles();
 
-    loadProfiles();
+}, []);
 
-  }, []);
-
-  async function checkAdmin() {
-
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (
-      !await isAdmin()
-    ) {
-
-      router.push("/");
-
-    }
-
-  }
-
-  async function loadProfiles() {
+    async function loadProfiles() {
 
     const { data } =
       await supabase
@@ -104,7 +82,7 @@ export default function VerificationPage() {
   return (
     <>
       <AuthGuard />
-
+<AdminGuard />
       <main className="min-h-screen bg-[#F7F5F2] p-10">
 
       <h1 className="mb-8 text-4xl font-black text-[#111827]">

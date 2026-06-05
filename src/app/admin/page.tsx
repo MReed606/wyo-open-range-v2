@@ -29,6 +29,10 @@ import {
 } from "@/components/auth/AuthGuard";
 
 import {
+  AdminGuard
+} from "@/components/auth/AdminGuard";
+
+import {
   loadAdminStats
 } from "@/lib/adminStats";
 
@@ -160,8 +164,11 @@ export default function AdminPage() {
   return (
 
     <>
-      <AuthGuard />
+  <AuthGuard />
 
+  <AdminGuard />
+
+  
       <main className="min-h-screen bg-[#F7F5F2] p-6 md:p-10">
 
         <div className="mx-auto max-w-7xl">

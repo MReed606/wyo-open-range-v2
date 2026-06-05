@@ -1,5 +1,5 @@
 "use client";
-
+import { AdminGuard } from "@/components/auth/AdminGuard";
 import { useEffect, useState } from "react";
 
 import Link from "next/link";
@@ -8,7 +8,6 @@ import { supabase } from "@/lib/supabase";
 
 import { AuthGuard } from "@/components/auth/AuthGuard";
 
-import { isAdmin } from "@/lib/admin";
 
 export default function AdminUsersPage() {
 
@@ -16,20 +15,10 @@ export default function AdminUsersPage() {
     useState<any[]>([]);
 
   useEffect(() => {
-    checkAdmin();
-    loadUsers();
-  }, []);
+  loadUsers();
+}, []);
 
-  async function checkAdmin() {
-
-    const admin =
-      await isAdmin();
-
-    if (!admin) {
-      window.location.href = "/";
-    }
-  }
-
+  
   async function loadUsers() {
 
     const { data } =
@@ -220,7 +209,7 @@ export default function AdminUsersPage() {
   return (
     <>
       <AuthGuard />
-
+<AdminGuard />
       <main className="min-h-screen bg-[#F7F5F2] p-6 md:p-10">
 
         <div className="mx-auto max-w-7xl">
