@@ -14,6 +14,7 @@ type PostListingFormProps = {
   price: string;
   category: string;
   region: string;
+  condition: string;
   images: string[];
   categories: string[];
   regions: string[];
@@ -22,8 +23,9 @@ type PostListingFormProps = {
   setDescription: (value: string) => void;
   setPrice: (value: string) => void;
   setCategory: (value: string) => void;
-  setRegion: (value: string) => void;
-  setImages: React.Dispatch<React.SetStateAction<string[]>>;
+      setRegion: (value: string) => void;
+    setCondition: (value: string) => void;
+    setImages: React.Dispatch<React.SetStateAction<string[]>>;
   onCreateListing: () => void;
 };
 
@@ -32,8 +34,9 @@ export function PostListingForm({
   description,
   price,
   category,
-  region,
-  images,
+      region,
+    condition,
+    images,
   categories,
   regions,
   loading,
@@ -41,8 +44,9 @@ export function PostListingForm({
   setDescription,
   setPrice,
   setCategory,
-  setRegion,
-  setImages,
+      setRegion,
+    setCondition,
+    setImages,
   onCreateListing,
 }: PostListingFormProps) {
   return (
@@ -70,6 +74,8 @@ export function PostListingForm({
           className="min-h-40 w-full rounded-2xl border border-gray-300 px-5 py-4 text-lg"
         />
 
+    
+
         <input
           value={price}
           onChange={(e) => setPrice(e.target.value)}
@@ -95,6 +101,48 @@ export function PostListingForm({
             </option>
           ))}
         </select>
+
+          <select
+            value={condition}
+            onChange={(e) =>
+              setCondition(
+                e.target.value
+              )
+            }
+            className="w-full rounded-2xl border border-gray-300 px-5 py-4 text-lg"
+          >
+            <option value="">
+              Select Condition
+            </option>
+
+            <option value="New">
+              New
+            </option>
+
+            <option value="Like New">
+              Like New
+            </option>
+
+            <option value="Excellent">
+              Excellent
+            </option>
+
+            <option value="Good">
+              Good
+            </option>
+
+            <option value="Fair">
+              Fair
+            </option>
+
+            <option value="Used">
+              Used
+            </option>
+
+            <option value="For Parts">
+              For Parts
+            </option>
+          </select>
 
         <select
           value={region}

@@ -73,7 +73,9 @@ const router =
   const [region,
     setRegion] =
     useState("");
-
+ const [condition,
+      setCondition] =
+      useState("");
    const [loading,
     setLoading] =
     useState(false);
@@ -161,7 +163,8 @@ if (
   !description.trim() ||
   !price.trim() ||
   !category ||
-  !region
+      !region ||
+    !condition
 
 ) {
 
@@ -273,9 +276,11 @@ if (
 
           category,
 
-          region,
+                      region,
 
-          slug,
+            condition,
+
+            slug,
           
           images,
             image_url:
@@ -372,6 +377,7 @@ if (
   price={price}
   category={category}
   region={region}
+      condition={condition}
   images={images}
   categories={categories}
   regions={marketplaceRegions}
@@ -381,6 +387,7 @@ if (
   setPrice={setPrice}
   setCategory={setCategory}
   setRegion={setRegion}
+      setCondition={setCondition}
   setImages={setImages}
   onCreateListing={createListing}
 />
