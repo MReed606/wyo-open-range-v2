@@ -35,15 +35,12 @@ export default function LoginPage() {
     if (mode === "signup") {
       const { error } =
         await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: {
-              first_name: "New",
-              last_name: "User",
-            },
-          },
-        });
+  email,
+  password,
+  options: {
+    data: {},
+  },
+});
 
       if (error) {
         setStatus(

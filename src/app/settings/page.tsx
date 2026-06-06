@@ -136,12 +136,29 @@ export default function SettingsPage() {
 }
 
   async function saveProfile() {
+    const split =
+      fullName
+        .trim()
+        .split(" ");
 
+    const firstName =
+      split[0] ?? "";
+
+    const lastInitial =
+      split.length > 1
+        ? split[
+            split.length - 1
+          ][0]
+        : "";
   await saveUserProfile({
 
     full_name:
       fullName,
+first_name:
+  firstName,
 
+last_initial:
+  lastInitial,
     phone,
 
     bio,
